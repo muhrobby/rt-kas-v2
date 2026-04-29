@@ -3,7 +3,7 @@ import "server-only"
 import { db } from "@/lib/db"
 import { logAktivitas, type NewLogAktivitas } from "@/lib/db/schema"
 
-export type AuditLogModul = "Data Warga" | "Kategori Kas" | "Kas Masuk" | "Kas Keluar"
+export type AuditLogModul = "Data Warga" | "Kategori Kas" | "Kas Masuk" | "Kas Keluar" | "Autentikasi"
 export type AuditLogAksi = "tambah" | "edit" | "hapus" | "login" | "logout"
 
 type WriteAuditLogInput = Pick<NewLogAktivitas, "userId" | "modul" | "aksi" | "keterangan">

@@ -4,6 +4,7 @@ import { username } from "better-auth/plugins";
 
 import { db } from "@/lib/db";
 import { account, session, user, verification } from "@/lib/db/schema";
+import { writeAuditLog } from "@/lib/services/audit-log-service";
 
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
@@ -29,6 +30,24 @@ export const auth = betterAuth({
   session: {
     expiresIn: 60 * 60 * 24 * 7,
     updateAge: 60 * 60 * 24,
+  },
+  databaseHooks: {
+    session: {
+      delete: {
+        after: async (deletedSession) => {
+          try {
+            await writeAuditLog({
+              userId: deletedSession.userId,
+              modul: "Autentikasi",
+              aksi: "logout",
+              keterangan: "Pengguna keluar dari sesi aktif",
+            });
+          } catch {
+            // Do not block sign-out if audit logging fails.
+          }
+        },
+      },
+    },
   },
   secret: process.env.BETTER_AUTH_SECRET!,
   baseURL: process.env.BETTER_AUTH_URL!,
