@@ -12,7 +12,6 @@ import { TunggakanDetailDialog } from "@/features/tunggakan/components/tunggakan
 import { TunggakanFilters } from "@/features/tunggakan/components/tunggakan-filters"
 import { TunggakanList } from "@/features/tunggakan/components/tunggakan-list"
 import { TunggakanSummary } from "@/features/tunggakan/components/tunggakan-summary"
-import { countWargaMenunggak } from "@/features/tunggakan/lib/tunggakan-calculations"
 
 interface KategoriOption {
   id: number
@@ -42,7 +41,6 @@ export function TunggakanView() {
 
   const [kategoriOptions, setKategoriOptions] = useState<KategoriOption[]>([])
   const [backendData, setBackendData] = useState<BackendTunggakanSummary | null>(null)
-  const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
@@ -61,7 +59,6 @@ export function TunggakanView() {
 
   useEffect(() => {
     async function loadTunggakan() {
-      setLoading(true)
       setError(null)
 
       const start = parsePeriode(periodeStart)
@@ -94,8 +91,6 @@ export function TunggakanView() {
       } else {
         setError(result.error)
       }
-
-      setLoading(false)
     }
 
     loadTunggakan()
