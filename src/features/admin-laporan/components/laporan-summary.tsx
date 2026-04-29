@@ -11,16 +11,16 @@ export function LaporanSummary({ totalMasuk, totalKeluar, saldoPeriode }: Lapora
   return (
     <section className="grid grid-cols-1 gap-3.5 md:grid-cols-3">
       <AppCard className="p-4">
-        <p className="text-[11px] font-semibold tracking-[0.6px] text-[var(--kanvas-ink-4)] uppercase">Total Masuk</p>
-        <p className="mt-1 text-2xl font-semibold text-[var(--kanvas-ink)]">{formatRupiah(totalMasuk)}</p>
+        <p className="text-[11px] font-semibold tracking-[0.6px] text-kanvas-ink-4 uppercase">Total Masuk</p>
+        <p className="mt-1 text-2xl font-semibold text-kanvas-ink">{formatRupiah(totalMasuk)}</p>
       </AppCard>
       <AppCard className="p-4">
-        <p className="text-[11px] font-semibold tracking-[0.6px] text-[var(--kanvas-ink-4)] uppercase">Total Keluar</p>
-        <p className="mt-1 text-2xl font-semibold text-[var(--kanvas-ink)]">{formatRupiah(totalKeluar)}</p>
+        <p className="text-[11px] font-semibold tracking-[0.6px] text-kanvas-ink-4 uppercase">Total Keluar</p>
+        <p className="mt-1 text-2xl font-semibold text-kanvas-ink">{formatRupiah(totalKeluar)}</p>
       </AppCard>
       <AppCard className="p-4">
-        <p className="text-[11px] font-semibold tracking-[0.6px] text-[var(--kanvas-ink-4)] uppercase">Saldo Periode</p>
-        <p className="mt-1 text-2xl font-semibold text-[var(--kanvas-ink)]">{formatRupiah(saldoPeriode)}</p>
+        <p className="text-[11px] font-semibold tracking-[0.6px] text-kanvas-ink-4 uppercase">Saldo Periode</p>
+        <p className="mt-1 text-2xl font-semibold text-kanvas-ink">{formatRupiah(saldoPeriode)}</p>
       </AppCard>
     </section>
   )

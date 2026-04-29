@@ -11,7 +11,7 @@ interface KasMasukToolbarProps {
 
 export function KasMasukToolbar({ totalTransaksi, totalNominal, onOpenForm }: KasMasukToolbarProps) {
   return (
-    <section className="flex flex-col gap-2.5 rounded-xl border border-[var(--kanvas-line)] bg-white p-3.5 lg:flex-row lg:items-center lg:justify-between">
+    <section className="flex flex-col gap-2.5 rounded-xl border border-kanvas-line bg-white p-3.5 lg:flex-row lg:items-center lg:justify-between">
       <div className="flex flex-wrap items-center gap-2">
         <AppPill tone="ok">{totalTransaksi} transaksi</AppPill>
         <AppPill tone="neutral">Total {formatRupiah(totalNominal)}</AppPill>

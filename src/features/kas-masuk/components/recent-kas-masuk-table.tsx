@@ -25,24 +25,24 @@ export function RecentKasMasukTable({ transactions, onOpenKuitansi, pagination }
       <div className="lg:hidden">
         {transactions.length > 0 ? (
           transactions.map((trx) => (
-            <div key={trx.id} className="border-b border-[var(--kanvas-line-2)] px-4 py-3 last:border-b-0">
+            <div key={trx.id} className="border-b border-kanvas-line-2 px-4 py-3 last:border-b-0">
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
-                  <p className="text-[13px] font-semibold text-[var(--kanvas-ink)]">{trx.wargaNama ?? "-"}</p>
-                  <p className="text-[10.5px] text-[var(--kanvas-ink-4)]">{trx.blok ?? "-"}</p>
+                  <p className="text-[13px] font-semibold text-kanvas-ink">{trx.wargaNama ?? "-"}</p>
+                  <p className="text-[10.5px] text-kanvas-ink-4">{trx.blok ?? "-"}</p>
                 </div>
-                <p className="text-right text-[13px] font-semibold text-[var(--kanvas-ink)]">{formatRupiah(trx.nominal)}</p>
+                <p className="text-right text-[13px] font-semibold text-kanvas-ink">{formatRupiah(trx.nominal)}</p>
               </div>
 
-              <div className="mt-2 space-y-1 text-[12px] text-[var(--kanvas-ink-3)]">
+              <div className="mt-2 space-y-1 text-[12px] text-kanvas-ink-3">
                 <p>
-                  <span className="font-semibold text-[var(--kanvas-ink-2)]">Kategori:</span> {trx.kategoriNama}
+                  <span className="font-semibold text-kanvas-ink-2">Kategori:</span> {trx.kategoriNama}
                 </p>
                 <p>
-                  <span className="font-semibold text-[var(--kanvas-ink-2)]">Tanggal:</span> {trx.tanggal}
+                  <span className="font-semibold text-kanvas-ink-2">Tanggal:</span> {trx.tanggal}
                 </p>
                 <p>
-                  <span className="font-semibold text-[var(--kanvas-ink-2)]">Periode:</span> {trx.periodeLabel ?? "-"}
+                  <span className="font-semibold text-kanvas-ink-2">Periode:</span> {trx.periodeLabel ?? "-"}
                 </p>
               </div>
 
@@ -59,14 +59,14 @@ export function RecentKasMasukTable({ transactions, onOpenKuitansi, pagination }
             </div>
           ))
         ) : (
-          <div className="px-4 py-10 text-center text-[13px] text-[var(--kanvas-ink-4)]">Belum ada transaksi kas masuk</div>
+          <div className="px-4 py-10 text-center text-[13px] text-kanvas-ink-4">Belum ada transaksi kas masuk</div>
         )}
       </div>
 
       <div className="hidden lg:block">
         <div className="overflow-x-auto">
           <div className="min-w-[760px]">
-            <div className="grid grid-cols-[90px_1.4fr_1.3fr_1fr_1fr_110px] border-b border-[var(--kanvas-line)] bg-[var(--kanvas-paper)] px-4 py-2.5 text-[10px] font-bold tracking-[0.7px] text-[var(--kanvas-ink-3)] uppercase">
+            <div className="grid grid-cols-[90px_1.4fr_1.3fr_1fr_1fr_110px] border-b border-kanvas-line bg-kanvas-paper px-4 py-2.5 text-[10px] font-bold tracking-[0.7px] text-kanvas-ink-3 uppercase">
               <div>Tgl</div>
               <div>Warga</div>
               <div>Kategori</div>
@@ -80,18 +80,18 @@ export function RecentKasMasukTable({ transactions, onOpenKuitansi, pagination }
                 transactions.map((trx) => (
                   <div
                     key={trx.id}
-                    className="grid grid-cols-[90px_1.4fr_1.3fr_1fr_1fr_110px] items-center border-b border-[var(--kanvas-line-2)] px-4 py-2.5 text-[13px] text-[var(--kanvas-ink-2)]"
+                    className="grid grid-cols-[90px_1.4fr_1.3fr_1fr_1fr_110px] items-center border-b border-kanvas-line-2 px-4 py-2.5 text-[13px] text-kanvas-ink-2"
                   >
-                    <p className="text-[12px] text-[var(--kanvas-ink-3)]">{trx.tanggal}</p>
+                    <p className="text-[12px] text-kanvas-ink-3">{trx.tanggal}</p>
 
                     <div>
-                      <p className="font-semibold text-[var(--kanvas-ink)]">{trx.wargaNama ?? "-"}</p>
-                      <p className="text-[10.5px] text-[var(--kanvas-ink-4)]">{trx.blok ?? "-"}</p>
+                      <p className="font-semibold text-kanvas-ink">{trx.wargaNama ?? "-"}</p>
+                      <p className="text-[10.5px] text-kanvas-ink-4">{trx.blok ?? "-"}</p>
                     </div>
 
                     <p>{trx.kategoriNama}</p>
-                    <p className="text-[12px] text-[var(--kanvas-ink-3)]">{trx.periodeLabel ?? "-"}</p>
-                    <p className="text-right font-semibold text-[var(--kanvas-ink)]">{formatRupiah(trx.nominal)}</p>
+                    <p className="text-[12px] text-kanvas-ink-3">{trx.periodeLabel ?? "-"}</p>
+                    <p className="text-right font-semibold text-kanvas-ink">{formatRupiah(trx.nominal)}</p>
 
                     <div className="flex justify-end">
                       <AppButton
@@ -106,7 +106,7 @@ export function RecentKasMasukTable({ transactions, onOpenKuitansi, pagination }
                   </div>
                 ))
               ) : (
-                <div className="px-4 py-10 text-center text-[13px] text-[var(--kanvas-ink-4)]">Belum ada transaksi kas masuk</div>
+                <div className="px-4 py-10 text-center text-[13px] text-kanvas-ink-4">Belum ada transaksi kas masuk</div>
               )}
             </div>
           </div>

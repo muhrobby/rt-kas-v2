@@ -55,9 +55,9 @@ export function LaporanFilters({
   )
 
   return (
-    <section className="grid grid-cols-1 gap-2.5 rounded-xl border border-[var(--kanvas-line)] bg-white p-3.5 sm:grid-cols-2 lg:grid-cols-3">
+    <section className="grid grid-cols-1 gap-2.5 rounded-xl border border-kanvas-line bg-white p-3.5 sm:grid-cols-2 lg:grid-cols-3">
       <label className="block">
-        <p className="mb-1 text-[11px] font-semibold tracking-[0.6px] text-[var(--kanvas-ink-4)] uppercase">Tahun</p>
+        <p className="mb-1 text-[11px] font-semibold tracking-[0.6px] text-kanvas-ink-4 uppercase">Tahun</p>
         <AppCombobox
           value={String(year)}
           onChange={(val) => onYearChange(Number(val))}
@@ -67,7 +67,7 @@ export function LaporanFilters({
       </label>
 
       <label className="block">
-        <p className="mb-1 text-[11px] font-semibold tracking-[0.6px] text-[var(--kanvas-ink-4)] uppercase">Bulan Mulai</p>
+        <p className="mb-1 text-[11px] font-semibold tracking-[0.6px] text-kanvas-ink-4 uppercase">Bulan Mulai</p>
         <AppCombobox
           value={String(startMonth)}
           onChange={(val) => onStartMonthChange(Number(val))}
@@ -77,7 +77,7 @@ export function LaporanFilters({
       </label>
 
       <label className="block">
-        <p className="mb-1 text-[11px] font-semibold tracking-[0.6px] text-[var(--kanvas-ink-4)] uppercase">Bulan Akhir</p>
+        <p className="mb-1 text-[11px] font-semibold tracking-[0.6px] text-kanvas-ink-4 uppercase">Bulan Akhir</p>
         <AppCombobox
           value={String(endMonth)}
           onChange={(val) => onEndMonthChange(Number(val))}

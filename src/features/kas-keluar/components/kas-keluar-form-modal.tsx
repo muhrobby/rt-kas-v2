@@ -62,10 +62,10 @@ export function KasKeluarFormModal({
       <div className="p-4 sm:p-6">
         <div className="mb-4 flex items-start justify-between gap-2">
           <div>
-            <p className="text-[11px] font-semibold tracking-[0.7px] text-[var(--kanvas-ink-4)] uppercase">Kas Keluar</p>
-            <h2 className="mt-1 text-2xl text-[var(--kanvas-ink)]">Input Pengeluaran</h2>
+            <p className="text-[11px] font-semibold tracking-[0.7px] text-kanvas-ink-4 uppercase">Kas Keluar</p>
+            <h2 className="mt-1 text-2xl text-kanvas-ink">Input Pengeluaran</h2>
           </div>
-          <button type="button" onClick={onClose} className="rounded p-1 text-[var(--kanvas-ink-3)]" aria-label="Tutup modal kas keluar">
+          <button type="button" onClick={onClose} className="rounded p-1 text-kanvas-ink-3" aria-label="Tutup modal kas keluar">
             <KanvasIcons.x size={18} />
           </button>
         </div>
@@ -87,13 +87,13 @@ export function KasKeluarFormModal({
               return (
                 <div>
                   <p className="font-semibold">{item.label}</p>
-                  <p className="text-[11px] text-[var(--kanvas-ink-4)]">{item.sub}</p>
+                  <p className="text-[11px] text-kanvas-ink-4">{item.sub}</p>
                 </div>
               )
             }}
           />
           {errors.kategoriId || fieldErrors?.kategoriId?.[0] ? (
-            <p className="mt-1 text-[11px] text-[var(--kanvas-danger)]">{errors.kategoriId || fieldErrors?.kategoriId?.[0]}</p>
+            <p className="mt-1 text-[11px] text-kanvas-danger">{errors.kategoriId || fieldErrors?.kategoriId?.[0]}</p>
           ) : null}
         </AppField>
 
@@ -106,7 +106,7 @@ export function KasKeluarFormModal({
               onChange={(value) => updateValue("nominal", Number(value || 0))}
             />
             {errors.nominal || fieldErrors?.nominal?.[0] ? (
-              <p className="mt-1 text-[11px] text-[var(--kanvas-danger)]">{errors.nominal || fieldErrors?.nominal?.[0]}</p>
+              <p className="mt-1 text-[11px] text-kanvas-danger">{errors.nominal || fieldErrors?.nominal?.[0]}</p>
             ) : null}
           </AppField>
 
@@ -117,7 +117,7 @@ export function KasKeluarFormModal({
               onChange={(value) => updateValue("tanggal", value)}
             />
             {errors.tanggal || fieldErrors?.tanggal?.[0] ? (
-              <p className="mt-1 text-[11px] text-[var(--kanvas-danger)]">{errors.tanggal || fieldErrors?.tanggal?.[0]}</p>
+              <p className="mt-1 text-[11px] text-kanvas-danger">{errors.tanggal || fieldErrors?.tanggal?.[0]}</p>
             ) : null}
           </AppField>
         </div>
@@ -131,7 +131,7 @@ export function KasKeluarFormModal({
         </AppField>
 
         {serverError ? (
-          <div className="mt-2 rounded-lg border border-[var(--kanvas-danger-soft)] bg-[var(--kanvas-info-soft)] p-2.5 text-[11.5px] text-[var(--kanvas-danger)]">
+          <div className="mt-2 rounded-lg border border-kanvas-danger-soft bg-kanvas-info-soft p-2.5 text-[11.5px] text-kanvas-danger">
             {serverError}
           </div>
         ) : null}

@@ -38,7 +38,7 @@ export function ToastProvider({ children }: PropsWithChildren) {
         {toasts.map((toast) => (
           <div
             key={toast.id}
-            className="flex items-center gap-2 rounded-[10px] bg-[var(--kanvas-ink)] px-3.5 py-2.5 text-[12.5px] font-medium text-[var(--kanvas-paper-2)] shadow-[0_8px_24px_rgba(16,33,61,0.2)]"
+            className="flex items-center gap-2 rounded-[10px] bg-kanvas-ink px-3.5 py-2.5 text-[12.5px] font-medium text-kanvas-paper-2 shadow-[0_8px_24px_rgba(16,33,61,0.2)]"
           >
             <span
               className="inline-block h-1.5 w-1.5 rounded-full"

@@ -16,7 +16,7 @@ interface KategoriToolbarProps {
 
 export function KategoriToolbar({ query, arus, tipe, onQueryChange, onArusChange, onTipeChange, onAdd }: KategoriToolbarProps) {
   return (
-    <section className="space-y-2.5 rounded-xl border border-[var(--kanvas-line)] bg-white p-3.5">
+    <section className="space-y-2.5 rounded-xl border border-kanvas-line bg-white p-3.5">
       <div className="flex flex-col gap-2.5 lg:flex-row lg:items-center">
         <AppInput
           value={query}
@@ -31,7 +31,7 @@ export function KategoriToolbar({ query, arus, tipe, onQueryChange, onArusChange
       </div>
 
       <div className="flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between">
-        <div className="inline-flex rounded-lg border border-[var(--kanvas-line)] bg-[var(--kanvas-paper)] p-0.5">
+        <div className="inline-flex rounded-lg border border-kanvas-line bg-kanvas-paper p-0.5">
           {[
             { id: "semua", label: "Semua" },
             { id: "masuk", label: "Masuk" },
@@ -55,7 +55,7 @@ export function KategoriToolbar({ query, arus, tipe, onQueryChange, onArusChange
           })}
         </div>
 
-        <div className="inline-flex rounded-lg border border-[var(--kanvas-line)] bg-[var(--kanvas-paper)] p-0.5">
+        <div className="inline-flex rounded-lg border border-kanvas-line bg-kanvas-paper p-0.5">
           {[
             { id: "semua", label: "Semua Tipe" },
             { id: "bulanan", label: "Bulanan" },

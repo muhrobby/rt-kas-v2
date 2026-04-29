@@ -39,11 +39,11 @@ export function TunggakanDetailDialog({ open, data, onClose }: TunggakanDetailDi
       <div className="p-6">
         <div className="mb-4 flex items-start justify-between gap-2">
           <div>
-            <p className="text-[11px] font-semibold tracking-[0.7px] text-[var(--kanvas-ink-4)] uppercase">Detail Tunggakan</p>
-            <h2 className="mt-1 text-2xl text-[var(--kanvas-ink)]">{data?.warga ?? "-"}</h2>
-            <p className="text-[12px] text-[var(--kanvas-ink-4)]">Blok {data?.blok ?? "-"}</p>
+            <p className="text-[11px] font-semibold tracking-[0.7px] text-kanvas-ink-4 uppercase">Detail Tunggakan</p>
+            <h2 className="mt-1 text-2xl text-kanvas-ink">{data?.warga ?? "-"}</h2>
+            <p className="text-[12px] text-kanvas-ink-4">Blok {data?.blok ?? "-"}</p>
           </div>
-          <button type="button" onClick={onClose} className="rounded p-1 text-[var(--kanvas-ink-3)]" aria-label="Tutup dialog detail tunggakan">
+          <button type="button" onClick={onClose} className="rounded p-1 text-kanvas-ink-3" aria-label="Tutup dialog detail tunggakan">
             <KanvasIcons.x size={18} />
           </button>
         </div>
@@ -51,7 +51,7 @@ export function TunggakanDetailDialog({ open, data, onClose }: TunggakanDetailDi
         <AppCard className="overflow-hidden p-0">
           <div className="overflow-x-auto">
             <div className="min-w-[400px] lg:min-w-full">
-              <div className="grid grid-cols-[1fr_100px_130px] border-b border-[var(--kanvas-line)] bg-[var(--kanvas-paper)] px-4 py-2 text-[10px] font-bold tracking-[0.7px] text-[var(--kanvas-ink-3)] uppercase">
+              <div className="grid grid-cols-[1fr_100px_130px] border-b border-kanvas-line bg-kanvas-paper px-4 py-2 text-[10px] font-bold tracking-[0.7px] text-kanvas-ink-3 uppercase">
                 <div>Kategori</div>
                 <div className="text-center">Periode</div>
                 <div className="text-right">Nominal</div>
@@ -61,13 +61,13 @@ export function TunggakanDetailDialog({ open, data, onClose }: TunggakanDetailDi
                 {paginatedData.items.map((item, index) => (
                   <div
                     key={`${item.kategori}-${item.periode}-${index}`}
-                    className="grid grid-cols-[1fr_100px_130px] items-center border-b border-[var(--kanvas-line-2)] px-4 py-2.5 text-[13px] text-[var(--kanvas-ink-2)] last:border-b-0"
+                    className="grid grid-cols-[1fr_100px_130px] items-center border-b border-kanvas-line-2 px-4 py-2.5 text-[13px] text-kanvas-ink-2 last:border-b-0"
                   >
                     <div>
-                      <p className="font-medium text-[var(--kanvas-ink)]">{item.kategori}</p>
+                      <p className="font-medium text-kanvas-ink">{item.kategori}</p>
                     </div>
-                    <p className="text-center text-[12px] text-[var(--kanvas-ink-3)]">{item.periode}</p>
-                    <p className="text-right font-semibold text-[var(--kanvas-ink)]">{formatRupiah(item.nominal)}</p>
+                    <p className="text-center text-[12px] text-kanvas-ink-3">{item.periode}</p>
+                    <p className="text-right font-semibold text-kanvas-ink">{formatRupiah(item.nominal)}</p>
                   </div>
                 ))}
               </div>
@@ -85,12 +85,12 @@ export function TunggakanDetailDialog({ open, data, onClose }: TunggakanDetailDi
           />
         </AppCard>
 
-        <div className="mt-4 flex items-center justify-between rounded-lg border border-[var(--kanvas-line)] bg-white px-4 py-3">
+        <div className="mt-4 flex items-center justify-between rounded-lg border border-kanvas-line bg-white px-4 py-3">
           <div className="flex items-center gap-2">
-            <p className="text-[12px] font-bold tracking-[0.5px] text-[var(--kanvas-ink-3)] uppercase">Total Tunggakan</p>
-            <span className="text-[11px] text-[var(--kanvas-ink-4)]">({data?.items.length ?? 0} item)</span>
+            <p className="text-[12px] font-bold tracking-[0.5px] text-kanvas-ink-3 uppercase">Total Tunggakan</p>
+            <span className="text-[11px] text-kanvas-ink-4">({data?.items.length ?? 0} item)</span>
           </div>
-          <p className="text-[15px] font-bold text-[var(--kanvas-ink)]">{formatRupiah(totalNominal)}</p>
+          <p className="text-[15px] font-bold text-kanvas-ink">{formatRupiah(totalNominal)}</p>
         </div>
 
         <div className="mt-4 flex justify-end gap-2">

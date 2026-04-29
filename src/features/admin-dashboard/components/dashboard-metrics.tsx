@@ -20,9 +20,9 @@ function MetricCard({
   return (
     <AppCard className="relative overflow-hidden p-[18px] pb-4">
       <div className="absolute top-0 left-0 h-[3px] w-full" style={{ background: accent }} />
-      <p className="text-[11px] font-semibold tracking-[0.6px] text-[var(--kanvas-ink-4)] uppercase">{label}</p>
-      <p className="mt-1.5 break-words text-2xl leading-tight font-semibold text-[var(--kanvas-ink)]">{value}</p>
-      <div className="mt-2 flex flex-wrap items-center gap-1.5 text-[11.5px] text-[var(--kanvas-ink-3)]">
+      <p className="text-[11px] font-semibold tracking-[0.6px] text-kanvas-ink-4 uppercase">{label}</p>
+      <p className="mt-1.5 break-words text-2xl leading-tight font-semibold text-kanvas-ink">{value}</p>
+      <div className="mt-2 flex flex-wrap items-center gap-1.5 text-[11.5px] text-kanvas-ink-3">
         {typeof trend === "number" ? <AppPill tone={trend > 0 ? "ok" : "danger"}>{`${trend > 0 ? "+" : ""}${trend}%`}</AppPill> : null}
         <span>{hint}</span>
       </div>

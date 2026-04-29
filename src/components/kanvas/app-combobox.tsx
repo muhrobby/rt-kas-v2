@@ -52,20 +52,20 @@ export function AppCombobox({
     <div className="relative w-full" ref={rootRef}>
       <button
         type="button"
-        className="flex w-full items-center justify-between gap-2 rounded-lg border border-[var(--kanvas-line)] bg-white px-3 py-2.5 text-left text-[13px]"
+        className="flex w-full items-center justify-between gap-2 rounded-lg border border-kanvas-line bg-white px-3 py-2.5 text-left text-[13px]"
         onClick={() => setOpen((state) => !state)}
         aria-expanded={open}
         aria-haspopup="listbox"
       >
-        <span className={selected ? "min-w-0 flex-1 truncate text-[var(--kanvas-ink)]" : "min-w-0 flex-1 truncate text-[var(--kanvas-ink-4)]"}>
+        <span className={selected ? "min-w-0 flex-1 truncate text-kanvas-ink" : "min-w-0 flex-1 truncate text-kanvas-ink-4"}>
           {selected ? selected.label : placeholder}
         </span>
         <KanvasIcons.chevronD size={14} />
       </button>
 
       {open ? (
-        <div className="absolute top-[calc(100%+4px)] right-0 left-0 z-30 max-h-60 overflow-auto rounded-[10px] border border-[var(--kanvas-line)] bg-white p-1.5 shadow-[0_12px_28px_rgba(16,33,61,0.14)]">
-          <div className="mb-1 flex items-center gap-1.5 border-b border-[var(--kanvas-line-2)] px-2 py-1">
+        <div className="absolute top-[calc(100%+4px)] right-0 left-0 z-30 max-h-60 overflow-auto rounded-[10px] border border-kanvas-line bg-white p-1.5 shadow-[0_12px_28px_rgba(16,33,61,0.14)]">
+          <div className="mb-1 flex items-center gap-1.5 border-b border-kanvas-line-2 px-2 py-1">
             <KanvasIcons.search size={13} />
             <input
               autoFocus
@@ -77,7 +77,7 @@ export function AppCombobox({
           </div>
 
           {filtered.length === 0 ? (
-            <div className="px-3 py-2.5 text-[12.5px] text-[var(--kanvas-ink-4)]">Tidak ada hasil</div>
+            <div className="px-3 py-2.5 text-[12.5px] text-kanvas-ink-4">Tidak ada hasil</div>
           ) : null}
 
           {filtered.map((option) => {
@@ -87,7 +87,7 @@ export function AppCombobox({
               <button
                 type="button"
                 key={option.id}
-                className="block w-full rounded-md px-2.5 py-2 text-left text-[13px] hover:bg-[var(--kanvas-paper)]"
+                className="block w-full rounded-md px-2.5 py-2 text-left text-[13px] hover:bg-kanvas-paper"
                 style={{ background: active ? "var(--kanvas-paper)" : "transparent" }}
                 onClick={() => {
                   onChange(option.id)
@@ -100,7 +100,7 @@ export function AppCombobox({
                 ) : (
                   <div>
                     <div>{option.label}</div>
-                    {option.subLabel ? <div className="text-[11px] text-[var(--kanvas-ink-4)]">{option.subLabel}</div> : null}
+                    {option.subLabel ? <div className="text-[11px] text-kanvas-ink-4">{option.subLabel}</div> : null}
                   </div>
                 )}
               </button>

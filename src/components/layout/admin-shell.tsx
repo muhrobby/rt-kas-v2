@@ -11,7 +11,7 @@ export function AdminShell({ children }: PropsWithChildren) {
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false)
 
   return (
-    <div className="flex min-h-svh min-w-0 bg-[var(--kanvas-paper)]">
+    <div className="flex min-h-svh min-w-0 bg-kanvas-paper">
       <AdminMobileSidebar open={mobileSidebarOpen} onClose={() => setMobileSidebarOpen(false)} />
 
       <div className="hidden lg:flex">

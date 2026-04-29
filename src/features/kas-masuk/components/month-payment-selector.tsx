@@ -10,7 +10,7 @@ interface MonthPaymentSelectorProps {
 
 export function MonthPaymentSelector({ paidMonths, selectedMonths, onToggle }: MonthPaymentSelectorProps) {
   return (
-    <div className="grid grid-cols-4 gap-1.5 rounded-lg border border-[var(--kanvas-line)] bg-white p-1.5 md:grid-cols-6 xl:grid-cols-12">
+    <div className="grid grid-cols-4 gap-1.5 rounded-lg border border-kanvas-line bg-white p-1.5 md:grid-cols-6 xl:grid-cols-12">
       {BULAN_SINGKAT.map((monthLabel, idx) => {
         const monthValue = idx + 1
         const paid = paidMonths.includes(monthValue)

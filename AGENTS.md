@@ -112,6 +112,17 @@ Output laporan Markdown:
 | Tambah fitur tidak diminta              | YAGNI — hanya yang diminta |
 | Buat file baru tanpa memberitahu        | Announce di report         |
 
+## DEFAULT EXECUTION BEHAVIOR
+
+Ketika menerima perintah berformat "TASK-XXX":
+
+1. Otomatis baca AGENTS.md dan docs/TASKS.md
+2. Cari task tersebut di TASKS.md
+3. Jalankan Phase 3 → 4 → 5 → 6
+4. Scope HANYA task yang disebutkan
+5. Jangan implement apapun di luar spec task itu
+6. Setelah selesai update checklist pengerjaan di docs/TASKS.md pada task yang di kerjakan
+
 ## KOMUNIKASI
 
 - Gunakan bahasa yang sama dengan user

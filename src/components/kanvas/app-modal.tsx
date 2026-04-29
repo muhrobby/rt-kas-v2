@@ -40,7 +40,7 @@ export function AppModal({ open, onClose, width = 520, children }: AppModalProps
       role="presentation"
     >
       <div
-        className="max-h-[92%] max-w-[92%] overflow-auto rounded-[14px] border border-[var(--kanvas-line)] bg-[var(--kanvas-paper-2)] shadow-[0_20px_60px_rgba(16,33,61,0.32)]"
+        className="max-h-[92%] max-w-[92%] overflow-auto rounded-[14px] border border-kanvas-line bg-kanvas-paper-2 shadow-[0_20px_60px_rgba(16,33,61,0.32)]"
         style={{ width }}
         onClick={handlePanelClick}
         role="dialog"

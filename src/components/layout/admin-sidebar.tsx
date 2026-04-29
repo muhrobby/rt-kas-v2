@@ -32,14 +32,14 @@ export function AdminSidebar() {
   }, [])
 
   return (
-    <aside className="sticky top-0 flex h-svh w-[220px] shrink-0 flex-col border-r border-[var(--kanvas-line)] bg-[var(--kanvas-paper-2)] px-3.5 py-5 xl:w-[232px]">
+    <aside className="sticky top-0 flex h-svh w-[220px] shrink-0 flex-col border-r border-kanvas-line bg-kanvas-paper-2 px-3.5 py-5 xl:w-[232px]">
       <div className="mb-5 flex items-center gap-2.5 px-1.5">
-        <div className="flex h-[34px] w-[34px] items-center justify-center rounded-[9px] bg-[var(--kanvas-ink)] text-xl leading-none text-[var(--kanvas-paper-2)]">
+        <div className="flex h-[34px] w-[34px] items-center justify-center rounded-[9px] bg-kanvas-ink text-xl leading-none text-kanvas-paper-2">
           K
         </div>
         <div className="leading-none">
-          <p className="text-lg text-[var(--kanvas-ink)]">Kanvas RT</p>
-          <p className="mt-1 text-[10px] font-semibold tracking-[1.5px] text-[var(--kanvas-ink-4)] uppercase">Kas RT 04</p>
+          <p className="text-lg text-kanvas-ink">Kanvas RT</p>
+          <p className="mt-1 text-[10px] font-semibold tracking-[1.5px] text-kanvas-ink-4 uppercase">Kas RT 04</p>
         </div>
       </div>
 
@@ -71,12 +71,12 @@ export function AdminSidebar() {
         })}
       </nav>
 
-      <div className="rounded-[10px] border border-[var(--kanvas-line)] bg-white p-3 text-[11.5px] text-[var(--kanvas-ink-3)]">
-        <p className="text-xs font-semibold text-[var(--kanvas-ink-2)]">Saldo Kas</p>
-        <p className="mt-1 text-lg font-semibold text-[var(--kanvas-ink)]">
+      <div className="rounded-[10px] border border-kanvas-line bg-white p-3 text-[11.5px] text-kanvas-ink-3">
+        <p className="text-xs font-semibold text-kanvas-ink-2">Saldo Kas</p>
+        <p className="mt-1 text-lg font-semibold text-kanvas-ink">
           {saldoKas !== null ? formatRupiah(saldoKas) : "—"}
         </p>
-        <p className="mt-1 text-[10.5px] text-[var(--kanvas-ink-4)]">per {new Date().toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" })}</p>
+        <p className="mt-1 text-[10.5px] text-kanvas-ink-4">per {new Date().toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" })}</p>
       </div>
     </aside>
   )

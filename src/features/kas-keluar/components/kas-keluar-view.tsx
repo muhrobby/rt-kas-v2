@@ -98,7 +98,7 @@ export function KasKeluarView() {
   return (
     <main className="space-y-3.5 p-6 md:p-7">
       {isLoading ? (
-        <p className="text-[12px] text-[var(--kanvas-ink-3)]">Memuat data...</p>
+        <p className="text-[12px] text-kanvas-ink-3">Memuat data...</p>
       ) : null}
 
       <KasKeluarToolbar

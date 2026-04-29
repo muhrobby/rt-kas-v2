@@ -21,38 +21,38 @@ export function WargaLaporanView({ data }: WargaLaporanViewProps) {
   return (
     <main className="space-y-3.5 p-4 md:p-6">
         <section>
-          <h1 className="text-[24px] text-[var(--kanvas-ink)]">Transparansi Kas</h1>
-          <p className="text-[12px] text-[var(--kanvas-ink-3)]">Rekap kas RT {data.tahun}, terbuka untuk seluruh warga.</p>
+          <h1 className="text-[24px] text-kanvas-ink">Transparansi Kas</h1>
+          <p className="text-[12px] text-kanvas-ink-3">Rekap kas RT {data.tahun}, terbuka untuk seluruh warga.</p>
         </section>
 
       <section className="grid grid-cols-1 gap-2 md:grid-cols-2">
         <AppCard className="p-3">
-          <p className="text-[10px] font-semibold tracking-[0.6px] text-[var(--kanvas-ink-4)] uppercase">Saldo Kas</p>
-          <p className="mt-1 text-[22px] text-[var(--kanvas-ink)]">{formatRupiah(data.summary.saldoKas)}</p>
+          <p className="text-[10px] font-semibold tracking-[0.6px] text-kanvas-ink-4 uppercase">Saldo Kas</p>
+          <p className="mt-1 text-[22px] text-kanvas-ink">{formatRupiah(data.summary.saldoKas)}</p>
         </AppCard>
         <AppCard className="p-3">
-          <p className="text-[10px] font-semibold tracking-[0.6px] text-[var(--kanvas-ink-4)] uppercase">Selisih YTD</p>
-          <p className="mt-1 text-[22px] text-[var(--kanvas-info)]">{ytdLabel}</p>
+          <p className="text-[10px] font-semibold tracking-[0.6px] text-kanvas-ink-4 uppercase">Selisih YTD</p>
+          <p className="mt-1 text-[22px] text-kanvas-info">{ytdLabel}</p>
         </AppCard>
       </section>
 
       <AppCard className="p-3.5">
         <div className="mb-2.5 flex items-center justify-between">
-          <p className="text-[16px] text-[var(--kanvas-ink)]">Pemasukan vs Pengeluaran</p>
-          <span className="text-[11px] text-[var(--kanvas-ink-3)]">Jan - Des {data.tahun}</span>
+          <p className="text-[16px] text-kanvas-ink">Pemasukan vs Pengeluaran</p>
+          <span className="text-[11px] text-kanvas-ink-3">Jan - Des {data.tahun}</span>
         </div>
         <BarsInOutChart data={data.monthlyCashflow} height={122} barWidth={20} gap={16} />
       </AppCard>
 
       <section>
-        <h2 className="mb-2 text-[16px] text-[var(--kanvas-ink)]">Ringkasan Bulanan</h2>
+        <h2 className="mb-2 text-[16px] text-kanvas-ink">Ringkasan Bulanan</h2>
         <div className="space-y-2">
           {data.cashflowDenganSaldo.map((row) => (
             <AppCard key={`row-${row.bulan}`} className="p-3">
               <div className="flex items-center justify-between gap-2">
                 <div>
-                  <p className="text-[13px] font-semibold text-[var(--kanvas-ink)]">{row.bulan} {data.tahun}</p>
-                  <p className="text-[11px] text-[var(--kanvas-ink-4)]">Saldo {formatRupiah(row.saldo ?? 0)}</p>
+                  <p className="text-[13px] font-semibold text-kanvas-ink">{row.bulan} {data.tahun}</p>
+                  <p className="text-[11px] text-kanvas-ink-4">Saldo {formatRupiah(row.saldo ?? 0)}</p>
                 </div>
                 <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
                   <AppPill tone="ok">+{formatRupiah(row.pemasukan).replace("Rp ", "")}</AppPill>
@@ -63,7 +63,7 @@ export function WargaLaporanView({ data }: WargaLaporanViewProps) {
                       setSelectedMonth(row.bulan)
                       setDrilldownOpen(true)
                     }}
-                    className="text-[11px] font-semibold text-[var(--kanvas-terra)]"
+                    className="text-[11px] font-semibold text-kanvas-terra"
                   >
                     Rincian
                   </button>

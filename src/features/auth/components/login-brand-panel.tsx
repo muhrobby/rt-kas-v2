@@ -1,6 +1,6 @@
 export function LoginBrandPanel() {
   return (
-    <section className="relative hidden min-h-svh overflow-hidden bg-[linear-gradient(160deg,var(--kanvas-terra)_0%,var(--kanvas-terra-2)_60%,#173968_100%)] text-[var(--kanvas-paper-2)] lg:flex lg:flex-col lg:justify-between lg:p-14">
+    <section className="relative hidden min-h-svh overflow-hidden bg-[linear-gradient(160deg,var(--kanvas-terra)_0%,var(--kanvas-terra-2)_60%,#173968_100%)] text-kanvas-paper-2 lg:flex lg:flex-col lg:justify-between lg:p-14">
       <div
         className="pointer-events-none absolute inset-0 opacity-10"
         style={{

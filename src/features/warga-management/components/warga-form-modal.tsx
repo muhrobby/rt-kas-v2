@@ -62,34 +62,34 @@ export function WargaFormModal({ open, mode, initialValues, onClose, onSubmit, s
       <div className="p-4 sm:p-6">
         <div className="mb-4 flex items-start justify-between gap-2">
           <div>
-            <p className="text-[11px] font-semibold tracking-[0.7px] text-[var(--kanvas-ink-4)] uppercase">Data Warga</p>
-            <h2 className="mt-1 text-2xl text-[var(--kanvas-ink)]">{title}</h2>
+            <p className="text-[11px] font-semibold tracking-[0.7px] text-kanvas-ink-4 uppercase">Data Warga</p>
+            <h2 className="mt-1 text-2xl text-kanvas-ink">{title}</h2>
           </div>
-          <button type="button" onClick={onClose} className="rounded p-1 text-[var(--kanvas-ink-3)]" aria-label="Tutup modal warga">
+          <button type="button" onClick={onClose} className="rounded p-1 text-kanvas-ink-3" aria-label="Tutup modal warga">
             <KanvasIcons.x size={18} />
           </button>
         </div>
 
         <AppField label="Nama Kepala Keluarga">
           <AppInput value={values.nama} onChange={(value) => updateField("nama", value)} placeholder="Mis. Bambang Sutrisno" />
-           {errors.nama || fieldErrors?.nama?.[0] ? <p className="mt-1 text-[11px] text-[var(--kanvas-danger)]">{errors.nama || fieldErrors?.nama?.[0]}</p> : null}
+           {errors.nama || fieldErrors?.nama?.[0] ? <p className="mt-1 text-[11px] text-kanvas-danger">{errors.nama || fieldErrors?.nama?.[0]}</p> : null}
         </AppField>
 
         <div className="grid grid-cols-1 gap-2.5 md:grid-cols-2 md:gap-3">
           <AppField label="Blok Rumah">
             <AppInput value={values.blok} onChange={(value) => updateField("blok", value)} placeholder="Mis. C-04" />
-            {errors.blok || fieldErrors?.blok?.[0] ? <p className="mt-1 text-[11px] text-[var(--kanvas-danger)]">{errors.blok || fieldErrors?.blok?.[0]}</p> : null}
+            {errors.blok || fieldErrors?.blok?.[0] ? <p className="mt-1 text-[11px] text-kanvas-danger">{errors.blok || fieldErrors?.blok?.[0]}</p> : null}
           </AppField>
 
           <AppField label="No. Telepon" hint="Dipakai sebagai username login">
             <AppInput value={values.telp} onChange={(value) => updateField("telp", value)} placeholder="08xx-xxxx-xxxx" />
-            {errors.telp || fieldErrors?.telp?.[0] ? <p className="mt-1 text-[11px] text-[var(--kanvas-danger)]">{errors.telp || fieldErrors?.telp?.[0]}</p> : null}
+            {errors.telp || fieldErrors?.telp?.[0] ? <p className="mt-1 text-[11px] text-kanvas-danger">{errors.telp || fieldErrors?.telp?.[0]}</p> : null}
           </AppField>
         </div>
 
         <div className="grid grid-cols-1 gap-2.5 md:grid-cols-2 md:gap-3">
           <AppField label="Status Hunian">
-            <div className="inline-flex w-full rounded-lg border border-[var(--kanvas-line)] bg-white p-0.5">
+            <div className="inline-flex w-full rounded-lg border border-kanvas-line bg-white p-0.5">
               {[
                 { value: "tetap", label: "Tetap" },
                 { value: "kontrak", label: "Kontrak" },
@@ -135,13 +135,13 @@ export function WargaFormModal({ open, mode, initialValues, onClose, onSubmit, s
             onChange={(value) => updateField("pindah", value)}
             disabled={values.statusHunian === "tetap"}
           />
-          {errors.pindah || fieldErrors?.pindah?.[0] ? <p className="mt-1 text-[11px] text-[var(--kanvas-danger)]">{errors.pindah || fieldErrors?.pindah?.[0]}</p> : null}
+          {errors.pindah || fieldErrors?.pindah?.[0] ? <p className="mt-1 text-[11px] text-kanvas-danger">{errors.pindah || fieldErrors?.pindah?.[0]}</p> : null}
         </AppField>
 
         {serverError ? (
-          <div className="mt-2 rounded-lg border border-[var(--kanvas-danger-soft)] bg-[var(--kanvas-info-soft)] p-2.5 text-[11.5px] text-[var(--kanvas-danger)]">{serverError}</div>
+          <div className="mt-2 rounded-lg border border-kanvas-danger-soft bg-kanvas-info-soft p-2.5 text-[11.5px] text-kanvas-danger">{serverError}</div>
         ) : (
-          <div className="mt-2 rounded-lg border border-[var(--kanvas-line)] bg-[var(--kanvas-paper)] p-2.5 text-[11.5px] text-[var(--kanvas-ink-3)]">
+          <div className="mt-2 rounded-lg border border-kanvas-line bg-kanvas-paper p-2.5 text-[11.5px] text-kanvas-ink-3">
             Akun login warga akan dibuat otomatis dengan username nomor telepon.
           </div>
         )}

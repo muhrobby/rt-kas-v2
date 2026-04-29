@@ -135,7 +135,7 @@ export function AdminLaporanView() {
   return (
     <main className="space-y-3.5 p-6 md:p-7">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <p className="text-[13px] text-[var(--kanvas-ink-3)]">Rekap laporan keuangan kas RT</p>
+        <p className="text-[13px] text-kanvas-ink-3">Rekap laporan keuangan kas RT</p>
         <ExportButtons contextLabel="laporan" onExportExcel={handleExportExcel} onExportPDF={handleExportPDF} />
       </div>
 
@@ -150,7 +150,7 @@ export function AdminLaporanView() {
 
       {isLoading ? (
         <div className="flex items-center justify-center py-12">
-          <p className="text-[13px] text-[var(--kanvas-ink-4)]">Memuat...</p>
+          <p className="text-[13px] text-kanvas-ink-4">Memuat...</p>
         </div>
       ) : error ? (
         <div className="flex items-center justify-center py-12">
@@ -158,7 +158,7 @@ export function AdminLaporanView() {
         </div>
       ) : filteredRows.length === 0 ? (
         <div className="flex items-center justify-center py-12">
-          <p className="text-[13px] text-[var(--kanvas-ink-4)]">Tidak ada data untuk periode ini</p>
+          <p className="text-[13px] text-kanvas-ink-4">Tidak ada data untuk periode ini</p>
         </div>
       ) : (
         <>

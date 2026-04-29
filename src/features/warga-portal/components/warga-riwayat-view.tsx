@@ -39,8 +39,8 @@ export function WargaRiwayatView({ periods, error }: WargaRiwayatViewProps) {
   return (
     <main className="space-y-3.5 p-4 md:p-6">
       <section>
-        <h1 className="text-[24px] text-[var(--kanvas-ink)]">Riwayat Pembayaran</h1>
-        <p className="text-[12px] text-[var(--kanvas-ink-3)]">Pilih periode untuk melihat status pembayaran iuran.</p>
+        <h1 className="text-[24px] text-kanvas-ink">Riwayat Pembayaran</h1>
+        <p className="text-[12px] text-kanvas-ink-3">Pilih periode untuk melihat status pembayaran iuran.</p>
       </section>
 
       <div className="flex gap-1.5 overflow-x-auto pb-2">
@@ -74,14 +74,14 @@ export function WargaRiwayatView({ periods, error }: WargaRiwayatViewProps) {
           <AppCard key={`${activePeriod.periode}-${item.kategori}`} className="p-3">
             <div className="flex items-start justify-between gap-2">
               <div>
-                <p className="text-[13px] font-semibold text-[var(--kanvas-ink)]">{item.kategori}</p>
-                <p className="text-[11px] text-[var(--kanvas-ink-4)]">
+                <p className="text-[13px] font-semibold text-kanvas-ink">{item.kategori}</p>
+                <p className="text-[11px] text-kanvas-ink-4">
                   {item.status === "lunas" ? `Dibayar ${item.tanggalBayar}` : item.status === "belum-tempo" ? "Belum jatuh tempo" : "Belum dibayar"}
                 </p>
               </div>
 
               <div className="text-right">
-                <p className="text-[13px] font-semibold text-[var(--kanvas-ink)]">{formatRupiah(item.nominal)}</p>
+                <p className="text-[13px] font-semibold text-kanvas-ink">{formatRupiah(item.nominal)}</p>
                 <div className="mt-1">
                   {item.status === "lunas" ? <AppPill tone="ok">Lunas</AppPill> : item.status === "belum-tempo" ? <AppPill tone="neutral">Belum Tempo</AppPill> : <AppPill tone="warn">Belum</AppPill>}
                 </div>
@@ -89,8 +89,8 @@ export function WargaRiwayatView({ periods, error }: WargaRiwayatViewProps) {
             </div>
 
             {item.status === "lunas" && item.refKuitansi && item.transaksiId ? (
-              <div className="mt-2.5 flex items-center justify-between border-t border-[var(--kanvas-line-2)] pt-2.5">
-                <p className="truncate text-[11px] text-[var(--kanvas-ink-4)]">{item.refKuitansi}</p>
+              <div className="mt-2.5 flex items-center justify-between border-t border-kanvas-line-2 pt-2.5">
+                <p className="truncate text-[11px] text-kanvas-ink-4">{item.refKuitansi}</p>
                 <AppButton
                   variant="outline"
                   size="sm"

@@ -20,7 +20,7 @@ const statusOptions: Array<{ id: WargaStatusFilter; label: string }> = [
 
 export function WargaToolbar({ query, status, onQueryChange, onStatusChange, onAdd }: WargaToolbarProps) {
   return (
-    <section className="rounded-xl border border-[var(--kanvas-line)] bg-white p-3.5">
+    <section className="rounded-xl border border-kanvas-line bg-white p-3.5">
       <div className="flex flex-col gap-2.5 lg:flex-row lg:items-center">
         <AppInput
           value={query}
@@ -30,7 +30,7 @@ export function WargaToolbar({ query, status, onQueryChange, onStatusChange, onA
           className="flex-1"
         />
 
-        <div className="inline-flex w-full rounded-lg border border-[var(--kanvas-line)] bg-[var(--kanvas-paper)] p-0.5 lg:w-auto">
+        <div className="inline-flex w-full rounded-lg border border-kanvas-line bg-kanvas-paper p-0.5 lg:w-auto">
           {statusOptions.map((option) => {
             const active = status === option.id
             return (

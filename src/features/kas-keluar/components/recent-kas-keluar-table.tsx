@@ -24,34 +24,34 @@ export function RecentKasKeluarTable({ transactions, pagination }: RecentKasKelu
       <div className="lg:hidden">
         {transactions.length > 0 ? (
           transactions.map((trx) => (
-            <div key={trx.id} className="border-b border-[var(--kanvas-line-2)] px-4 py-3 last:border-b-0">
+            <div key={trx.id} className="border-b border-kanvas-line-2 px-4 py-3 last:border-b-0">
               <div className="flex items-start justify-between gap-3">
-                <p className="text-[13px] font-semibold text-[var(--kanvas-ink)]">{trx.kategoriNama}</p>
-                <p className="text-right text-[13px] font-semibold text-[var(--kanvas-ink)]">{formatRupiah(trx.nominal)}</p>
+                <p className="text-[13px] font-semibold text-kanvas-ink">{trx.kategoriNama}</p>
+                <p className="text-right text-[13px] font-semibold text-kanvas-ink">{formatRupiah(trx.nominal)}</p>
               </div>
 
-              <div className="mt-2 space-y-1 text-[12px] text-[var(--kanvas-ink-3)]">
+              <div className="mt-2 space-y-1 text-[12px] text-kanvas-ink-3">
                 <p>
-                  <span className="font-semibold text-[var(--kanvas-ink-2)]">Tanggal:</span> {trx.tanggal}
+                  <span className="font-semibold text-kanvas-ink-2">Tanggal:</span> {trx.tanggal}
                 </p>
                 <p>
-                  <span className="font-semibold text-[var(--kanvas-ink-2)]">Periode:</span> {trx.periodeLabel ?? trx.tanggal}
+                  <span className="font-semibold text-kanvas-ink-2">Periode:</span> {trx.periodeLabel ?? trx.tanggal}
                 </p>
                 <p className="break-words">
-                  <span className="font-semibold text-[var(--kanvas-ink-2)]">Catatan:</span> {trx.catatan ?? "-"}
+                  <span className="font-semibold text-kanvas-ink-2">Catatan:</span> {trx.catatan ?? "-"}
                 </p>
               </div>
             </div>
           ))
         ) : (
-          <div className="px-4 py-10 text-center text-[13px] text-[var(--kanvas-ink-4)]">Belum ada transaksi kas keluar</div>
+          <div className="px-4 py-10 text-center text-[13px] text-kanvas-ink-4">Belum ada transaksi kas keluar</div>
         )}
       </div>
 
       <div className="hidden lg:block">
         <div className="overflow-x-auto">
           <div className="min-w-[720px]">
-            <div className="grid grid-cols-[100px_1.4fr_1fr_1fr_1.2fr] border-b border-[var(--kanvas-line)] bg-[var(--kanvas-paper)] px-4 py-2.5 text-[10px] font-bold tracking-[0.7px] text-[var(--kanvas-ink-3)] uppercase">
+            <div className="grid grid-cols-[100px_1.4fr_1fr_1fr_1.2fr] border-b border-kanvas-line bg-kanvas-paper px-4 py-2.5 text-[10px] font-bold tracking-[0.7px] text-kanvas-ink-3 uppercase">
               <div>Tanggal</div>
               <div>Kategori</div>
               <div>Periode</div>
@@ -64,17 +64,17 @@ export function RecentKasKeluarTable({ transactions, pagination }: RecentKasKelu
                 transactions.map((trx) => (
                   <div
                     key={trx.id}
-                    className="grid grid-cols-[100px_1.4fr_1fr_1fr_1.2fr] items-center border-b border-[var(--kanvas-line-2)] px-4 py-2.5 text-[13px] text-[var(--kanvas-ink-2)]"
+                    className="grid grid-cols-[100px_1.4fr_1fr_1fr_1.2fr] items-center border-b border-kanvas-line-2 px-4 py-2.5 text-[13px] text-kanvas-ink-2"
                   >
-                    <p className="text-[12px] text-[var(--kanvas-ink-3)]">{trx.tanggal}</p>
-                    <p className="font-semibold text-[var(--kanvas-ink)]">{trx.kategoriNama}</p>
-                    <p className="text-[12px] text-[var(--kanvas-ink-3)]">{trx.periodeLabel ?? trx.tanggal}</p>
-                    <p className="text-right font-semibold text-[var(--kanvas-ink)]">{formatRupiah(trx.nominal)}</p>
-                    <p className="text-[12px] text-[var(--kanvas-ink-3)]">{trx.catatan ?? "-"}</p>
+                    <p className="text-[12px] text-kanvas-ink-3">{trx.tanggal}</p>
+                    <p className="font-semibold text-kanvas-ink">{trx.kategoriNama}</p>
+                    <p className="text-[12px] text-kanvas-ink-3">{trx.periodeLabel ?? trx.tanggal}</p>
+                    <p className="text-right font-semibold text-kanvas-ink">{formatRupiah(trx.nominal)}</p>
+                    <p className="text-[12px] text-kanvas-ink-3">{trx.catatan ?? "-"}</p>
                   </div>
                 ))
               ) : (
-                <div className="px-4 py-10 text-center text-[13px] text-[var(--kanvas-ink-4)]">Belum ada transaksi kas keluar</div>
+                <div className="px-4 py-10 text-center text-[13px] text-kanvas-ink-4">Belum ada transaksi kas keluar</div>
               )}
             </div>
           </div>

@@ -12,15 +12,15 @@ export function AppInput({ className, leading, value, onChange, ...props }: AppI
   return (
     <div
       className={cn(
-        "flex w-full items-center gap-2 rounded-lg border border-[var(--kanvas-line)] bg-white px-3 py-2.5 focus-within:border-[var(--kanvas-terra)] focus-within:ring-2 focus-within:ring-[var(--kanvas-terra-soft)]",
+        "flex w-full items-center gap-2 rounded-lg border border-kanvas-line bg-white px-3 py-2.5 focus-within:border-kanvas-terra focus-within:ring-2 focus-within:ring-kanvas-terra-soft",
         className,
       )}
     >
-      {leading ? <span className="text-[var(--kanvas-ink-4)]">{leading}</span> : null}
+      {leading ? <span className="text-kanvas-ink-4">{leading}</span> : null}
       <input
         value={value ?? ""}
         onChange={(event) => onChange?.(event.target.value)}
-        className="min-w-0 flex-1 bg-transparent text-[13px] text-[var(--kanvas-ink)] outline-none"
+        className="min-w-0 flex-1 bg-transparent text-[13px] text-kanvas-ink outline-none"
         {...props}
       />
     </div>

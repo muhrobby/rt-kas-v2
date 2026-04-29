@@ -77,15 +77,15 @@ export function KategoriFormModal({
       <div className="p-4 sm:p-6">
         <div className="mb-4 flex items-start justify-between gap-2">
           <div>
-            <p className="text-[11px] font-semibold tracking-[0.7px] text-[var(--kanvas-ink-4)] uppercase">Kategori Kas</p>
-            <h2 className="mt-1 text-2xl text-[var(--kanvas-ink)]">
+            <p className="text-[11px] font-semibold tracking-[0.7px] text-kanvas-ink-4 uppercase">Kategori Kas</p>
+            <h2 className="mt-1 text-2xl text-kanvas-ink">
               {mode === "add" ? "Tambah Kategori" : "Edit Kategori"}
             </h2>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="rounded p-1 text-[var(--kanvas-ink-3)]"
+            className="rounded p-1 text-kanvas-ink-3"
             aria-label="Tutup modal kategori"
           >
             <KanvasIcons.x size={18} />
@@ -99,7 +99,7 @@ export function KategoriFormModal({
             placeholder="Mis. Iuran Lingkungan"
           />
           {errors.nama || fieldErrors?.nama?.[0] ? (
-            <p className="mt-1 text-[11px] text-[var(--kanvas-danger)]">
+            <p className="mt-1 text-[11px] text-kanvas-danger">
               {errors.nama || fieldErrors?.nama?.[0]}
             </p>
           ) : null}
@@ -107,7 +107,7 @@ export function KategoriFormModal({
 
         <div className="grid grid-cols-1 gap-2.5 md:grid-cols-2 md:gap-3">
           <AppField label="Jenis Arus">
-            <div className="inline-flex w-full rounded-lg border border-[var(--kanvas-line)] bg-white p-0.5">
+            <div className="inline-flex w-full rounded-lg border border-kanvas-line bg-white p-0.5">
               {[
                 { id: "masuk", label: "Masuk" },
                 { id: "keluar", label: "Keluar" },
@@ -132,7 +132,7 @@ export function KategoriFormModal({
           </AppField>
 
           <AppField label="Tipe Tagihan">
-            <div className="inline-flex w-full rounded-lg border border-[var(--kanvas-line)] bg-white p-0.5">
+            <div className="inline-flex w-full rounded-lg border border-kanvas-line bg-white p-0.5">
               {[
                 { id: "bulanan", label: "Bulanan" },
                 { id: "sekali", label: "Sekali" },
@@ -166,14 +166,14 @@ export function KategoriFormModal({
             placeholder="0"
           />
           {errors.nominalDefault || fieldErrors?.nominalDefault?.[0] ? (
-            <p className="mt-1 text-[11px] text-[var(--kanvas-danger)]">
+            <p className="mt-1 text-[11px] text-kanvas-danger">
               {errors.nominalDefault || fieldErrors?.nominalDefault?.[0]}
             </p>
           ) : null}
         </AppField>
 
         {serverError ? (
-          <div className="mt-2 rounded-lg border border-[var(--kanvas-danger-soft)] bg-[var(--kanvas-info-soft)] p-2.5 text-[11.5px] text-[var(--kanvas-danger)]">
+          <div className="mt-2 rounded-lg border border-kanvas-danger-soft bg-kanvas-info-soft p-2.5 text-[11.5px] text-kanvas-danger">
             {serverError}
           </div>
         ) : null}

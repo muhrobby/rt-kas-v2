@@ -117,7 +117,7 @@ export function LogAktivitasView() {
   return (
     <main className="space-y-3.5 p-6 md:p-7">
       <div className="flex items-center justify-between gap-2">
-        <p className="text-[13px] text-[var(--kanvas-ink-3)]">Riwayat aktivitas pengurus dan transaksi</p>
+        <p className="text-[13px] text-kanvas-ink-3">Riwayat aktivitas pengurus dan transaksi</p>
         <ExportButtons contextLabel="log aktivitas" onExportPDF={handleExportPDF} />
       </div>
 
@@ -134,7 +134,7 @@ export function LogAktivitasView() {
 
       {isLoading ? (
         <div className="flex items-center justify-center py-12">
-          <p className="text-[13px] text-[var(--kanvas-ink-4)]">Memuat...</p>
+          <p className="text-[13px] text-kanvas-ink-4">Memuat...</p>
         </div>
       ) : error ? (
         <div className="flex items-center justify-center py-12">
