@@ -163,7 +163,7 @@ export function WargaManagementView() {
       return
     }
     await reloadList()
-    pushToast("Data warga berhasil dihapus", "warn")
+    pushToast("Data warga berhasil dihapus", "ok")
     setDeleteOpen(false)
     setSelectedWarga(null)
   }
@@ -178,7 +178,7 @@ export function WargaManagementView() {
     })
     setUpdatingPengurusId(null)
     if (!result.ok) {
-      pushToast(result.error || "Gagal mengubah status pengurus", "warn")
+      pushToast(result.error || "Gagal mengubah status pengurus", "error")
       return
     }
     await reloadList()

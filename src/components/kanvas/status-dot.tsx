@@ -4,8 +4,8 @@ interface StatusDotProps {
 }
 
 const colors = {
-  ok: "var(--kanvas-info)",
-  warn: "var(--kanvas-terra-2)",
+  ok: "var(--kanvas-success)",
+  warn: "var(--kanvas-warning)",
   danger: "var(--kanvas-danger)",
   neutral: "var(--kanvas-ink-4)",
   terra: "var(--kanvas-terra)",

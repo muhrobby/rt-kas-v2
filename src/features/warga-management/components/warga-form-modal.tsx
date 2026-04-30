@@ -139,7 +139,7 @@ export function WargaFormModal({ open, mode, initialValues, onClose, onSubmit, s
         </AppField>
 
         {serverError ? (
-          <div className="mt-2 rounded-lg border border-kanvas-danger-soft bg-kanvas-info-soft p-2.5 text-[11.5px] text-kanvas-danger">{serverError}</div>
+          <div className="mt-2 rounded-lg border border-kanvas-danger-soft bg-kanvas-danger-soft p-2.5 text-[11.5px] text-kanvas-danger">{serverError}</div>
         ) : (
           <div className="mt-2 rounded-lg border border-kanvas-line bg-kanvas-paper p-2.5 text-[11.5px] text-kanvas-ink-3">
             Akun login warga akan dibuat otomatis dengan username nomor telepon.

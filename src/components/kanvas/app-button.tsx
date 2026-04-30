@@ -21,7 +21,7 @@ const palettes: Record<AppButtonVariant, { bg: string; fg: string; border: strin
   dark: { bg: "var(--kanvas-ink)", fg: "var(--kanvas-paper-2)", border: "var(--kanvas-ink)", hover: "var(--kanvas-ink-2)" },
   outline: { bg: "#ffffff", fg: "var(--kanvas-ink-2)", border: "var(--kanvas-line)", hover: "var(--kanvas-paper)" },
   ghost: { bg: "transparent", fg: "var(--kanvas-ink-2)", border: "transparent", hover: "var(--kanvas-paper-2)" },
-  danger: { bg: "#ffffff", fg: "var(--kanvas-danger)", border: "var(--kanvas-danger-soft)", hover: "var(--kanvas-info-soft)" },
+  danger: { bg: "#ffffff", fg: "var(--kanvas-danger)", border: "var(--kanvas-danger-soft)", hover: "var(--kanvas-danger-soft)" },
 }
 
 const sizes: Record<AppButtonSize, { py: number; px: number; fs: number }> = {

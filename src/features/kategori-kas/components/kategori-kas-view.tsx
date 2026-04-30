@@ -142,7 +142,7 @@ export function KategoriKasView() {
       return
     }
     await reloadList()
-    pushToast("Kategori berhasil dihapus", "warn")
+    pushToast("Kategori berhasil dihapus", "ok")
     setDeleteOpen(false)
     setSelectedKategori(null)
   }

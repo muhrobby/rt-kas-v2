@@ -38,8 +38,8 @@ export function AdminSidebar() {
           K
         </div>
         <div className="leading-none">
-          <p className="text-lg text-kanvas-ink">Kanvas RT</p>
-          <p className="mt-1 text-[10px] font-semibold tracking-[1.5px] text-kanvas-ink-4 uppercase">Kas RT 04</p>
+          <p className="text-lg text-kanvas-ink">KAS RT</p>
+          <p className="mt-1 text-[10px] font-semibold tracking-[1.5px] text-kanvas-ink-4 uppercase">Kas RT 01</p>
         </div>
       </div>
 

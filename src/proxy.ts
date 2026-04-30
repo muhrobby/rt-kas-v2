@@ -6,9 +6,7 @@ import { eq } from "drizzle-orm";
 
 const PUBLIC_PATHS = ["/login", "/api/auth", "/unauthorized"];
 
-export const runtime = "nodejs";
-
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   if (PUBLIC_PATHS.some((p) => pathname.startsWith(p))) {

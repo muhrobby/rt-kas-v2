@@ -5,23 +5,33 @@ import { usePathname } from "next/navigation"
 import { KanvasIcons } from "@/components/kanvas"
 import { LogoutButton } from "@/components/auth/logout-button"
 import { PageHeader } from "@/components/layout/page-header"
+import type { AdminShellUser } from "@/components/layout/admin-shell"
 
 interface AdminTopbarProps {
+  user?: AdminShellUser
   onOpenSidebar?: () => void
 }
 
+const namaBulan = [
+  "Januari", "Februari", "Maret", "April", "Mei", "Juni",
+  "Juli", "Agustus", "September", "Oktober", "November", "Desember"
+];
+
+const month = namaBulan[new Date().getMonth()-1]
+const year = new Date().getFullYear()
+
 const titlesByPath: Record<string, { subtitle: string; title: string }> = {
-  "/admin/dashboard": { subtitle: "RT 04 / RW 09 · Apr 2026", title: "Beranda Pengurus" },
+  "/admin/dashboard": { subtitle: "RT 001 / RW 010", title: "Beranda Pengurus" },
   "/admin/warga": { subtitle: "Total warga aktif", title: "Manajemen Warga" },
   "/admin/kategori": { subtitle: "Master data iuran", title: "Kategori Kas" },
-  "/admin/kas-masuk": { subtitle: "Apr 2026", title: "Kas Masuk" },
-  "/admin/kas-keluar": { subtitle: "Apr 2026", title: "Kas Keluar" },
+  "/admin/kas-masuk": { subtitle: ``, title: "Kas Masuk" },
+  "/admin/kas-keluar": { subtitle: "", title: "Kas Keluar" },
   "/admin/tunggakan": { subtitle: "Rekap iuran", title: "Tunggakan" },
-  "/admin/laporan": { subtitle: "Periode 2026", title: "Laporan Keuangan" },
+  "/admin/laporan": { subtitle: "", title: "Laporan Keuangan" },
   "/admin/log-aktivitas": { subtitle: "Audit trail", title: "Log Aktivitas" },
 }
 
-export function AdminTopbar({ onOpenSidebar }: AdminTopbarProps) {
+export function AdminTopbar({ user, onOpenSidebar }: AdminTopbarProps) {
   const pathname = usePathname()
   const heading = titlesByPath[pathname] ?? titlesByPath["/admin/dashboard"]
 
@@ -52,11 +62,11 @@ export function AdminTopbar({ onOpenSidebar }: AdminTopbarProps) {
 
         <div className="flex items-center gap-2 rounded-full border border-kanvas-line bg-white py-1 pr-2 pl-1 sm:pr-2.5">
           <div className="flex h-7 w-7 items-center justify-center rounded-full bg-kanvas-ink text-[11px] font-bold text-kanvas-paper-2">
-            BS
+            {user?.initials ?? "U"}
           </div>
           <div className="hidden leading-tight sm:block">
-            <p className="text-[12.5px] font-semibold text-kanvas-ink">Budi Santoso</p>
-            <p className="text-[10.5px] text-kanvas-ink-4">Ketua RT</p>
+            <p className="text-[12.5px] font-semibold text-kanvas-ink">{user?.name ?? "User"}</p>
+            <p className="text-[10.5px] text-kanvas-ink-4">{user?.role ?? "Admin"}</p>
           </div>
           <LogoutButton
             className="p-1 text-kanvas-ink-3 disabled:cursor-not-allowed disabled:opacity-50"

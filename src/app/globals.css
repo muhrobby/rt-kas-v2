@@ -54,6 +54,10 @@
     --color-kanvas-info-soft: var(--kanvas-info-soft);
     --color-kanvas-danger: var(--kanvas-danger);
     --color-kanvas-danger-soft: var(--kanvas-danger-soft);
+    --color-kanvas-success: var(--kanvas-success);
+    --color-kanvas-success-soft: var(--kanvas-success-soft);
+    --color-kanvas-warning: var(--kanvas-warning);
+    --color-kanvas-warning-soft: var(--kanvas-warning-soft);
     --radius-sm: calc(var(--radius) * 0.6);
     --radius-md: calc(var(--radius) * 0.8);
     --radius-lg: var(--radius);
@@ -111,8 +115,12 @@
     --kanvas-terra-soft: #d6e7fb;
     --kanvas-info: #3f7dd1;
     --kanvas-info-soft: #e3efff;
-    --kanvas-danger: #2a5da6;
-    --kanvas-danger-soft: #dbe9ff;
+    --kanvas-danger: #dc2626;
+    --kanvas-danger-soft: #fee2e2;
+    --kanvas-success: #16a34a;
+    --kanvas-success-soft: #dcfce7;
+    --kanvas-warning: #d97706;
+    --kanvas-warning-soft: #fef3c7;
 }
 
 .dark {

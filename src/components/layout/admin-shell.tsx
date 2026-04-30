@@ -7,7 +7,18 @@ import { AdminMobileSidebar } from "@/components/layout/admin-mobile-sidebar"
 import { AdminSidebar } from "@/components/layout/admin-sidebar"
 import { AdminTopbar } from "@/components/layout/admin-topbar"
 
-export function AdminShell({ children }: PropsWithChildren) {
+export interface AdminShellUser {
+  name: string
+  initials: string
+  role: string
+  wargaId: number | null
+}
+
+interface AdminShellProps extends PropsWithChildren {
+  user?: AdminShellUser
+}
+
+export function AdminShell({ children, user }: AdminShellProps) {
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false)
 
   return (
@@ -19,7 +30,7 @@ export function AdminShell({ children }: PropsWithChildren) {
       </div>
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <AdminTopbar onOpenSidebar={() => setMobileSidebarOpen(true)} />
+        <AdminTopbar user={user} onOpenSidebar={() => setMobileSidebarOpen(true)} />
         <div className="flex-1 overflow-auto overflow-x-hidden">{children}</div>
       </div>
     </div>

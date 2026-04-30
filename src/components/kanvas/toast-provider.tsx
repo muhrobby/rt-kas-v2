@@ -3,7 +3,7 @@
 import { createContext, useCallback, useContext, useMemo, useState } from "react"
 import type { PropsWithChildren } from "react"
 
-type ToastTone = "ok" | "warn"
+type ToastTone = "ok" | "warn" | "error" | "info"
 
 interface ToastItem {
   id: string
@@ -42,7 +42,16 @@ export function ToastProvider({ children }: PropsWithChildren) {
           >
             <span
               className="inline-block h-1.5 w-1.5 rounded-full"
-              style={{ background: toast.tone === "ok" ? "var(--kanvas-info)" : "var(--kanvas-terra)" }}
+              style={{
+                background:
+                  toast.tone === "ok"
+                    ? "var(--kanvas-success)"
+                    : toast.tone === "warn"
+                      ? "var(--kanvas-warning)"
+                      : toast.tone === "error"
+                        ? "var(--kanvas-danger)"
+                        : "var(--kanvas-info)",
+              }}
             />
             {toast.message}
           </div>

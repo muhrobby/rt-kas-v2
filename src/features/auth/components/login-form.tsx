@@ -99,7 +99,7 @@ export function LoginForm() {
           />
         </AppField>
 
-        {error ? <p className="mt-1 mb-4 rounded-lg border border-kanvas-danger-soft bg-kanvas-info-soft px-3 py-2 text-[12px] text-kanvas-danger">{error}</p> : null}
+        {error ? <p className="mt-1 mb-4 rounded-lg border border-kanvas-danger-soft bg-kanvas-danger-soft px-3 py-2 text-[12px] text-kanvas-danger">{error}</p> : null}
 
         <AppButton className="w-full" size="lg" onClick={submit} trailing={<KanvasIcons.arrowR size={14} />} disabled={submitting}>
           {submitting ? "Memproses..." : "Masuk"}

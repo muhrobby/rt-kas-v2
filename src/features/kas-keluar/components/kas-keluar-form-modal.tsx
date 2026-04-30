@@ -131,7 +131,7 @@ export function KasKeluarFormModal({
         </AppField>
 
         {serverError ? (
-          <div className="mt-2 rounded-lg border border-kanvas-danger-soft bg-kanvas-info-soft p-2.5 text-[11.5px] text-kanvas-danger">
+          <div className="mt-2 rounded-lg border border-kanvas-danger-soft bg-kanvas-danger-soft p-2.5 text-[11.5px] text-kanvas-danger">
             {serverError}
           </div>
         ) : null}

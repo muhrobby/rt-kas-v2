@@ -24,7 +24,7 @@ export function LogoutButton({ className, label = "Keluar", iconOnly = false, ar
     try {
       const result = await logoutClient()
       if (!result.success) {
-        pushToast(result.error ?? "Gagal keluar. Coba lagi.", "warn")
+        pushToast(result.error ?? "Gagal keluar. Coba lagi.", "error")
         return
       }
 

@@ -10,8 +10,8 @@ interface AppPillProps extends PropsWithChildren {
 
 const tones: Record<AppPillTone, [string, string]> = {
   neutral: ["var(--kanvas-ink-3)", "var(--kanvas-line-2)"],
-  ok: ["var(--kanvas-info)", "var(--kanvas-info-soft)"],
-  warn: ["var(--kanvas-terra-2)", "var(--kanvas-terra-soft)"],
+  ok: ["var(--kanvas-success)", "var(--kanvas-success-soft)"],
+  warn: ["var(--kanvas-warning)", "var(--kanvas-warning-soft)"],
   danger: ["var(--kanvas-danger)", "var(--kanvas-danger-soft)"],
   terra: ["var(--kanvas-terra-2)", "var(--kanvas-terra-soft)"],
   plum: ["var(--kanvas-ink-2)", "var(--kanvas-line-2)"],
