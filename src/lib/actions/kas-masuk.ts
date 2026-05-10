@@ -8,6 +8,7 @@ import { kategoriKas, transaksi, warga } from "@/lib/db/schema"
 import { writeAuditLog } from "@/lib/services/audit-log-service"
 import { hasPaidMonthly, hasPaidSekali } from "@/lib/services/transaksi-service"
 import { listWarga } from "@/lib/services/warga-service"
+import { getFirstBillablePeriod, isPeriodEligible } from "@/lib/billing/billing-eligibility"
 import {
   type CreateKasMasukInput,
   createKasMasukSchema,
@@ -29,13 +30,19 @@ export async function listWargaAction(input: { search?: string; status?: "semua"
   const data = await listWarga({ search: input.search, status: input.status })
   return {
     ok: true as const,
-    data: data.map((w) => ({
-      id: w.id,
-      nama: w.nama,
-      blok: w.blok,
-      telp: w.telp,
-      statusHunian: w.statusHunian,
-    })),
+    data: data.map((w) => {
+      const firstBill = getFirstBillablePeriod(w.createdAt)
+      return {
+        id: w.id,
+        nama: w.nama,
+        blok: w.blok,
+        telp: w.telp,
+        statusHunian: w.statusHunian,
+        createdAt: w.createdAt.toISOString(),
+        firstBillMonth: firstBill.bulan,
+        firstBillYear: firstBill.tahun,
+      }
+    }),
   }
 }
 
@@ -91,6 +98,21 @@ export async function listTransaksiMasukAction() {
 
 export async function getPaidMonthsAction(wargaId: number, kategoriId: number, tahun: number) {
   await requireAdmin()
+
+  const [wargaRow] = await db.select().from(warga).where(eq(warga.id, wargaId)).limit(1)
+  if (!wargaRow) {
+    return { ok: false, error: "Data warga tidak ditemukan." }
+  }
+
+  const [kategori] = await db.select().from(kategoriKas).where(eq(kategoriKas.id, kategoriId)).limit(1)
+  if (!kategori) {
+    return { ok: false, error: "Kategori tidak ditemukan." }
+  }
+
+  if (kategori.tipeTagihan !== "bulanan") {
+    return { ok: false, error: "Aksi ini hanya untuk kategori bulanan." }
+  }
+
   const { listTransaksiMasuk } = await import("@/lib/services/transaksi-service")
   const rows = await listTransaksiMasuk({ wargaId, kategoriId })
   const paid: number[] = []
@@ -102,7 +124,23 @@ export async function getPaidMonthsAction(wargaId: number, kategoriId: number, t
       if (month && !paid.includes(month)) paid.push(month)
     }
   }
-  return { ok: true as const, data: paid.sort((a, b) => a - b) }
+
+  const firstBill = getFirstBillablePeriod(wargaRow.createdAt)
+  const notEligible: number[] = []
+
+  if (tahun < firstBill.tahun) {
+    for (let m = 1; m <= 12; m++) notEligible.push(m)
+  } else if (tahun === firstBill.tahun) {
+    for (let m = 1; m < firstBill.bulan; m++) notEligible.push(m)
+  }
+
+  return {
+    ok: true as const,
+    data: {
+      paid: paid.sort((a, b) => a - b),
+      notEligible: notEligible.sort((a, b) => a - b),
+    },
+  }
 }
 
 export async function createKasMasukAction(input: CreateKasMasukInput): Promise<ActionResult<{ id: number }>> {
@@ -134,6 +172,15 @@ export async function createKasMasukAction(input: CreateKasMasukInput): Promise<
       const daftarBulan = Array.isArray(bulanInput) ? bulanInput : [bulanInput]
       if (daftarBulan.length === 0) {
         return { ok: false, error: "Pilih minimal 1 bulan tagihan." }
+      }
+
+      for (const bulan of daftarBulan) {
+        if (!isPeriodEligible(wargaRow.createdAt, Number(bulan), tahun)) {
+          return {
+            ok: false,
+            error: "Periode tagihan belum berlaku untuk warga ini.",
+          }
+        }
       }
 
       for (const bulan of daftarBulan) {

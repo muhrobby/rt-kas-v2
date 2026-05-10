@@ -6,6 +6,7 @@ export type AdminIconName =
   | "out"
   | "alert"
   | "log"
+  | "gear"
 
 export type WargaIconName = "home" | "receipt" | "doc"
 
@@ -32,6 +33,7 @@ export const adminNavItems: AdminNavItem[] = [
   { id: "tunggakan", label: "Tunggakan", href: "/admin/tunggakan", icon: "alert" },
   { id: "laporan", label: "Laporan Keuangan", href: "/admin/laporan", icon: "doc" },
   { id: "log-aktivitas", label: "Log Aktivitas", href: "/admin/log-aktivitas", icon: "log" },
+  { id: "settings", label: "Pengaturan", href: "/admin/settings", icon: "gear" },
 ]
 
 export const wargaNavItems: WargaNavItem[] = [

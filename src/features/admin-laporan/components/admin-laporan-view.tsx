@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react"
 
 import { ExportButtons } from "@/components/shared/export-buttons"
+import type { PdfBranding } from "@/lib/branding/format-branding"
 import { paginateItems } from "@/lib/pagination"
 import { getLaporanAction } from "@/lib/actions/laporan"
 import { generateLaporanPDF } from "@/lib/export/pdf"
@@ -37,6 +38,7 @@ export function AdminLaporanView() {
   const [endMonth, setEndMonth] = useState(3)
   const [currentPage, setCurrentPage] = useState(1)
   const [laporanData, setLaporanData] = useState<LaporanResult | null>(null)
+  const [pdfBranding, setPdfBranding] = useState<PdfBranding | undefined>()
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [detailModal, setDetailModal] = useState<{ open: boolean; data: MonthlyCashflowRow | null }>({
@@ -61,6 +63,7 @@ export function AdminLaporanView() {
 
         if (result.ok) {
           setLaporanData(result.data)
+          setPdfBranding(result.data.branding)
           setError(null)
         } else {
           setError(result.error ?? "Gagal memuat laporan")
@@ -129,8 +132,9 @@ export function AdminLaporanView() {
       saldoPeriode: totals.saldoPeriode,
       saldoAwal,
       periodeLabel: `${MONTH_NAMES[startMonth]} ${year} - ${MONTH_NAMES[endMonth]} ${year}`,
+      branding: pdfBranding,
     })
-  }, [filteredRows, totals, startMonth, endMonth, year])
+  }, [filteredRows, totals, startMonth, endMonth, year, pdfBranding])
 
   return (
     <main className="space-y-3.5 p-6 md:p-7">

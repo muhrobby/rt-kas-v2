@@ -3,6 +3,7 @@
 import { useMemo, useState, useTransition } from "react"
 
 import { AppButton, AppCard, AppPill, KanvasIcons } from "@/components/kanvas"
+import type { PdfBranding } from "@/lib/branding/format-branding"
 import { formatRupiah } from "@/lib/format/currency"
 import { getMyKuitansiAction } from "@/lib/actions/warga-portal"
 import type { WargaHistoryPeriod } from "@/types/rt-kas"
@@ -17,6 +18,7 @@ interface KuitansiSelection {
   wargaNama: string
   blok?: string
   petugas?: string | null
+  branding?: PdfBranding
 }
 
 interface WargaRiwayatViewProps {
@@ -112,6 +114,7 @@ export function WargaRiwayatView({ periods, error }: WargaRiwayatViewProps) {
                         wargaNama: result.data.warga,
                         blok: result.data.blok,
                         petugas: result.data.petugas,
+                        branding: result.data.branding,
                       })
                       setReceiptOpen(true)
                     })

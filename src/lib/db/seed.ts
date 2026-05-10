@@ -4,10 +4,12 @@ import { hashPassword } from "better-auth/crypto";
 import { eq } from "drizzle-orm";
 
 import { db } from "./index";
+import { appSettings } from "./schema/app-settings";
 import { account, user } from "./schema/auth";
 import { kategoriKas } from "./schema/kategori-kas";
 import { transaksi } from "./schema/transaksi";
 import { warga } from "./schema/warga";
+import { defaultAppSettings } from "../constants/app-settings";
 
 async function main() {
   console.log("Seeding database...");
@@ -16,6 +18,13 @@ async function main() {
   if (!process.env.SEED_ADMIN_PASSWORD) {
     console.warn("WARNING: Using default seed password. Set SEED_ADMIN_PASSWORD env var for production.");
   }
+
+  console.log("Seeding app settings...");
+  await db
+    .insert(appSettings)
+    .values(defaultAppSettings)
+    .onConflictDoNothing();
+  console.log("App settings seeded.");
 
   console.log("Creating admin user...");
   const adminId = generateId();

@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState, useTransition } from "react"
 
 import { AppCard, useToast } from "@/components/kanvas"
+import type { PdfBranding } from "@/lib/branding/format-branding"
 import { paginateItems } from "@/lib/pagination"
 import { getKuitansiAdminAction } from "@/lib/actions/kuitansi"
 import { generateKuitansiPDF } from "@/lib/export/pdf"
@@ -42,6 +43,7 @@ interface KuitansiSelection {
   wargaNama: string
   blok?: string
   petugas?: string | null
+  branding?: PdfBranding
 }
 
 export function KasMasukView() {
@@ -57,8 +59,11 @@ export function KasMasukView() {
   const [isLoading, startTransition] = useTransition()
 
   const [selectedWargaId, setSelectedWargaId] = useState("")
+  const [selectedFirstBillMonth, setSelectedFirstBillMonth] = useState<number | undefined>()
+  const [selectedFirstBillYear, setSelectedFirstBillYear] = useState<number | undefined>()
   const [selectedKategoriId, setSelectedKategoriId] = useState("")
   const [paidMonths, setPaidMonths] = useState<number[]>([])
+  const [notEligibleMonths, setNotEligibleMonths] = useState<number[]>([])
   const [oneTimePaid, setOneTimePaid] = useState(false)
   const [loadingPaidMonths, setLoadingPaidMonths] = useState(false)
   const [receiptOpen, setReceiptOpen] = useState(false)
@@ -81,12 +86,19 @@ export function KasMasukView() {
     })
   }, [])
 
-  const handleWargaChange = useCallback((id: string) => {
-    setSelectedWargaId(id)
-    setPaidMonths([])
-    setOneTimePaid(false)
-    setReceiptError(null)
-  }, [])
+  const handleWargaChange = useCallback(
+    (id: string) => {
+      setSelectedWargaId(id)
+      setPaidMonths([])
+      setNotEligibleMonths([])
+      setOneTimePaid(false)
+      setReceiptError(null)
+      const found = wargaOptions.find((w) => w.id === id)
+      setSelectedFirstBillMonth(found?.firstBillMonth)
+      setSelectedFirstBillYear(found?.firstBillYear)
+    },
+    [wargaOptions],
+  )
 
   const handleKategoriChange = useCallback(
     async (id: string) => {
@@ -94,13 +106,15 @@ export function KasMasukView() {
       const found = kategoriOptions.find((k) => k.id === id) ?? null
       setSelectedKategori(found)
       setPaidMonths([])
+      setNotEligibleMonths([])
       setOneTimePaid(false)
 
       if (found?.tipeTagihan === "bulanan" && selectedWargaId && id) {
         setLoadingPaidMonths(true)
         try {
-          const months = await fetchPaidMonths(Number(selectedWargaId), Number(id), new Date().getFullYear())
-          setPaidMonths(months)
+          const { paid, notEligible } = await fetchPaidMonths(Number(selectedWargaId), Number(id), new Date().getFullYear())
+          setPaidMonths(paid)
+          setNotEligibleMonths(notEligible)
         } finally {
           setLoadingPaidMonths(false)
         }
@@ -145,7 +159,10 @@ export function KasMasukView() {
     setSelectedKategoriId("")
     setSelectedKategori(null)
     setPaidMonths([])
+    setNotEligibleMonths([])
     setOneTimePaid(false)
+    setSelectedFirstBillMonth(undefined)
+    setSelectedFirstBillYear(undefined)
     setFormOpen(true)
   }
 
@@ -195,6 +212,7 @@ export function KasMasukView() {
         wargaNama: result.data.warga,
         blok: result.data.blok,
         petugas: result.data.petugas,
+        branding: result.data.branding,
       })
       setReceiptOpen(true)
     })
@@ -252,8 +270,11 @@ export function KasMasukView() {
         fieldErrors={fieldErrors}
         submitting={submitting}
         paidMonths={paidMonths}
+        notEligibleMonths={notEligibleMonths}
         oneTimePaid={oneTimePaid}
         loadingPaidMonths={loadingPaidMonths}
+        firstBillMonth={selectedFirstBillMonth}
+        firstBillYear={selectedFirstBillYear}
       />
     </main>
   )

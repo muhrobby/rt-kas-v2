@@ -4,6 +4,9 @@ import type { Metadata } from "next"
 import { ToastProvider } from "@/components/kanvas"
 import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
+import { getAppBranding } from "@/lib/branding/format-branding"
+import { getBrandingThemeStyle } from "@/lib/branding/theme-style"
+import { getAppSettings } from "@/lib/services/app-settings-service"
 import { cn } from "@/lib/utils"
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" })
@@ -13,23 +16,29 @@ const fontMono = Geist_Mono({
   variable: "--font-mono",
 })
 
-export const metadata: Metadata = {
-  title: "RT Kas",
-  description: "Aplikasi manajemen kas RT untuk pengurus dan warga.",
+export async function generateMetadata(): Promise<Metadata> {
+  const branding = getAppBranding(await getAppSettings())
+
+  return {
+    title: branding.appName,
+    description: `Aplikasi manajemen kas ${branding.rtRwLabel} untuk pengurus dan warga.`,
+  }
 }
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode
 }>) {
+  const branding = getAppBranding(await getAppSettings())
+
   return (
     <html
       lang="id"
       suppressHydrationWarning
       className={cn("antialiased", fontMono.variable, "font-sans", inter.variable)}
     >
-      <body>
+      <body style={getBrandingThemeStyle(branding)}>
         <ThemeProvider>
           <ToastProvider>{children}</ToastProvider>
         </ThemeProvider>

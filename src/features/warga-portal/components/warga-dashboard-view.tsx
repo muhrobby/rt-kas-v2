@@ -33,7 +33,7 @@ export function WargaDashboardView({ data }: WargaDashboardViewProps) {
       <AppCard className="p-3.5">
         <div className="flex flex-wrap items-start justify-between gap-2.5">
           <div>
-            <p className="text-[11px] font-semibold tracking-[0.6px] text-kanvas-ink-4 uppercase">Saldo Kas RT</p>
+            <p className="text-[11px] font-semibold tracking-[0.6px] text-kanvas-ink-4 uppercase">Saldo Kas</p>
             <p className="mt-1 text-2xl text-kanvas-ink">{formatRupiah(data.saldoKas)}</p>
           </div>
           <Link href="/warga/laporan" className="inline-flex shrink-0 items-center gap-1 rounded-lg border border-kanvas-line bg-white px-3 py-1.5 text-[12px] font-semibold text-kanvas-ink-2">

@@ -1,6 +1,9 @@
 "use server"
 
 import { requireAdmin } from "@/lib/auth/permissions"
+import { getPdfBranding } from "@/lib/branding/format-branding"
+import type { PdfBranding } from "@/lib/branding/format-branding"
+import { getAppSettings } from "@/lib/services/app-settings-service"
 import { getLaporanKeuangan, type LaporanResult } from "@/lib/services/laporan-service"
 import { ZodError, z } from "zod"
 
@@ -11,6 +14,10 @@ type ActionResult<T> =
       error: string
       fieldErrors?: Record<string, string[]>
     }
+
+type LaporanPdfResult = LaporanResult & {
+  branding: PdfBranding
+}
 
 const filterSchema = z.object({
   startMonth: z.number().int().min(0).max(11),
@@ -43,13 +50,13 @@ function toActionError(error: unknown): ActionResult<never> {
 
 export async function getLaporanAction(
   filter: z.infer<typeof filterSchema>,
-): Promise<ActionResult<LaporanResult>> {
+): Promise<ActionResult<LaporanPdfResult>> {
   await requireAdmin()
 
   try {
     const parsed = filterSchema.parse(filter)
-    const result = await getLaporanKeuangan(parsed)
-    return { ok: true, data: result }
+    const [laporan, settings] = await Promise.all([getLaporanKeuangan(parsed), getAppSettings()])
+    return { ok: true, data: { ...laporan, branding: getPdfBranding(settings) } }
   } catch (error) {
     return toActionError(error)
   }

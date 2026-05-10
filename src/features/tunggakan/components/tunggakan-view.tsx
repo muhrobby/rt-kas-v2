@@ -129,7 +129,7 @@ export function TunggakanView() {
         kategori={kategori}
         periodeStart={periodeStart}
         periodeEnd={periodeEnd}
-        kategoriOptions={["semua", ...kategoriOptions.map((k) => k.nama)]}
+        kategoriOptions={Array.from(new Set(kategoriOptions.map((k) => k.nama)))}
         onKategoriChange={(val) => { setKategori(val); setCurrentPage(1) }}
         onPeriodeStartChange={(val) => { setPeriodeStart(val); setCurrentPage(1) }}
         onPeriodeEndChange={(val) => { setPeriodeEnd(val); setCurrentPage(1) }}

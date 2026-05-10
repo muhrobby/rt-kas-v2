@@ -11,6 +11,8 @@ export interface WargaOptionUi {
   id: string
   label: string
   sub: string
+  firstBillMonth: number
+  firstBillYear: number
 }
 
 export interface KategoriOptionUi {
@@ -48,6 +50,8 @@ export async function fetchWargaOptions(): Promise<WargaOptionUi[]> {
       id: String(w.id),
       label: `${w.nama} · ${w.blok}`,
       sub: w.telp,
+      firstBillMonth: w.firstBillMonth,
+      firstBillYear: w.firstBillYear,
     }))
 }
 
@@ -96,10 +100,10 @@ export async function fetchTransaksiMasuk(): Promise<TransaksiUi[]> {
   })
 }
 
-export async function fetchPaidMonths(wargaId: number, kategoriId: number, tahun: number): Promise<number[]> {
+export async function fetchPaidMonths(wargaId: number, kategoriId: number, tahun: number): Promise<{ paid: number[]; notEligible: number[] }> {
   const result = await getPaidMonthsAction(wargaId, kategoriId, tahun)
-  if (!result.ok) return []
-  return result.data
+  if (!result.ok) return { paid: [], notEligible: [] }
+  return result.data as { paid: number[]; notEligible: number[] }
 }
 
 export async function createKasMasukFromForm(input: CreateKasMasukInput) {

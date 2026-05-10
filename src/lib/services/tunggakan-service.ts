@@ -5,6 +5,7 @@ import { and, eq, inArray } from "drizzle-orm"
 import { db } from "@/lib/db"
 import { kategoriKas, transaksi, warga } from "@/lib/db/schema"
 import { TunggakanFilterInput } from "@/lib/validations/tunggakan"
+import { isPeriodEligible } from "@/lib/billing/billing-eligibility"
 
 export interface TunggakanItem {
   kategori: string
@@ -47,6 +48,7 @@ async function getActiveWarga() {
       id: warga.id,
       nama: warga.namaKepalaKeluarga,
       blok: warga.blokRumah,
+      createdAt: warga.createdAt,
     })
     .from(warga)
     .orderBy(warga.blokRumah, warga.id)
@@ -223,6 +225,9 @@ export async function getTunggakan(filter: TunggakanFilterInput): Promise<Tungga
   for (const kat of filteredBulanan) {
     for (const { bulan, tahun } of bulanCombinations) {
       for (const w of allWarga) {
+        if (!isPeriodEligible(w.createdAt, bulan, tahun)) {
+          continue
+        }
         const wargaPaidKey = `${w.id}-${kat.id}-${bulan}-${tahun}`
 
         if (!paidBulanan.has(wargaPaidKey)) {

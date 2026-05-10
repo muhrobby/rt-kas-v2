@@ -9,6 +9,7 @@ import { adminNavItems } from "@/lib/constants/nav"
 import { formatRupiah } from "@/lib/format/currency"
 import { getDashboardSummaryAction } from "@/lib/actions/dashboard"
 import { useTunggakanCount } from "@/hooks/use-tunggakan-count"
+import type { AppBranding } from "@/lib/branding/format-branding"
 
 const iconMap = {
   home: KanvasIcons.home,
@@ -18,12 +19,18 @@ const iconMap = {
   out: KanvasIcons.out,
   alert: KanvasIcons.alert,
   log: KanvasIcons.log,
+  gear: KanvasIcons.gear,
 } as const
 
-export function AdminSidebar() {
+interface AdminSidebarProps {
+  branding: AppBranding
+}
+
+export function AdminSidebar({ branding }: AdminSidebarProps) {
   const pathname = usePathname()
   const tunggakanCount = useTunggakanCount()
   const [saldoKas, setSaldoKas] = useState<number | null>(null)
+  const brandInitial = branding.appName.trim().charAt(0).toUpperCase() || "K"
 
   useEffect(() => {
     getDashboardSummaryAction().then((data) => {
@@ -35,11 +42,11 @@ export function AdminSidebar() {
     <aside className="sticky top-0 flex h-svh w-[220px] shrink-0 flex-col border-r border-kanvas-line bg-kanvas-paper-2 px-3.5 py-5 xl:w-[232px]">
       <div className="mb-5 flex items-center gap-2.5 px-1.5">
         <div className="flex h-[34px] w-[34px] items-center justify-center rounded-[9px] bg-kanvas-ink text-xl leading-none text-kanvas-paper-2">
-          K
+          {brandInitial}
         </div>
         <div className="leading-none">
-          <p className="text-lg text-kanvas-ink">KAS RT</p>
-          <p className="mt-1 text-[10px] font-semibold tracking-[1.5px] text-kanvas-ink-4 uppercase">Kas RT 01</p>
+          <p className="text-lg text-kanvas-ink">{branding.appName}</p>
+          <p className="mt-1 text-[10px] font-semibold tracking-[1.5px] text-kanvas-ink-4 uppercase">{branding.rtRwLabel}</p>
         </div>
       </div>
 

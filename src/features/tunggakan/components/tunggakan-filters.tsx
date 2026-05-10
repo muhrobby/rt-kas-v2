@@ -31,11 +31,13 @@ export function TunggakanFilters({
           className="h-[42px] w-full rounded-lg border border-kanvas-line bg-white px-3 text-[13px] text-kanvas-ink outline-none"
         >
           <option value="semua">Semua kategori</option>
-          {kategoriOptions.map((option) => (
-            <option key={option} value={option}>
-              {option}
-            </option>
-          ))}
+          {kategoriOptions
+            .filter((option) => option !== "semua")
+            .map((option) => (
+              <option key={option} value={option}>
+                {option}
+              </option>
+            ))}
         </select>
       </label>
 

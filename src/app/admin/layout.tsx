@@ -4,10 +4,13 @@ import { getCurrentUser } from "@/lib/auth/session"
 import { db } from "@/lib/db"
 import { warga } from "@/lib/db/schema"
 import { AdminShell } from "@/components/layout/admin-shell"
+import { getAppBranding } from "@/lib/branding/format-branding"
+import { getAppSettings } from "@/lib/services/app-settings-service"
 import { eq } from "drizzle-orm"
 
 export default async function AdminLayout({ children }: PropsWithChildren) {
-  const currentUser = await getCurrentUser()
+  const [currentUser, settings] = await Promise.all([getCurrentUser(), getAppSettings()])
+  const branding = getAppBranding(settings)
 
   let wargaData = null
   if (currentUser?.wargaId) {
@@ -26,7 +29,7 @@ export default async function AdminLayout({ children }: PropsWithChildren) {
     wargaId: currentUser?.wargaId ?? null,
   }
 
-  return <AdminShell user={userDisplay}>{children}</AdminShell>
+  return <AdminShell branding={branding} user={userDisplay}>{children}</AdminShell>
 }
 
 function getInitials(name: string): string {

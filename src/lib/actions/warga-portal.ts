@@ -1,6 +1,9 @@
 "use server"
 
 import { requireWarga } from "@/lib/auth/permissions"
+import { getPdfBranding } from "@/lib/branding/format-branding"
+import type { PdfBranding } from "@/lib/branding/format-branding"
+import { getAppSettings } from "@/lib/services/app-settings-service"
 import { getKuitansiForWarga } from "@/lib/services/kuitansi-service"
 import {
   getWargaDashboardData,
@@ -18,6 +21,10 @@ type ActionResult<T> =
       ok: false
       error: string
     }
+
+type KuitansiWargaPdfData = Awaited<ReturnType<typeof getKuitansiForWarga>> & {
+  branding: PdfBranding
+}
 
 function toActionError(error: unknown): ActionResult<never> {
   if (error instanceof Error && error.message.startsWith("Kuitansi tidak ditemukan")) {
@@ -72,12 +79,15 @@ export async function getMyRiwayatAction(filter?: Partial<WargaRiwayatFilter>): 
   }
 }
 
-export async function getMyKuitansiAction(transaksiId: number): Promise<ActionResult<Awaited<ReturnType<typeof getKuitansiForWarga>>>> {
+export async function getMyKuitansiAction(transaksiId: number): Promise<ActionResult<KuitansiWargaPdfData>> {
   const currentUser = await requireWarga()
 
   try {
-    const data = await getKuitansiForWarga({ wargaId: getSessionWargaId(currentUser), transaksiId })
-    return { ok: true, data }
+    const [kuitansi, settings] = await Promise.all([
+      getKuitansiForWarga({ wargaId: getSessionWargaId(currentUser), transaksiId }),
+      getAppSettings(),
+    ])
+    return { ok: true, data: { ...kuitansi, branding: getPdfBranding(settings) } }
   } catch (error) {
     return toActionError(error)
   }

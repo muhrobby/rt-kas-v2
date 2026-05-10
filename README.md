@@ -61,9 +61,11 @@ cp .env.example .env
 4. Siapkan database
 
 ```bash
-npm run db:push
+npm run db:migrate
 npm run db:seed
 ```
+
+> Catatan: Gunakan `db:migrate` untuk production. `db:push` hanya untuk development/testing lokal.
 
 5. Jalankan development server
 

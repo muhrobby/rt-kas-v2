@@ -6,6 +6,7 @@ import { db } from "@/lib/db"
 import { BULAN } from "@/lib/constants/months"
 import { kategoriKas, transaksi, warga } from "@/lib/db/schema"
 import { getSaldoSummary } from "@/lib/services/saldo-service"
+import { isPeriodEligible } from "@/lib/billing/billing-eligibility"
 import type { ExpenseBreakdownItem, MonthlyCashflow, WargaHistoryPeriod, WargaPaymentStatus } from "@/types/rt-kas"
 
 const monthNames = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agt", "Sep", "Okt", "Nov", "Des"]
@@ -141,6 +142,16 @@ async function getWargaProfile(wargaId: number) {
 }
 
 async function getPaymentStatusForPeriod(wargaId: number, filter: WargaRiwayatFilter): Promise<WargaPaymentStatus[]> {
+  const [wargaRow] = await db
+    .select({ createdAt: warga.createdAt })
+    .from(warga)
+    .where(eq(warga.id, wargaId))
+    .limit(1)
+
+  if (!wargaRow) {
+    return []
+  }
+
   const categories = await db
     .select({
       id: kategoriKas.id,
@@ -164,7 +175,15 @@ async function getPaymentStatusForPeriod(wargaId: number, filter: WargaRiwayatFi
     .from(transaksi)
     .where(and(eq(transaksi.tipeArus, "masuk"), eq(transaksi.wargaId, wargaId)))
 
-  return categories.map((category) => {
+  const results: WargaPaymentStatus[] = []
+
+  for (const category of categories) {
+    if (category.tipeTagihan === "bulanan") {
+      if (!isPeriodEligible(wargaRow.createdAt, filter.bulan, filter.tahun)) {
+        continue
+      }
+    }
+
     const paid = paidRows.find((row) => {
       if (row.kategoriId !== category.id) return false
       if (category.tipeTagihan === "sekali") {
@@ -174,7 +193,7 @@ async function getPaymentStatusForPeriod(wargaId: number, filter: WargaRiwayatFi
     })
 
     if (paid) {
-      return {
+      results.push({
         kategori: category.nama,
         tipeTagihan: category.tipeTagihan,
         status: "lunas" as const,
@@ -182,17 +201,20 @@ async function getPaymentStatusForPeriod(wargaId: number, filter: WargaRiwayatFi
         tanggalBayar: formatDateId(paid.waktuTransaksi),
         transaksiId: paid.id,
         refKuitansi: getReceiptRef(paid.id, paid.waktuTransaksi.getFullYear()),
-      }
+      })
+      continue
     }
 
-    return {
+    results.push({
       kategori: category.nama,
       tipeTagihan: category.tipeTagihan,
       status: category.tipeTagihan === "sekali" ? "belum-tempo" as const : "belum" as const,
       nominal: Number(category.nominalDefault),
       jatuhTempoLabel: category.tipeTagihan === "sekali" ? "Sesuai pengumuman" : undefined,
-    }
-  })
+    })
+  }
+
+  return results
 }
 
 export async function getWargaDashboardData(wargaId: number): Promise<WargaDashboardData> {

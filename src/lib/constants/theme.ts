@@ -1,3 +1,5 @@
+import { defaultAppSettings } from "@/lib/constants/app-settings"
+
 export type KanvasCardStyle = "soft" | "outlined" | "sharp"
 
 export const kanvasTheme = {
@@ -11,9 +13,9 @@ export const kanvasTheme = {
     ink4: "#7f95b4",
     line: "#d9e5f7",
     line2: "#e8effb",
-    terra: "#2d6bb4",
-    terra2: "#1f4f8a",
-    terraSoft: "#d6e7fb",
+    terra: defaultAppSettings.primaryColor,
+    terra2: defaultAppSettings.secondaryColor,
+    terraSoft: defaultAppSettings.accentColor,
   },
   radius: {
     soft: 12,

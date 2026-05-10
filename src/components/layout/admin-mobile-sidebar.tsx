@@ -8,8 +8,10 @@ import { dashboardData } from "@/features/admin-dashboard/lib/dashboard-data"
 import { adminNavItems } from "@/lib/constants/nav"
 import { formatRupiah } from "@/lib/format/currency"
 import { useTunggakanCount } from "@/hooks/use-tunggakan-count"
+import type { AppBranding } from "@/lib/branding/format-branding"
 
 interface AdminMobileSidebarProps {
+  branding: AppBranding
   open: boolean
   onClose: () => void
 }
@@ -22,11 +24,13 @@ const iconMap = {
   out: KanvasIcons.out,
   alert: KanvasIcons.alert,
   log: KanvasIcons.log,
+  gear: KanvasIcons.gear,
 } as const
 
-export function AdminMobileSidebar({ open, onClose }: AdminMobileSidebarProps) {
+export function AdminMobileSidebar({ branding, open, onClose }: AdminMobileSidebarProps) {
   const pathname = usePathname()
   const tunggakanCount = useTunggakanCount()
+  const brandInitial = branding.appName.trim().charAt(0).toUpperCase() || "K"
 
   return (
     <div className={`fixed inset-0 z-50 lg:hidden ${open ? "" : "pointer-events-none"}`} aria-hidden={!open}>
@@ -45,11 +49,11 @@ export function AdminMobileSidebar({ open, onClose }: AdminMobileSidebarProps) {
         <div className="mb-5 flex items-center justify-between gap-2.5 px-1.5">
           <div className="flex items-center gap-2.5">
             <div className="flex h-[34px] w-[34px] items-center justify-center rounded-[9px] bg-kanvas-ink text-xl leading-none text-kanvas-paper-2">
-              K
+              {brandInitial}
             </div>
             <div className="leading-none">
-              <p className="text-lg text-kanvas-ink">Kas RT</p>
-              <p className="mt-1 text-[10px] font-semibold tracking-[1.5px] text-kanvas-ink-4 uppercase">Kas RT 01</p>
+              <p className="text-lg text-kanvas-ink">{branding.appName}</p>
+              <p className="mt-1 text-[10px] font-semibold tracking-[1.5px] text-kanvas-ink-4 uppercase">{branding.rtRwLabel}</p>
             </div>
           </div>
 

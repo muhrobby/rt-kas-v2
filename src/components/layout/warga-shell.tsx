@@ -8,6 +8,7 @@ import { AppPill, KanvasIcons } from "@/components/kanvas"
 import { LogoutButton } from "@/components/auth/logout-button"
 import { WargaMobileNav } from "@/components/layout/warga-mobile-nav"
 import { wargaNavItems } from "@/lib/constants/nav"
+import type { AppBranding } from "@/lib/branding/format-branding"
 
 const iconMap = {
   home: KanvasIcons.home,
@@ -27,7 +28,12 @@ export interface WargaShellProfile {
   statusHunian: "tetap" | "kontrak"
 }
 
-export function WargaShell({ children, profile }: PropsWithChildren<{ profile: WargaShellProfile }>) {
+interface WargaShellProps extends PropsWithChildren {
+  branding: AppBranding
+  profile: WargaShellProfile
+}
+
+export function WargaShell({ branding, children, profile }: WargaShellProps) {
   const pathname = usePathname()
   const me = profile
   const initials = me.nama
@@ -42,7 +48,9 @@ export function WargaShell({ children, profile }: PropsWithChildren<{ profile: W
       <header className="sticky top-0 z-30 border-b border-kanvas-line bg-white/95 backdrop-blur-sm">
         <div className="mx-auto flex w-full max-w-[1100px] items-center justify-between px-4 py-2.5 md:px-6 md:py-3">
           <div className="min-w-0">
-            <p className="text-[11px] font-semibold tracking-[0.7px] text-kanvas-ink-4 uppercase">Portal Warga RT 04</p>
+            <p className="text-[11px] font-semibold tracking-[0.7px] text-kanvas-ink-4 uppercase">
+              {branding.appName} - {branding.rtRwLabel}
+            </p>
             <p className="truncate text-[17px] text-kanvas-ink">{titleByPath[pathname] ?? "Portal Warga"}</p>
           </div>
 

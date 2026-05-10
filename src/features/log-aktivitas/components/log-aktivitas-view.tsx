@@ -22,7 +22,7 @@ const initialFilters: LogFilterState = {
   query: "",
 }
 
-const STATIC_MODUL_OPTIONS = ["Kas Masuk", "Kas Keluar", "Warga", "Kategori", "Login"]
+const STATIC_MODUL_OPTIONS = ["Kas Masuk", "Kas Keluar", "Warga", "Kategori", "Login", "Pengaturan"]
 const STATIC_AKSI_OPTIONS = ["tambah", "edit", "hapus", "login", "logout"]
 
 export function LogAktivitasView() {

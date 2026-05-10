@@ -1,6 +1,7 @@
 "use client"
 
 import { AppButton, AppModal, KanvasIcons, useToast } from "@/components/kanvas"
+import type { PdfBranding } from "@/lib/branding/format-branding"
 import { formatRupiah } from "@/lib/format/currency"
 
 interface KuitansiData {
@@ -11,6 +12,7 @@ interface KuitansiData {
   wargaNama: string
   blok?: string
   petugas?: string | null
+  branding?: PdfBranding
 }
 
 interface KuitansiDialogProps {
@@ -22,6 +24,7 @@ interface KuitansiDialogProps {
 
 export function KuitansiDialog({ open, data, onClose, onDownloadPdf }: KuitansiDialogProps) {
   const { pushToast } = useToast()
+  const rtRwLabel = data?.branding?.rtRwLabel ?? "-"
 
   return (
     <AppModal open={open} onClose={onClose} width={460}>
@@ -29,7 +32,7 @@ export function KuitansiDialog({ open, data, onClose, onDownloadPdf }: KuitansiD
         <div className="mb-4 flex items-start justify-between">
           <div>
             <p className="text-[11px] font-semibold tracking-[0.6px] text-kanvas-ink-4 uppercase">e-Kuitansi</p>
-            <h2 className="mt-1 text-[22px] text-kanvas-ink">RT 04 / RW 09</h2>
+            <h2 className="mt-1 text-[22px] text-kanvas-ink">{rtRwLabel}</h2>
           </div>
           <button type="button" onClick={onClose} className="rounded p-1 text-kanvas-ink-3" aria-label="Tutup kuitansi">
             <KanvasIcons.x size={18} />

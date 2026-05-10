@@ -62,4 +62,5 @@ export const KanvasIcons = {
   arrowR: (props: KanvasIconProps) => <IconPath {...props} path="M5 12h14M13 5l7 7-7 7" />,
   more: (props: KanvasIconProps) => <IconPath {...props} strokeWidth={2.5} path="M5 12h.01M12 12h.01M19 12h.01" />,
   logout: (props: KanvasIconProps) => <IconPath {...props} path="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9" />,
+  gear: (props: KanvasIconProps) => <IconPath {...props} path="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z" />,
 }

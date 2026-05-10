@@ -33,8 +33,11 @@ interface KasMasukFormModalProps {
   fieldErrors?: Record<string, string[]>
   submitting?: boolean
   paidMonths?: number[]
+  notEligibleMonths?: number[]
   oneTimePaid?: boolean
   loadingPaidMonths?: boolean
+  firstBillMonth?: number
+  firstBillYear?: number
 }
 
 export function KasMasukFormModal({
@@ -52,8 +55,11 @@ export function KasMasukFormModal({
   fieldErrors,
   submitting = false,
   paidMonths = [],
+  notEligibleMonths = [],
   oneTimePaid = false,
   loadingPaidMonths = false,
+  firstBillMonth,
+  firstBillYear,
 }: KasMasukFormModalProps) {
   const [values, setValues] = useState<KasMasukFormValues>(initialValues)
   const [errors, setErrors] = useState({ wargaId: "", kategoriId: "", nominal: "" })
@@ -177,17 +183,31 @@ export function KasMasukFormModal({
               </AppField>
             </div>
 
-            <AppField label="Selector Bulan" hint="Bulan tercoret = sudah dibayar">
+            <AppField label="Selector Bulan" hint="Bulan tercoret = sudah dibayar. Bulan tersamarkan = belum eligible.">
               {loadingPaidMonths ? (
                 <p className="text-[11px] text-kanvas-ink-3">Memuat...</p>
               ) : (
                 <MonthPaymentSelector
                   paidMonths={paidMonths}
+                  notEligibleMonths={notEligibleMonths}
                   selectedMonths={values.bulan}
                   onToggle={toggleMonth}
+                  firstBillMonth={firstBillMonth ?? 1}
+                  firstBillYear={firstBillYear ?? 2000}
+                  tahun={values.tahun}
                 />
               )}
             </AppField>
+            {firstBillMonth != null && firstBillYear != null && values.tahun < firstBillYear ? (
+              <p className="mt-1 text-[11px] text-kanvas-ink-3">
+                Tagihan warga ini belum dimulai.
+              </p>
+            ) : null}
+            {firstBillMonth != null && firstBillYear != null && values.tahun === firstBillYear && firstBillMonth > 1 ? (
+              <p className="mt-1 text-[11px] text-kanvas-ink-3">
+                Tagihan warga ini mulai {BULAN_SINGKAT[firstBillMonth - 1]} {firstBillYear}.
+              </p>
+            ) : null}
             {selectedKategori?.tipeTagihan === "bulanan" && values.bulan.length === 0 ? (
               <p className="-mt-1 text-[11px] text-kanvas-danger">Pilih minimal 1 bulan.</p>
             ) : null}

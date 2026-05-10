@@ -1,0 +1,15 @@
+export const defaultAppSettings = {
+  id: 1,
+  appName: "RT Kas",
+  organizationName: "RT 01 / RW 010",
+  rtNumber: "01",
+  rwNumber: "010",
+  address: null as string | null,
+  phone: null as string | null,
+  email: null as string | null,
+  primaryColor: "#2d6bb4",
+  secondaryColor: "#1f4f8a",
+  accentColor: "#d6e7fb",
+  receiptTitle: "Kuitansi Pembayaran",
+  receiptFooter: null as string | null,
+} as const;
