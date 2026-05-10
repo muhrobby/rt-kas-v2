@@ -45,6 +45,8 @@ const laporanFilterSchema = z.object({
   tahun: z.number().int().min(2000).max(2100).optional(),
 })
 
+const kuitansiTransaksiIdSchema = z.number().int().positive()
+
 function getSessionWargaId(currentUser: Awaited<ReturnType<typeof requireWarga>>) {
   if (!currentUser.wargaId) {
     throw new Error("Session warga tidak valid.")
@@ -83,8 +85,9 @@ export async function getMyKuitansiAction(transaksiId: number): Promise<ActionRe
   const currentUser = await requireWarga()
 
   try {
+    const parsedTransaksiId = kuitansiTransaksiIdSchema.parse(transaksiId)
     const [kuitansi, settings] = await Promise.all([
-      getKuitansiForWarga({ wargaId: getSessionWargaId(currentUser), transaksiId }),
+      getKuitansiForWarga({ wargaId: getSessionWargaId(currentUser), transaksiId: parsedTransaksiId }),
       getAppSettings(),
     ])
     return { ok: true, data: { ...kuitansi, branding: getPdfBranding(settings) } }

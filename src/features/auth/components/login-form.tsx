@@ -25,7 +25,8 @@ export function LoginForm() {
   const [error, setError] = useState("")
   const [submitting, setSubmitting] = useState(false)
 
-  const submit = async () => {
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
     setError("")
 
     if (!phone.trim() || !password.trim()) {
@@ -85,25 +86,27 @@ export function LoginForm() {
         <h1 className="mt-2 text-[32px] leading-tight text-kanvas-ink">Selamat datang kembali</h1>
         <p className="mt-2 mb-7 text-[13px] text-kanvas-ink-3">Gunakan nomor telepon yang terdaftar.</p>
 
-        <AppField label="Nomor Telepon">
-          <AppInput value={phone} onChange={setPhone} placeholder="08xx-xxxx-xxxx" leading={<KanvasIcons.users size={14} />} />
-        </AppField>
+        <form onSubmit={handleSubmit}>
+          <AppField label="Nomor Telepon">
+            <AppInput value={phone} onChange={setPhone} placeholder="08xx-xxxx-xxxx" leading={<KanvasIcons.users size={14} />} />
+          </AppField>
 
-        <AppField label="Password">
-          <AppInput
-            value={password}
-            onChange={setPassword}
-            placeholder="••••••••"
-            type="password"
-            leading={<KanvasIcons.shield size={14} />}
-          />
-        </AppField>
+          <AppField label="Password">
+            <AppInput
+              value={password}
+              onChange={setPassword}
+              placeholder="••••••••"
+              type="password"
+              leading={<KanvasIcons.shield size={14} />}
+            />
+          </AppField>
 
-        {error ? <p className="mt-1 mb-4 rounded-lg border border-kanvas-danger-soft bg-kanvas-danger-soft px-3 py-2 text-[12px] text-kanvas-danger">{error}</p> : null}
+          {error ? <p className="mt-1 mb-4 rounded-lg border border-kanvas-danger-soft bg-kanvas-danger-soft px-3 py-2 text-[12px] text-kanvas-danger">{error}</p> : null}
 
-        <AppButton className="w-full" size="lg" onClick={submit} trailing={<KanvasIcons.arrowR size={14} />} disabled={submitting}>
-          {submitting ? "Memproses..." : "Masuk"}
-        </AppButton>
+          <AppButton type="submit" className="w-full" size="lg" trailing={<KanvasIcons.arrowR size={14} />} disabled={submitting}>
+            {submitting ? "Memproses..." : "Masuk"}
+          </AppButton>
+        </form>
 
         <p className="mt-5 text-center text-[11.5px] text-kanvas-ink-4">Lupa password? Hubungi pengurus RT.</p>
       </div>

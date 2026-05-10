@@ -8,6 +8,7 @@ import { createWargaFromForm, deleteWargaById, fetchWargaList, updateWargaFromFo
 
 import { DeleteWargaDialog } from "@/features/warga-management/components/delete-warga-dialog"
 import { WargaFormModal } from "@/features/warga-management/components/warga-form-modal"
+import { TemporaryPasswordDialog } from "@/features/warga-management/components/temporary-password-dialog"
 import { WargaTable } from "@/features/warga-management/components/warga-table"
 import { WargaToolbar } from "@/features/warga-management/components/warga-toolbar"
 import { filterWarga } from "@/features/warga-management/lib/warga-filters"
@@ -53,6 +54,7 @@ export function WargaManagementView() {
   const [isLoading, startTransition] = useTransition()
   const [isDeleting, setIsDeleting] = useState(false)
   const [updatingPengurusId, setUpdatingPengurusId] = useState<string | null>(null)
+  const [tempPasswordData, setTempPasswordData] = useState<{ nama: string, telp: string, password?: string } | null>(null)
 
   useEffect(() => {
     startTransition(async () => {
@@ -134,6 +136,14 @@ export function WargaManagementView() {
       }
       await reloadList()
       pushToast("Warga baru berhasil ditambahkan")
+      
+      if (result.data.temporaryPassword) {
+        setTempPasswordData({
+          nama: values.nama,
+          telp: values.telp,
+          password: result.data.temporaryPassword,
+        })
+      }
     } else if (selectedWarga) {
       const result = await updateWargaFromForm(Number(selectedWarga.id), payload)
       if (!result.ok) {
@@ -237,6 +247,14 @@ export function WargaManagementView() {
         onConfirm={handleDeleteConfirm}
         serverError={serverError}
         deleting={isDeleting}
+      />
+
+      <TemporaryPasswordDialog
+        open={!!tempPasswordData}
+        wargaNama={tempPasswordData?.nama ?? ""}
+        wargaTelp={tempPasswordData?.telp ?? ""}
+        password={tempPasswordData?.password ?? ""}
+        onClose={() => setTempPasswordData(null)}
       />
     </main>
   )

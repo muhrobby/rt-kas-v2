@@ -59,97 +59,99 @@ export function KasKeluarFormModal({
 
   return (
     <AppModal open={open} onClose={onClose} width={560}>
-      <div className="p-4 sm:p-6">
-        <div className="mb-4 flex items-start justify-between gap-2">
-          <div>
-            <p className="text-[11px] font-semibold tracking-[0.7px] text-kanvas-ink-4 uppercase">Kas Keluar</p>
-            <h2 className="mt-1 text-2xl text-kanvas-ink">Input Pengeluaran</h2>
+      <form onSubmit={(e) => { e.preventDefault(); handleSubmit(); }}>
+        <div className="p-4 sm:p-6">
+          <div className="mb-4 flex items-start justify-between gap-2">
+            <div>
+              <p className="text-[11px] font-semibold tracking-[0.7px] text-kanvas-ink-4 uppercase">Kas Keluar</p>
+              <h2 className="mt-1 text-2xl text-kanvas-ink">Input Pengeluaran</h2>
+            </div>
+            <button type="button" onClick={onClose} className="rounded p-1 text-kanvas-ink-3" aria-label="Tutup modal kas keluar">
+              <KanvasIcons.x size={18} />
+            </button>
           </div>
-          <button type="button" onClick={onClose} className="rounded p-1 text-kanvas-ink-3" aria-label="Tutup modal kas keluar">
-            <KanvasIcons.x size={18} />
-          </button>
-        </div>
 
-        <AppField label="Kategori Pengeluaran">
-          <AppCombobox
-            value={values.kategoriId}
-            onChange={(value) => {
-              updateValue("kategoriId", value)
-              const next = kategoriOptions.find((item) => item.id === value)
-              if (next) {
-                updateValue("nominal", next.nominal)
-              }
-            }}
-            options={kategoriOptions}
-            placeholder="Pilih kategori..."
-            renderItem={(option) => {
-              const item = option as KategoriKeluarOptionUi
-              return (
-                <div>
-                  <p className="font-semibold">{item.label}</p>
-                  <p className="text-[11px] text-kanvas-ink-4">{item.sub}</p>
-                </div>
-              )
-            }}
-          />
-          {errors.kategoriId || fieldErrors?.kategoriId?.[0] ? (
-            <p className="mt-1 text-[11px] text-kanvas-danger">{errors.kategoriId || fieldErrors?.kategoriId?.[0]}</p>
+          <AppField label="Kategori Pengeluaran">
+            <AppCombobox
+              value={values.kategoriId}
+              onChange={(value) => {
+                updateValue("kategoriId", value)
+                const next = kategoriOptions.find((item) => item.id === value)
+                if (next) {
+                  updateValue("nominal", next.nominal)
+                }
+              }}
+              options={kategoriOptions}
+              placeholder="Pilih kategori..."
+              renderItem={(option) => {
+                const item = option as KategoriKeluarOptionUi
+                return (
+                  <div>
+                    <p className="font-semibold">{item.label}</p>
+                    <p className="text-[11px] text-kanvas-ink-4">{item.sub}</p>
+                  </div>
+                )
+              }}
+            />
+            {errors.kategoriId || fieldErrors?.kategoriId?.[0] ? (
+              <p className="mt-1 text-[11px] text-kanvas-danger">{errors.kategoriId || fieldErrors?.kategoriId?.[0]}</p>
+            ) : null}
+          </AppField>
+
+          <div className="grid grid-cols-1 gap-2.5 md:grid-cols-2 md:gap-3">
+            <AppField label="Nominal">
+              <AppInput
+                type="number"
+                min={0}
+                value={String(values.nominal)}
+                onChange={(value) => updateValue("nominal", Number(value || 0))}
+              />
+              {errors.nominal || fieldErrors?.nominal?.[0] ? (
+                <p className="mt-1 text-[11px] text-kanvas-danger">{errors.nominal || fieldErrors?.nominal?.[0]}</p>
+              ) : null}
+            </AppField>
+
+            <AppField label="Tanggal Transaksi">
+              <AppInput
+                type="date"
+                value={values.tanggal}
+                onChange={(value) => updateValue("tanggal", value)}
+              />
+              {errors.tanggal || fieldErrors?.tanggal?.[0] ? (
+                <p className="mt-1 text-[11px] text-kanvas-danger">{errors.tanggal || fieldErrors?.tanggal?.[0]}</p>
+              ) : null}
+            </AppField>
+          </div>
+
+          <AppField label="Catatan" optional>
+            <AppInput
+              value={values.catatan}
+              onChange={(value) => updateValue("catatan", value)}
+              placeholder="Mis. transfer honor satpam"
+            />
+          </AppField>
+
+          {serverError ? (
+            <div className="mt-2 rounded-lg border border-kanvas-danger-soft bg-kanvas-danger-soft p-2.5 text-[11.5px] text-kanvas-danger">
+              {serverError}
+            </div>
           ) : null}
-        </AppField>
 
-        <div className="grid grid-cols-1 gap-2.5 md:grid-cols-2 md:gap-3">
-          <AppField label="Nominal">
-            <AppInput
-              type="number"
-              min={0}
-              value={String(values.nominal)}
-              onChange={(value) => updateValue("nominal", Number(value || 0))}
-            />
-            {errors.nominal || fieldErrors?.nominal?.[0] ? (
-              <p className="mt-1 text-[11px] text-kanvas-danger">{errors.nominal || fieldErrors?.nominal?.[0]}</p>
-            ) : null}
-          </AppField>
-
-          <AppField label="Tanggal Transaksi">
-            <AppInput
-              type="date"
-              value={values.tanggal}
-              onChange={(value) => updateValue("tanggal", value)}
-            />
-            {errors.tanggal || fieldErrors?.tanggal?.[0] ? (
-              <p className="mt-1 text-[11px] text-kanvas-danger">{errors.tanggal || fieldErrors?.tanggal?.[0]}</p>
-            ) : null}
-          </AppField>
-        </div>
-
-        <AppField label="Catatan" optional>
-          <AppInput
-            value={values.catatan}
-            onChange={(value) => updateValue("catatan", value)}
-            placeholder="Mis. transfer honor satpam"
-          />
-        </AppField>
-
-        {serverError ? (
-          <div className="mt-2 rounded-lg border border-kanvas-danger-soft bg-kanvas-danger-soft p-2.5 text-[11.5px] text-kanvas-danger">
-            {serverError}
+          <div className="mt-4 flex flex-wrap justify-end gap-2">
+            <AppButton type="button" variant="outline" onClick={onClose}>
+              Batal
+            </AppButton>
+            <AppButton
+              type="submit"
+              variant="primary"
+              leading={<KanvasIcons.check size={13} />}
+              disabled={submitting}
+            >
+              {submitting ? "Menyimpan..." : "Simpan Pengeluaran"}
+            </AppButton>
           </div>
-        ) : null}
-
-        <div className="mt-4 flex flex-wrap justify-end gap-2">
-          <AppButton variant="outline" onClick={onClose}>
-            Batal
-          </AppButton>
-          <AppButton
-            variant="primary"
-            onClick={handleSubmit}
-            leading={<KanvasIcons.check size={13} />}
-            disabled={submitting}
-          >
-            {submitting ? "Menyimpan..." : "Simpan Pengeluaran"}
-          </AppButton>
         </div>
-      </div>
+      </form>
     </AppModal>
   )
 }

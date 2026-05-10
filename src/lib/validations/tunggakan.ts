@@ -1,5 +1,11 @@
 import { z } from "zod"
 
+export const MAX_TUNGGAKAN_RANGE_MONTHS = 24
+
+function getPeriodIndex(year: number, month: number) {
+  return year * 12 + month
+}
+
 export const tunggakanFilterSchema = z
   .object({
     kategoriId: z.number().int().positive().optional(),
@@ -10,14 +16,25 @@ export const tunggakanFilterSchema = z
   })
   .refine(
     (data) => {
-      const mulai = data.tahunMulai * 12 + data.bulanMulai
-      const selesai = data.tahunSelesai * 12 + data.bulanSelesai
+      const mulai = getPeriodIndex(data.tahunMulai, data.bulanMulai)
+      const selesai = getPeriodIndex(data.tahunSelesai, data.bulanSelesai)
       return mulai <= selesai
     },
     {
       message: "Periode mulai tidak boleh lebih besar dari periode selesai.",
       path: ["bulanMulai"],
     }
+  )
+  .refine(
+    (data) => {
+      const mulai = getPeriodIndex(data.tahunMulai, data.bulanMulai)
+      const selesai = getPeriodIndex(data.tahunSelesai, data.bulanSelesai)
+      return selesai - mulai + 1 <= MAX_TUNGGAKAN_RANGE_MONTHS
+    },
+    {
+      message: `Range periode maksimal ${MAX_TUNGGAKAN_RANGE_MONTHS} bulan.`,
+      path: ["bulanSelesai"],
+    },
   )
 
 export type TunggakanFilterInput = z.infer<typeof tunggakanFilterSchema>

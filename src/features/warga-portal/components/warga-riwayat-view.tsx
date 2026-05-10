@@ -72,13 +72,17 @@ export function WargaRiwayatView({ periods, error }: WargaRiwayatViewProps) {
             {error}
           </AppCard>
         ) : null}
-        {activePeriod?.items.map((item) => (
-          <AppCard key={`${activePeriod.periode}-${item.kategori}`} className="p-3">
+        {activePeriod?.items.map((item, index) => (
+          <AppCard key={item.transaksiId ?? `${activePeriod.periode}-${item.kategori}-${item.nominal}-${index}`} className="p-3">
             <div className="flex items-start justify-between gap-2">
               <div>
                 <p className="text-[13px] font-semibold text-kanvas-ink">{item.kategori}</p>
                 <p className="text-[11px] text-kanvas-ink-4">
-                  {item.status === "lunas" ? `Dibayar ${item.tanggalBayar}` : item.status === "belum-tempo" ? "Belum jatuh tempo" : "Belum dibayar"}
+                  {item.status === "lunas"
+                    ? `Dibayar ${item.tanggalBayar}${item.periodeLabel ? ` · ${item.periodeLabel}` : ""}`
+                    : item.status === "belum-tempo"
+                      ? `Belum jatuh tempo${item.periodeLabel ? ` · ${item.periodeLabel}` : ""}`
+                      : `Belum dibayar${item.periodeLabel ? ` · ${item.periodeLabel}` : ""}`}
                 </p>
               </div>
 

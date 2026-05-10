@@ -17,7 +17,7 @@ export type LogAktivitasFilters = {
 }
 
 const DEFAULT_LIMIT = 100
-const MAX_LIMIT = 1000
+const MAX_LIMIT = 5000
 
 export async function listLogAktivitas(
   filters: LogAktivitasFilters = {},
@@ -41,7 +41,7 @@ export async function listLogAktivitas(
   }
 
   if (aksi && aksi !== "semua") {
-    conditions.push(eq(logAktivitas.aksi, aksi as "tambah" | "edit" | "hapus" | "login" | "logout"))
+    conditions.push(eq(logAktivitas.aksi, aksi as "tambah" | "edit" | "hapus" | "login" | "logout" | "export_excel"))
   }
 
   if (petugas && petugas !== "semua") {
@@ -114,7 +114,7 @@ export async function listLogAktivitasWithCount(
   }
 
   if (filters.aksi && filters.aksi !== "semua") {
-    conditions.push(eq(logAktivitas.aksi, filters.aksi as "tambah" | "edit" | "hapus" | "login" | "logout"))
+    conditions.push(eq(logAktivitas.aksi, filters.aksi as "tambah" | "edit" | "hapus" | "login" | "logout" | "export_excel"))
   }
 
   if (filters.petugas && filters.petugas !== "semua") {

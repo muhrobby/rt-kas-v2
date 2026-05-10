@@ -1,12 +1,13 @@
 "use client"
 
+import { useEffect, useState } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 
 import { AppPill, KanvasIcons } from "@/components/kanvas"
-import { dashboardData } from "@/features/admin-dashboard/lib/dashboard-data"
 import { adminNavItems } from "@/lib/constants/nav"
 import { formatRupiah } from "@/lib/format/currency"
+import { getDashboardSummaryAction } from "@/lib/actions/dashboard"
 import { useTunggakanCount } from "@/hooks/use-tunggakan-count"
 import type { AppBranding } from "@/lib/branding/format-branding"
 
@@ -30,7 +31,14 @@ const iconMap = {
 export function AdminMobileSidebar({ branding, open, onClose }: AdminMobileSidebarProps) {
   const pathname = usePathname()
   const tunggakanCount = useTunggakanCount()
+  const [saldoKas, setSaldoKas] = useState<number | null>(null)
   const brandInitial = branding.appName.trim().charAt(0).toUpperCase() || "K"
+
+  useEffect(() => {
+    getDashboardSummaryAction().then((data) => {
+      setSaldoKas(data.saldoKas)
+    })
+  }, [])
 
   return (
     <div className={`fixed inset-0 z-50 lg:hidden ${open ? "" : "pointer-events-none"}`} aria-hidden={!open}>
@@ -94,8 +102,10 @@ export function AdminMobileSidebar({ branding, open, onClose }: AdminMobileSideb
 
         <div className="mt-3 rounded-[10px] border border-kanvas-line bg-white p-3 text-[11.5px] text-kanvas-ink-3">
           <p className="text-xs font-semibold text-kanvas-ink-2">Saldo Kas</p>
-          <p className="mt-1 text-lg font-semibold text-kanvas-ink">{formatRupiah(dashboardData.saldoKas)}</p>
-          <p className="mt-1 text-[10.5px] text-kanvas-ink-4">per 22 Apr 2026</p>
+          <p className="mt-1 text-lg font-semibold text-kanvas-ink">
+            {saldoKas !== null ? formatRupiah(saldoKas) : "—"}
+          </p>
+          <p className="mt-1 text-[10.5px] text-kanvas-ink-4">per {new Date().toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" })}</p>
         </div>
       </aside>
     </div>

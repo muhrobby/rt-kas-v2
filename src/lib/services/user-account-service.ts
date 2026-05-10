@@ -1,5 +1,6 @@
 import "server-only"
 
+import { randomBytes } from "crypto"
 import { generateId } from "better-auth"
 import { hashPassword } from "better-auth/crypto"
 import { and, eq, ne } from "drizzle-orm"
@@ -46,11 +47,12 @@ async function ensurePhoneUnique(phone: string, tx: Tx, excludeWargaId?: number)
   }
 }
 
-export async function createWargaUserAccount(input: CreateWargaUserAccountInput, tx: Tx) {
+export async function createWargaUserAccount(input: CreateWargaUserAccountInput, tx: Tx): Promise<{ temporaryPassword?: string }> {
   await ensurePhoneUnique(input.phone, tx)
 
   const userId = generateId()
-  const password = input.password ?? input.phone
+  const isGenerated = !input.password
+  const password = input.password ?? randomBytes(12).toString("hex")
   const hashedPassword = await hashPassword(password)
 
   await tx.insert(user).values({
@@ -62,6 +64,7 @@ export async function createWargaUserAccount(input: CreateWargaUserAccountInput,
     displayUsername: input.phone,
     role: "user",
     wargaId: input.wargaId,
+    mustChangePassword: isGenerated,
   })
 
   await tx.insert(account).values({
@@ -71,6 +74,10 @@ export async function createWargaUserAccount(input: CreateWargaUserAccountInput,
     providerId: "credential",
     password: hashedPassword,
   })
+
+  return {
+    temporaryPassword: isGenerated ? password : undefined,
+  }
 }
 
 export async function updateWargaUserAccount(input: UpdateWargaUserAccountInput, tx: Tx) {

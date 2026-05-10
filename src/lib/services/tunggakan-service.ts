@@ -137,15 +137,22 @@ async function getPaidBulanan(
   return paidSet
 }
 
-async function getPaidSekali(wargaIds: number[], kategoriIds: number[]): Promise<Set<number>> {
+async function getPaidSekaliMap(
+  wargaIds: number[],
+  kategoriIds: number[],
+): Promise<Map<string, Set<string>>> {
+  const paidMap = new Map<string, Set<string>>()
+
   if (wargaIds.length === 0 || kategoriIds.length === 0) {
-    return new Set()
+    return paidMap
   }
 
   const paidRows = await db
     .select({
       wargaId: transaksi.wargaId,
       kategoriId: transaksi.kategoriId,
+      bulanTagihan: transaksi.bulanTagihan,
+      tahunTagihan: transaksi.tahunTagihan,
     })
     .from(transaksi)
     .where(
@@ -156,14 +163,19 @@ async function getPaidSekali(wargaIds: number[], kategoriIds: number[]): Promise
       ),
     )
 
-  const paidSet = new Set<number>()
   for (const row of paidRows) {
-    if (row.wargaId && row.kategoriId) {
-      paidSet.add(row.wargaId * 10000 + row.kategoriId)
+    if (row.wargaId && row.kategoriId && row.bulanTagihan && row.tahunTagihan) {
+      const mapKey = `${row.wargaId}-${row.kategoriId}`
+      const periodKey = `${row.bulanTagihan}-${row.tahunTagihan}`
+
+      if (!paidMap.has(mapKey)) {
+        paidMap.set(mapKey, new Set())
+      }
+      paidMap.get(mapKey)!.add(periodKey)
     }
   }
 
-  return paidSet
+  return paidMap
 }
 
 function formatPeriode(bulan: number, tahun: number): string {
@@ -202,9 +214,11 @@ export async function getTunggakan(filter: TunggakanFilterInput): Promise<Tungga
     filteredBulanan.map((k) => k.id),
   )
 
-  const paidSekali = await getPaidSekali(
+  const filteredSekaliWithNominal = filteredSekali.filter((kat) => kat.nominalDefault > 0)
+
+  const paidSekaliMap = await getPaidSekaliMap(
     wargaIds,
-    filteredSekali.map((k) => k.id),
+    filteredSekaliWithNominal.map((k) => k.id),
   )
 
   const wargaTunggakanMap = new Map<
@@ -243,15 +257,16 @@ export async function getTunggakan(filter: TunggakanFilterInput): Promise<Tungga
     }
   }
 
-  for (const kat of filteredSekali) {
+  for (const kat of filteredSekaliWithNominal) {
     for (const w of allWarga) {
-      const paidKey = w.id * 10000 + kat.id
+      const mapKey = `${w.id}-${kat.id}`
+      const paidPeriods = paidSekaliMap.get(mapKey)
 
-      if (!paidSekali.has(paidKey) && kat.nominalDefault > 0) {
+      if (!paidPeriods || paidPeriods.size === 0) {
         const entry = wargaTunggakanMap.get(w.id)!
         entry.items.push({
           kategori: kat.nama,
-          periode: "Sekali",
+          periode: kat.nama,
           nominal: kat.nominalDefault,
         })
         entry.totalNominal += kat.nominalDefault

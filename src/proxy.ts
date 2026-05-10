@@ -37,6 +37,7 @@ export async function proxy(request: NextRequest) {
       id: user.id,
       role: user.role,
       wargaId: user.wargaId,
+      mustChangePassword: user.mustChangePassword,
     })
     .from(user)
     .where(eq(user.id, session.user.id))
@@ -44,6 +45,18 @@ export async function proxy(request: NextRequest) {
 
   if (!sessionUser) {
     return NextResponse.redirect(new URL("/login", request.url));
+  }
+
+  // Force change password redirect
+  if (sessionUser.mustChangePassword) {
+    const changePasswordPath = sessionUser.role === "admin" 
+      ? "/admin/change-password" 
+      : "/warga/change-password";
+    
+    // Don't redirect if already on change-password page
+    if (pathname !== changePasswordPath) {
+      return NextResponse.redirect(new URL(changePasswordPath, request.url));
+    }
   }
 
   if (pathname === "/") {

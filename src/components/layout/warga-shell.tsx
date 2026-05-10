@@ -20,6 +20,7 @@ const titleByPath: Record<string, string> = {
   "/warga/dashboard": "Portal Warga",
   "/warga/riwayat": "Riwayat Pembayaran",
   "/warga/laporan": "Transparansi Kas",
+  "/warga/change-password": "Ganti Password",
 }
 
 export interface WargaShellProfile {
@@ -101,6 +102,20 @@ export function WargaShell({ branding, children, profile }: WargaShellProps) {
               )
             })}
           </nav>
+
+          <div className="mt-4 border-t border-kanvas-line pt-3">
+            <Link
+              href="/warga/change-password"
+              className="flex items-center gap-2 rounded-lg px-2.5 py-2 text-[13px] font-medium"
+              style={{
+                background: pathname === "/warga/change-password" ? "var(--kanvas-terra-soft)" : "transparent",
+                color: pathname === "/warga/change-password" ? "var(--kanvas-terra-2)" : "var(--kanvas-ink-2)",
+              }}
+            >
+              <KanvasIcons.shield size={14} />
+              Ganti Password
+            </Link>
+          </div>
         </aside>
 
         <div className="min-w-0 flex-1 pb-[88px] md:pb-0">{children}</div>

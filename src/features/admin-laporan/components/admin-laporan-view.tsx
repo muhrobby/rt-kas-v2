@@ -3,10 +3,8 @@
 import { useCallback, useEffect, useMemo, useState } from "react"
 
 import { ExportButtons } from "@/components/shared/export-buttons"
-import type { PdfBranding } from "@/lib/branding/format-branding"
 import { paginateItems } from "@/lib/pagination"
 import { getLaporanAction } from "@/lib/actions/laporan"
-import { generateLaporanPDF } from "@/lib/export/pdf"
 import type { LaporanResult, MonthlyCashflowRow } from "@/lib/services/laporan-service"
 
 import { LaporanFilters } from "@/features/admin-laporan/components/laporan-filters"
@@ -15,30 +13,14 @@ import { LaporanTable } from "@/features/admin-laporan/components/laporan-table"
 import { LaporanDetailModal } from "@/features/admin-laporan/components/laporan-detail-modal"
 
 const PAGE_SIZE = 6
-const saldoAwal = 12480000
-
-const MONTH_NAMES = [
-  "Januari",
-  "Februari",
-  "Maret",
-  "April",
-  "Mei",
-  "Juni",
-  "Juli",
-  "Agustus",
-  "September",
-  "Oktober",
-  "November",
-  "Desember",
-]
 
 export function AdminLaporanView() {
   const [year, setYear] = useState(2026)
   const [startMonth, setStartMonth] = useState(0)
   const [endMonth, setEndMonth] = useState(3)
+  const [saldoAwal, setSaldoAwal] = useState(0)
   const [currentPage, setCurrentPage] = useState(1)
   const [laporanData, setLaporanData] = useState<LaporanResult | null>(null)
-  const [pdfBranding, setPdfBranding] = useState<PdfBranding | undefined>()
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [detailModal, setDetailModal] = useState<{ open: boolean; data: MonthlyCashflowRow | null }>({
@@ -63,7 +45,6 @@ export function AdminLaporanView() {
 
         if (result.ok) {
           setLaporanData(result.data)
-          setPdfBranding(result.data.branding)
           setError(null)
         } else {
           setError(result.error ?? "Gagal memuat laporan")
@@ -84,7 +65,7 @@ export function AdminLaporanView() {
     return () => {
       cancelled = true
     }
-  }, [year, startMonth, endMonth])
+  }, [year, startMonth, endMonth, saldoAwal])
 
   const filteredRows = useMemo(() => {
     if (!laporanData?.rows) return []
@@ -121,20 +102,18 @@ export function AdminLaporanView() {
       saldoAwal: String(saldoAwal),
     })
     window.open(`/api/export/laporan?${params.toString()}`, "_blank")
-  }, [year, startMonth, endMonth])
+  }, [year, startMonth, endMonth, saldoAwal])
 
   const handleExportPDF = useCallback(() => {
-    if (!filteredRows.length) return
-    generateLaporanPDF({
-      rows: filteredRows,
-      totalPemasukan: totals.totalMasuk,
-      totalPengeluaran: totals.totalKeluar,
-      saldoPeriode: totals.saldoPeriode,
-      saldoAwal,
-      periodeLabel: `${MONTH_NAMES[startMonth]} ${year} - ${MONTH_NAMES[endMonth]} ${year}`,
-      branding: pdfBranding,
+    const params = new URLSearchParams({
+      startMonth: String(startMonth),
+      startYear: String(year),
+      endMonth: String(endMonth),
+      endYear: String(year),
+      saldoAwal: String(saldoAwal),
     })
-  }, [filteredRows, totals, startMonth, endMonth, year, pdfBranding])
+    window.open(`/api/export/laporan-pdf?${params.toString()}`, "_blank")
+  }, [year, startMonth, endMonth, saldoAwal])
 
   return (
     <main className="space-y-3.5 p-6 md:p-7">
@@ -147,9 +126,11 @@ export function AdminLaporanView() {
         year={year}
         startMonth={startMonth}
         endMonth={endMonth}
+        saldoAwal={saldoAwal}
         onYearChange={(val) => { setYear(val); setCurrentPage(1) }}
         onStartMonthChange={(value) => { setStartMonth(Math.max(0, Math.min(11, value))); setCurrentPage(1) }}
         onEndMonthChange={(value) => { setEndMonth(Math.max(0, Math.min(11, value))); setCurrentPage(1) }}
+        onSaldoAwalChange={(val) => { setSaldoAwal(val); setCurrentPage(1) }}
       />
 
       {isLoading ? (

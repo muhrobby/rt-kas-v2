@@ -73,6 +73,11 @@ function toActionError(error: unknown): ActionResult<never> {
   }
 }
 
+function isValidMonth(value: string) {
+  const month = Number(value)
+  return Number.isInteger(month) && month >= 1 && month <= 12
+}
+
 export async function listTransaksiMasukAction() {
   await requireAdmin()
   const { listTransaksiMasuk } = await import("@/lib/services/transaksi-service")
@@ -109,9 +114,7 @@ export async function getPaidMonthsAction(wargaId: number, kategoriId: number, t
     return { ok: false, error: "Kategori tidak ditemukan." }
   }
 
-  if (kategori.tipeTagihan !== "bulanan") {
-    return { ok: false, error: "Aksi ini hanya untuk kategori bulanan." }
-  }
+  // allow both bulanan and sekali
 
   const { listTransaksiMasuk } = await import("@/lib/services/transaksi-service")
   const rows = await listTransaksiMasuk({ wargaId, kategoriId })
@@ -128,10 +131,12 @@ export async function getPaidMonthsAction(wargaId: number, kategoriId: number, t
   const firstBill = getFirstBillablePeriod(wargaRow.createdAt)
   const notEligible: number[] = []
 
-  if (tahun < firstBill.tahun) {
-    for (let m = 1; m <= 12; m++) notEligible.push(m)
-  } else if (tahun === firstBill.tahun) {
-    for (let m = 1; m < firstBill.bulan; m++) notEligible.push(m)
+  if (kategori.tipeTagihan === "bulanan") {
+    if (tahun < firstBill.tahun) {
+      for (let m = 1; m <= 12; m++) notEligible.push(m)
+    } else if (tahun === firstBill.tahun) {
+      for (let m = 1; m < firstBill.bulan; m++) notEligible.push(m)
+    }
   }
 
   return {
@@ -162,18 +167,26 @@ export async function createKasMasukAction(input: CreateKasMasukInput): Promise<
       return { ok: false, error: "Data warga tidak ditemukan." }
     }
 
+    const bulanInput = parsed.bulanTagihan
+    const tahun = parsed.tahunTagihan
+    if (bulanInput === undefined || !tahun) {
+      return { ok: false, error: "Bulan dan tahun tagihan wajib untuk kategori ini." }
+    }
+
+    const daftarBulan = Array.isArray(bulanInput) ? bulanInput : [bulanInput]
+    if (daftarBulan.length === 0) {
+      return { ok: false, error: "Pilih minimal 1 bulan tagihan." }
+    }
+
+    if (daftarBulan.some((bulan) => !isValidMonth(bulan))) {
+      return { ok: false, error: "Bulan tagihan tidak valid." }
+    }
+
+    if (kategori.tipeTagihan === "sekali" && daftarBulan.length !== 1) {
+      return { ok: false, error: "Kategori sekali bayar hanya boleh memilih 1 bulan." }
+    }
+
     if (kategori.tipeTagihan === "bulanan") {
-      const bulanInput = parsed.bulanTagihan
-      const tahun = parsed.tahunTagihan
-      if (bulanInput === undefined || !tahun) {
-        return { ok: false, error: "Bulan dan tahun tagihan wajib untuk kategori bulanan." }
-      }
-
-      const daftarBulan = Array.isArray(bulanInput) ? bulanInput : [bulanInput]
-      if (daftarBulan.length === 0) {
-        return { ok: false, error: "Pilih minimal 1 bulan tagihan." }
-      }
-
       for (const bulan of daftarBulan) {
         if (!isPeriodEligible(wargaRow.createdAt, Number(bulan), tahun)) {
           return {
@@ -182,55 +195,35 @@ export async function createKasMasukAction(input: CreateKasMasukInput): Promise<
           }
         }
       }
+    }
 
-      for (const bulan of daftarBulan) {
-        const paid = await hasPaidMonthly(parsed.wargaId, parsed.kategoriId, Number(bulan), tahun)
-        if (paid) {
-          return {
-            ok: false,
-            error: `Warga sudah membayar ${kategori.namaKategori} untuk bulan ${bulan}/${tahun}.`,
-          }
-        }
-      }
-    } else {
-      const paid = await hasPaidSekali(parsed.wargaId, parsed.kategoriId)
+    for (const bulan of daftarBulan) {
+      const paid = kategori.tipeTagihan === "bulanan"
+        ? await hasPaidMonthly(parsed.wargaId, parsed.kategoriId, Number(bulan), tahun)
+        : await hasPaidSekali(parsed.wargaId, parsed.kategoriId, Number(bulan), tahun)
       if (paid) {
         return {
           ok: false,
-          error: `Warga sudah pernah membayar ${kategori.namaKategori}.`,
+          error: `Warga sudah membayar ${kategori.namaKategori} untuk bulan ${bulan}/${tahun}.`,
         }
       }
     }
 
-    const createdRows = kategori.tipeTagihan === "bulanan"
-      ? await db
-          .insert(transaksi)
-          .values(
-            (Array.isArray(parsed.bulanTagihan) ? parsed.bulanTagihan : [parsed.bulanTagihan ?? ""]).map((bulan) => ({
-              userId: admin.id,
-              wargaId: parsed.wargaId,
-              kategoriId: parsed.kategoriId,
-              nominal: parsed.nominal,
-              bulanTagihan: bulan,
-              tahunTagihan: parsed.tahunTagihan,
-              tipeArus: "masuk" as const,
-              keterangan: parsed.keterangan ?? null,
-            })),
-          )
-          .returning({ id: transaksi.id })
-      : await db
-          .insert(transaksi)
-          .values({
+    const createdRows = await db
+        .insert(transaksi)
+        .values(
+          daftarBulan.map((bulan) => ({
             userId: admin.id,
             wargaId: parsed.wargaId,
             kategoriId: parsed.kategoriId,
             nominal: parsed.nominal,
-            bulanTagihan: null,
-            tahunTagihan: null,
-            tipeArus: "masuk",
+            bulanTagihan: bulan,
+            tahunTagihan: tahun,
+            tipeArus: "masuk" as const,
             keterangan: parsed.keterangan ?? null,
-          })
-          .returning({ id: transaksi.id })
+          })),
+        )
+        .returning({ id: transaksi.id })
 
     const created = createdRows[0]
 
@@ -239,7 +232,7 @@ export async function createKasMasukAction(input: CreateKasMasukInput): Promise<
       modul: "Kas Masuk",
       aksi: "tambah",
       keterangan:
-        kategori.tipeTagihan === "bulanan" && Array.isArray(parsed.bulanTagihan)
+        Array.isArray(parsed.bulanTagihan)
           ? `Mencatat kas masuk "${kategori.namaKategori}" (${parsed.bulanTagihan.length} bulan) dari ${wargaRow.namaKepalaKeluarga} (${wargaRow.blokRumah})`
           : `Mencatat kas masuk "${kategori.namaKategori}" dari ${wargaRow.namaKepalaKeluarga} (${wargaRow.blokRumah})`,
     })

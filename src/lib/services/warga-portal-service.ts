@@ -1,6 +1,6 @@
 import "server-only"
 
-import { and, asc, eq, gte, lt, sql } from "drizzle-orm"
+import { and, asc, eq, gte, inArray, lt, sql } from "drizzle-orm"
 
 import { db } from "@/lib/db"
 import { BULAN } from "@/lib/constants/months"
@@ -141,6 +141,40 @@ async function getWargaProfile(wargaId: number) {
   return toProfile(row)
 }
 
+type SekaliRelevantPeriodMap = Map<number, Set<string>>
+
+function toPeriodKey(bulan: number, tahun: number) {
+  return `${bulan}-${tahun}`
+}
+
+async function getSekaliRelevantPeriodsByKategori(kategoriIds: number[]): Promise<SekaliRelevantPeriodMap> {
+  const result: SekaliRelevantPeriodMap = new Map()
+  if (kategoriIds.length === 0) return result
+
+  const rows = await db
+    .select({
+      kategoriId: transaksi.kategoriId,
+      bulanTagihan: transaksi.bulanTagihan,
+      tahunTagihan: transaksi.tahunTagihan,
+    })
+    .from(transaksi)
+    .where(and(eq(transaksi.tipeArus, "masuk"), inArray(transaksi.kategoriId, kategoriIds)))
+
+  for (const row of rows) {
+    if (!row.tahunTagihan) continue
+    const bulan = normalizeMonthTagihan(row.bulanTagihan)
+    if (!bulan) continue
+
+    const key = toPeriodKey(bulan, row.tahunTagihan)
+    if (!result.has(row.kategoriId)) {
+      result.set(row.kategoriId, new Set())
+    }
+    result.get(row.kategoriId)!.add(key)
+  }
+
+  return result
+}
+
 async function getPaymentStatusForPeriod(wargaId: number, filter: WargaRiwayatFilter): Promise<WargaPaymentStatus[]> {
   const [wargaRow] = await db
     .select({ createdAt: warga.createdAt })
@@ -175,7 +209,11 @@ async function getPaymentStatusForPeriod(wargaId: number, filter: WargaRiwayatFi
     .from(transaksi)
     .where(and(eq(transaksi.tipeArus, "masuk"), eq(transaksi.wargaId, wargaId)))
 
+  const sekaliKategoriIds = categories.filter((category) => category.tipeTagihan === "sekali").map((category) => category.id)
+  const sekaliRelevantPeriods = await getSekaliRelevantPeriodsByKategori(sekaliKategoriIds)
+
   const results: WargaPaymentStatus[] = []
+  const periodeLabel = getPeriodLabel(filter.bulan, filter.tahun)
 
   for (const category of categories) {
     if (category.tipeTagihan === "bulanan") {
@@ -184,11 +222,25 @@ async function getPaymentStatusForPeriod(wargaId: number, filter: WargaRiwayatFi
       }
     }
 
+    if (category.tipeTagihan === "sekali") {
+      const periodKey = toPeriodKey(filter.bulan, filter.tahun)
+      const relevantPeriods = sekaliRelevantPeriods.get(category.id)
+      const isRelevantPeriod = relevantPeriods?.has(periodKey) ?? false
+
+      if (!isRelevantPeriod || Number(category.nominalDefault) <= 0) {
+        results.push({
+          kategori: category.nama,
+          tipeTagihan: category.tipeTagihan,
+          status: "belum-tempo" as const,
+          nominal: Number(category.nominalDefault),
+          periodeLabel,
+        })
+        continue
+      }
+    }
+
     const paid = paidRows.find((row) => {
       if (row.kategoriId !== category.id) return false
-      if (category.tipeTagihan === "sekali") {
-        return row.bulanTagihan == null && row.tahunTagihan == null
-      }
       return normalizeMonthTagihan(row.bulanTagihan) === filter.bulan && row.tahunTagihan === filter.tahun
     })
 
@@ -198,6 +250,7 @@ async function getPaymentStatusForPeriod(wargaId: number, filter: WargaRiwayatFi
         tipeTagihan: category.tipeTagihan,
         status: "lunas" as const,
         nominal: Number(paid.nominal),
+        periodeLabel,
         tanggalBayar: formatDateId(paid.waktuTransaksi),
         transaksiId: paid.id,
         refKuitansi: getReceiptRef(paid.id, paid.waktuTransaksi.getFullYear()),
@@ -208,9 +261,9 @@ async function getPaymentStatusForPeriod(wargaId: number, filter: WargaRiwayatFi
     results.push({
       kategori: category.nama,
       tipeTagihan: category.tipeTagihan,
-      status: category.tipeTagihan === "sekali" ? "belum-tempo" as const : "belum" as const,
+      status: "belum" as const,
       nominal: Number(category.nominalDefault),
-      jatuhTempoLabel: category.tipeTagihan === "sekali" ? "Sesuai pengumuman" : undefined,
+      periodeLabel,
     })
   }
 
@@ -244,6 +297,7 @@ export async function getWargaRiwayatPembayaran(wargaId: number, periode: WargaR
       status: item.status,
       tanggalBayar: item.tanggalBayar,
       nominal: item.nominal,
+      periodeLabel: item.periodeLabel,
       transaksiId: item.transaksiId,
       refKuitansi: item.refKuitansi,
     })),
@@ -265,16 +319,24 @@ export async function getWargaLaporanTransparansi(filter: WargaLaporanFilter = {
   const startDate = new Date(tahun, 0, 1)
   const endDate = new Date(tahun + 1, 0, 1)
 
-  const [saldo, transaksiRows, pengeluaranRows] = await Promise.all([
+  const [saldo, transaksiMasukRows, transaksiKeluarRows, pengeluaranRows] = await Promise.all([
     getSaldoSummary(),
+    // Pemasukan: filter by tahun_tagihan, group by bulan_tagihan
     db
       .select({
-        tipeArus: transaksi.tipeArus,
+        bulanTagihan: transaksi.bulanTagihan,
+        nominal: transaksi.nominal,
+      })
+      .from(transaksi)
+      .where(and(eq(transaksi.tipeArus, "masuk"), eq(transaksi.tahunTagihan, tahun))),
+    // Pengeluaran: filter by waktu_transaksi (tidak punya bulan_tagihan)
+    db
+      .select({
         nominal: transaksi.nominal,
         waktuTransaksi: transaksi.waktuTransaksi,
       })
       .from(transaksi)
-      .where(and(gte(transaksi.waktuTransaksi, startDate), lt(transaksi.waktuTransaksi, endDate))),
+      .where(and(eq(transaksi.tipeArus, "keluar"), gte(transaksi.waktuTransaksi, startDate), lt(transaksi.waktuTransaksi, endDate))),
     db
       .select({
         bulanNum: sql<number>`extract(month from ${transaksi.waktuTransaksi})::int`,
@@ -293,11 +355,13 @@ export async function getWargaLaporanTransparansi(filter: WargaLaporanFilter = {
   let totalPengeluaran = 0
 
   const monthlyCashflow: MonthlyCashflow[] = monthNames.map((bulan, index) => {
-    const pemasukan = transaksiRows
-      .filter((row) => row.tipeArus === "masuk" && row.waktuTransaksi.getMonth() === index)
+    // Pemasukan: pakai bulan_tagihan (sama dengan laporan-service)
+    const pemasukan = transaksiMasukRows
+      .filter((row) => normalizeMonthTagihan(row.bulanTagihan) === index + 1)
       .reduce((sum, row) => sum + Number(row.nominal), 0)
-    const pengeluaran = transaksiRows
-      .filter((row) => row.tipeArus === "keluar" && row.waktuTransaksi.getMonth() === index)
+    // Pengeluaran: pakai waktu_transaksi
+    const pengeluaran = transaksiKeluarRows
+      .filter((row) => row.waktuTransaksi.getMonth() === index)
       .reduce((sum, row) => sum + Number(row.nominal), 0)
 
     totalPemasukan += pemasukan

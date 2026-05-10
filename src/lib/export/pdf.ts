@@ -68,7 +68,7 @@ function getContactLine(branding: PdfBranding): string | null {
   return [branding.address, branding.phone, branding.email].filter(Boolean).join(" | ") || null
 }
 
-export function generateLaporanPDF(data: PdfLaporanData): void {
+export function generateLaporanPDFBytes(data: PdfLaporanData): ArrayBuffer {
   const doc = new jsPDF()
   const branding = getBranding(data.branding)
   const primaryColor = hexToRgb(branding.primaryColor)
@@ -76,7 +76,7 @@ export function generateLaporanPDF(data: PdfLaporanData): void {
   doc.setTextColor(...primaryColor)
   doc.setFontSize(16)
   doc.setFont("helvetica", "bold")
-  doc.text("Laporan Keuangan Kas RT", 105, 20, { align: "center" })
+  doc.text(`Laporan Keuangan ${branding.appName}`, 105, 20, { align: "center" })
 
   doc.setTextColor(40)
   doc.setFontSize(11)
@@ -125,7 +125,6 @@ export function generateLaporanPDF(data: PdfLaporanData): void {
   const totalPemasukan = data.totalPemasukan
   const saldoPeriode = data.saldoPeriode
 
-  // Simple table using doc.text since jspdf-autotable has types issues
   let yPos = 84
   doc.setDrawColor(...primaryColor)
   doc.line(14, yPos - 4, 196, yPos - 4)
@@ -167,7 +166,20 @@ export function generateLaporanPDF(data: PdfLaporanData): void {
     }
   }
 
-  doc.save(`laporan-kas-${safeFilenamePart(data.periodeLabel)}.pdf`)
+  return doc.output("arraybuffer") as ArrayBuffer
+}
+
+export function generateLaporanPDF(data: PdfLaporanData): void {
+  const bytes = generateLaporanPDFBytes(data)
+  const blob = new Blob([bytes], { type: "application/pdf" })
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement("a")
+  link.href = url
+  link.download = `laporan-kas-${safeFilenamePart(data.periodeLabel)}.pdf`
+  document.body.appendChild(link)
+  link.click()
+  document.body.removeChild(link)
+  URL.revokeObjectURL(url)
 }
 
 export function generateKuitansiPDF(data: PdfKuitansiData): void {

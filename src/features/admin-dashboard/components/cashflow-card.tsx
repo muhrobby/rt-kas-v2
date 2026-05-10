@@ -49,18 +49,21 @@ export function CashflowCard({ cashflowBulanan, cashflowDenganSaldo }: CashflowC
           pemasukan: entry.pemasukan,
           pengeluaran: entry.pengeluaran,
         }))}
-        height={170}
-        barWidth={28}
-        gap={24}
+        height={220}
       />
 
-      <div className="mt-4 grid grid-cols-2 gap-y-2 border-t border-kanvas-line-2 pt-3 md:grid-cols-4">
-        {cashflowDenganSaldo.map((entry) => (
-          <div key={`saldo-${entry.bulan}`} className="text-center">
-            <p className="text-[10px] font-semibold tracking-[0.5px] text-kanvas-ink-4 uppercase">Saldo {entry.bulan}</p>
-            <p className="mt-0.5 text-[13px] font-semibold text-kanvas-ink">{formatRupiah(entry.saldo ?? 0).replace("Rp ", "")}</p>
+      {/* Saldo bulanan: scroll horizontal agar tidak overflow di mobile */}
+      <div className="mt-4 border-t border-kanvas-line-2 pt-3">
+        <div className="overflow-x-auto">
+          <div className="flex min-w-max gap-x-4 pb-1">
+            {cashflowDenganSaldo.map((entry) => (
+              <div key={`saldo-${entry.bulan}`} className="min-w-[64px] text-center">
+                <p className="text-[10px] font-semibold tracking-[0.5px] text-kanvas-ink-4 uppercase">Saldo {entry.bulan}</p>
+                <p className="mt-0.5 text-[13px] font-semibold text-kanvas-ink">{formatRupiah(entry.saldo ?? 0).replace("Rp ", "")}</p>
+              </div>
+            ))}
           </div>
-        ))}
+        </div>
       </div>
     </AppCard>
   )

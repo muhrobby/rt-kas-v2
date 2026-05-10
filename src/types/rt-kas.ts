@@ -6,7 +6,7 @@ export type JenisArus = "masuk" | "keluar"
 
 export type TipeTagihan = "bulanan" | "sekali"
 
-export type AksiAktivitas = "tambah" | "edit" | "hapus" | "login" | "logout"
+export type AksiAktivitas = "tambah" | "edit" | "hapus" | "login" | "logout" | "export_excel"
 
 export interface Warga {
   id: string
@@ -81,6 +81,7 @@ export interface WargaPaymentStatus {
   tipeTagihan: TipeTagihan
   status: WargaPaymentStatusState
   nominal: number
+  periodeLabel?: string
   tanggalBayar?: string
   jatuhTempoLabel?: string
   transaksiId?: number
@@ -92,6 +93,7 @@ export interface WargaHistoryItem {
   status: WargaPaymentStatusState
   tanggalBayar?: string
   nominal: number
+  periodeLabel?: string
   transaksiId?: number
   refKuitansi?: string
 }

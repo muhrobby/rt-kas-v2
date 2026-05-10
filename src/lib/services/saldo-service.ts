@@ -1,12 +1,24 @@
 import "server-only"
 
-import { and, count, desc, eq, gte, sql } from "drizzle-orm"
+import { and, count, desc, eq, gte, lte, sql } from "drizzle-orm"
 
 import { db } from "@/lib/db"
 import { logAktivitas, transaksi, user, warga } from "@/lib/db/schema"
 
-const currentYear = new Date().getFullYear()
-const currentMonth = new Date().getMonth()
+const monthNames = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agt", "Sep", "Okt", "Nov", "Des"]
+const monthNamesLong = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"]
+
+/** Konversi bulan_tagihan (angka string atau nama bulan) ke 1-12. Return null jika tidak valid. */
+function parseBulanTagihan(value: string | null): number | null {
+  if (!value) return null
+  const numeric = Number(value)
+  if (Number.isInteger(numeric) && numeric >= 1 && numeric <= 12) return numeric
+  const longIdx = monthNamesLong.findIndex((m) => m.toLowerCase() === value.toLowerCase())
+  if (longIdx >= 0) return longIdx + 1
+  const shortIdx = monthNames.findIndex((m) => m.toLowerCase() === value.toLowerCase())
+  if (shortIdx >= 0) return shortIdx + 1
+  return null
+}
 
 export type MonthlyCashflow = {
   bulan: string
@@ -25,8 +37,6 @@ export type SaldoSummary = {
   totalWargaAktif: number
 }
 
-const monthNames = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agt", "Sep", "Okt", "Nov", "Des"]
-
 function getStartOfMonth(year: number, month: number) {
   return new Date(year, month, 1)
 }
@@ -36,6 +46,9 @@ function getEndOfMonth(year: number, month: number) {
 }
 
 export async function getSaldoSummary(): Promise<SaldoSummary> {
+  const now = new Date()
+  const currentYear = now.getFullYear()
+  const currentMonth = now.getMonth()
   const startOfMonth = getStartOfMonth(currentYear, currentMonth)
 
   const [pemasukanResult] = await db
@@ -82,19 +95,28 @@ export async function getSaldoSummary(): Promise<SaldoSummary> {
   }
 }
 
-export async function getMonthlyCashflow(year: number = currentYear): Promise<MonthlyCashflow[]> {
+export async function getMonthlyCashflow(year: number = new Date().getFullYear()): Promise<MonthlyCashflow[]> {
   const startDate = new Date(year, 0, 1)
+  const endDate = new Date(year, 11, 31, 23, 59, 59, 999)
 
-  const rows = await db
-    .select({
-      tipeArus: transaksi.tipeArus,
-      bulanTagihan: transaksi.bulanTagihan,
-      tahunTagihan: transaksi.tahunTagihan,
-      waktuTransaksi: transaksi.waktuTransaksi,
-      nominal: transaksi.nominal,
-    })
-    .from(transaksi)
-    .where(gte(transaksi.waktuTransaksi, startDate))
+  const [masukRows, keluarRows] = await Promise.all([
+    // Pemasukan: filter by tahun_tagihan, group by bulan_tagihan
+    db
+      .select({
+        bulanTagihan: transaksi.bulanTagihan,
+        nominal: transaksi.nominal,
+      })
+      .from(transaksi)
+      .where(and(eq(transaksi.tipeArus, "masuk"), eq(transaksi.tahunTagihan, year))),
+    // Pengeluaran: filter by waktu_transaksi
+    db
+      .select({
+        waktuTransaksi: transaksi.waktuTransaksi,
+        nominal: transaksi.nominal,
+      })
+      .from(transaksi)
+      .where(and(eq(transaksi.tipeArus, "keluar"), gte(transaksi.waktuTransaksi, startDate), lte(transaksi.waktuTransaksi, endDate))),
+  ])
 
   const result: MonthlyCashflow[] = []
 
@@ -102,13 +124,19 @@ export async function getMonthlyCashflow(year: number = currentYear): Promise<Mo
     const monthStart = getStartOfMonth(year, m)
     const monthEnd = getEndOfMonth(year, m)
 
-    const monthTransactions = rows.filter((trx) => {
-      const waktu = new Date(trx.waktuTransaksi)
-      return waktu >= monthStart && waktu <= monthEnd
-    })
+    const pemasukan = masukRows
+      .filter((trx) => {
+        const bulanNum = parseBulanTagihan(trx.bulanTagihan)
+        return bulanNum === m + 1
+      })
+      .reduce((sum, trx) => sum + Number(trx.nominal), 0)
 
-    const pemasukan = monthTransactions.filter((trx) => trx.tipeArus === "masuk").reduce((sum, trx) => sum + Number(trx.nominal), 0)
-    const pengeluaran = monthTransactions.filter((trx) => trx.tipeArus === "keluar").reduce((sum, trx) => sum + Number(trx.nominal), 0)
+    const pengeluaran = keluarRows
+      .filter((trx) => {
+        const waktu = new Date(trx.waktuTransaksi)
+        return waktu >= monthStart && waktu <= monthEnd
+      })
+      .reduce((sum, trx) => sum + Number(trx.nominal), 0)
 
     result.push({
       bulan: monthNames[m],
@@ -122,7 +150,7 @@ export async function getMonthlyCashflow(year: number = currentYear): Promise<Mo
   return result
 }
 
-export async function getCashflowWithSaldo(year: number = currentYear): Promise<{ bulan: string; pemasukan: number; pengeluaran: number; saldo: number }[]> {
+export async function getCashflowWithSaldo(year: number = new Date().getFullYear()): Promise<{ bulan: string; pemasukan: number; pengeluaran: number; saldo: number }[]> {
   const monthly = await getMonthlyCashflow(year)
   let running = 0
   return monthly.map((m) => {

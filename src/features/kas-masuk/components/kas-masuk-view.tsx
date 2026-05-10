@@ -64,7 +64,6 @@ export function KasMasukView() {
   const [selectedKategoriId, setSelectedKategoriId] = useState("")
   const [paidMonths, setPaidMonths] = useState<number[]>([])
   const [notEligibleMonths, setNotEligibleMonths] = useState<number[]>([])
-  const [oneTimePaid, setOneTimePaid] = useState(false)
   const [loadingPaidMonths, setLoadingPaidMonths] = useState(false)
   const [receiptOpen, setReceiptOpen] = useState(false)
   const [selectedReceipt, setSelectedReceipt] = useState<KuitansiSelection | null>(null)
@@ -86,18 +85,36 @@ export function KasMasukView() {
     })
   }, [])
 
+  const loadPaidMonths = useCallback(async (wargaId: string, kategoriId: string, tahun: number) => {
+    const kategori = kategoriOptions.find((item) => item.id === kategoriId)
+    if (!wargaId || !kategoriId || !kategori) {
+      setPaidMonths([])
+      setNotEligibleMonths([])
+      return
+    }
+
+    setLoadingPaidMonths(true)
+    try {
+      const { paid, notEligible } = await fetchPaidMonths(Number(wargaId), Number(kategoriId), tahun)
+      setPaidMonths(paid)
+      setNotEligibleMonths(notEligible)
+    } finally {
+      setLoadingPaidMonths(false)
+    }
+  }, [kategoriOptions])
+
   const handleWargaChange = useCallback(
     (id: string) => {
       setSelectedWargaId(id)
       setPaidMonths([])
       setNotEligibleMonths([])
-      setOneTimePaid(false)
       setReceiptError(null)
       const found = wargaOptions.find((w) => w.id === id)
       setSelectedFirstBillMonth(found?.firstBillMonth)
       setSelectedFirstBillYear(found?.firstBillYear)
+      void loadPaidMonths(id, selectedKategoriId, new Date().getFullYear())
     },
-    [wargaOptions],
+    [loadPaidMonths, selectedKategoriId, wargaOptions],
   )
 
   const handleKategoriChange = useCallback(
@@ -107,26 +124,16 @@ export function KasMasukView() {
       setSelectedKategori(found)
       setPaidMonths([])
       setNotEligibleMonths([])
-      setOneTimePaid(false)
-
-      if (found?.tipeTagihan === "bulanan" && selectedWargaId && id) {
-        setLoadingPaidMonths(true)
-        try {
-          const { paid, notEligible } = await fetchPaidMonths(Number(selectedWargaId), Number(id), new Date().getFullYear())
-          setPaidMonths(paid)
-          setNotEligibleMonths(notEligible)
-        } finally {
-          setLoadingPaidMonths(false)
-        }
-      }
-      if (found?.tipeTagihan === "sekali" && selectedWargaId && id) {
-        const rows = transactions.filter(
-          (t) => t.jenisArus === "masuk" && t.wargaId === selectedWargaId && t.kategoriId === id,
-        )
-        setOneTimePaid(rows.length > 0)
-      }
+      await loadPaidMonths(selectedWargaId, id, new Date().getFullYear())
     },
-    [kategoriOptions, selectedWargaId, transactions],
+    [kategoriOptions, loadPaidMonths, selectedWargaId],
+  )
+
+  const handleYearChange = useCallback(
+    (year: number) => {
+      void loadPaidMonths(selectedWargaId, selectedKategoriId, year)
+    },
+    [loadPaidMonths, selectedKategoriId, selectedWargaId],
   )
 
   const transaksiMasuk = useMemo(
@@ -160,7 +167,6 @@ export function KasMasukView() {
     setSelectedKategori(null)
     setPaidMonths([])
     setNotEligibleMonths([])
-    setOneTimePaid(false)
     setSelectedFirstBillMonth(undefined)
     setSelectedFirstBillYear(undefined)
     setFormOpen(true)
@@ -175,8 +181,8 @@ export function KasMasukView() {
         wargaId: Number(selectedWargaId),
         kategoriId: Number(selectedKategoriId),
         nominal: values.nominal,
-        bulanTagihan: selectedKategori?.tipeTagihan === "bulanan" ? values.bulan.map(String) : undefined,
-        tahunTagihan: selectedKategori?.tipeTagihan === "bulanan" ? values.tahun : undefined,
+        bulanTagihan: (selectedKategori?.tipeTagihan === "bulanan" || selectedKategori?.tipeTagihan === "sekali") ? values.bulan.map(String) : undefined,
+        tahunTagihan: (selectedKategori?.tipeTagihan === "bulanan" || selectedKategori?.tipeTagihan === "sekali") ? values.tahun : undefined,
         keterangan: values.catatan || undefined,
       })
       if (!result.ok) {
@@ -271,10 +277,10 @@ export function KasMasukView() {
         submitting={submitting}
         paidMonths={paidMonths}
         notEligibleMonths={notEligibleMonths}
-        oneTimePaid={oneTimePaid}
         loadingPaidMonths={loadingPaidMonths}
         firstBillMonth={selectedFirstBillMonth}
         firstBillYear={selectedFirstBillYear}
+        onYearChange={handleYearChange}
       />
     </main>
   )

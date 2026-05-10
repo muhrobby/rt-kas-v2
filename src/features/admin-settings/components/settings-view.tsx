@@ -1,8 +1,9 @@
 "use client"
 
 import { useEffect, useState, useTransition } from "react"
+import Link from "next/link"
 
-import { useToast } from "@/components/kanvas"
+import { AppCard, KanvasIcons, useToast } from "@/components/kanvas"
 import { getAppSettingsAction, updateAppSettingsAction } from "@/lib/actions/app-settings"
 import { SettingsForm, type SettingsFormValues, mapSettingsToFormValues } from "@/features/admin-settings/components/settings-form"
 import { SettingsPreviewCard } from "@/features/admin-settings/components/settings-preview-card"
@@ -41,6 +42,20 @@ export function SettingsView() {
 
   return (
     <main className="space-y-3.5 p-6 md:p-7">
+      <AppCard className="flex items-center justify-between p-4">
+        <div>
+          <p className="text-[13px] font-semibold text-kanvas-ink">Keamanan Akun</p>
+          <p className="mt-0.5 text-[12px] text-kanvas-ink-3">Ubah password akun admin Anda</p>
+        </div>
+        <Link
+          href="/admin/change-password"
+          className="inline-flex items-center gap-1.5 rounded-lg border border-kanvas-line bg-white px-3 py-2 text-[12px] font-semibold text-kanvas-ink-2 hover:bg-kanvas-paper-2"
+        >
+          <KanvasIcons.shield size={14} />
+          Ganti Password
+        </Link>
+      </AppCard>
+
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 xl:grid-cols-3">
         <div className="lg:col-span-1 xl:col-span-2">
           {settings ? (

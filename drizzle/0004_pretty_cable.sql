@@ -1,0 +1,1 @@
+ALTER TYPE "public"."aksi" ADD VALUE 'export_excel';

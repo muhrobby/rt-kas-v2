@@ -1,6 +1,6 @@
 import "server-only"
 
-import { and, count, desc, eq, ilike, isNull, or } from "drizzle-orm"
+import { and, count, desc, eq, ilike, or } from "drizzle-orm"
 
 import { db } from "@/lib/db"
 import { kategoriKas, transaksi, warga } from "@/lib/db/schema"
@@ -118,7 +118,7 @@ export async function hasPaidMonthly(wargaId: number, kategoriId: number, bulan:
   return (row?.total ?? 0) > 0
 }
 
-export async function hasPaidSekali(wargaId: number, kategoriId: number) {
+export async function hasPaidSekali(wargaId: number, kategoriId: number, bulan: number, tahun: number) {
   const [row] = await db
     .select({ total: count() })
     .from(transaksi)
@@ -126,8 +126,8 @@ export async function hasPaidSekali(wargaId: number, kategoriId: number) {
       and(
         eq(transaksi.wargaId, wargaId),
         eq(transaksi.kategoriId, kategoriId),
-        isNull(transaksi.bulanTagihan),
-        isNull(transaksi.tahunTagihan),
+        eq(transaksi.bulanTagihan, String(bulan)),
+        eq(transaksi.tahunTagihan, tahun),
         eq(transaksi.tipeArus, "masuk"),
       ),
     )

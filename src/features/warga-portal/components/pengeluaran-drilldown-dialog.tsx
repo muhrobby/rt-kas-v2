@@ -27,7 +27,7 @@ export function PengeluaranDrilldownDialog({ open, monthLabel, rows, onClose }: 
           </button>
         </div>
 
-        <div className="space-y-2">
+        <div className="max-h-[50vh] space-y-2 overflow-y-auto">
           {rows.length > 0 ? rows.map((row) => (
             <div key={`${monthLabel}-${row.kategori}`} className="flex flex-col gap-1 rounded-lg border border-kanvas-line bg-kanvas-paper-2 px-3 py-2.5 text-[12px] sm:flex-row sm:items-center sm:justify-between">
               <span className="text-kanvas-ink-3">{row.kategori}</span>

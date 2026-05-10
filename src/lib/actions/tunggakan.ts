@@ -17,9 +17,10 @@ type ActionResult<T> =
 function toActionError(error: unknown): ActionResult<never> {
   if (error instanceof ZodError) {
     const flattened = error.flatten().fieldErrors as Record<string, string[]>
+    const firstFieldError = Object.values(flattened).flat()[0]
     return {
       ok: false,
-      error: "Input tidak valid.",
+      error: firstFieldError ?? "Input tidak valid.",
       fieldErrors: flattened,
     }
   }

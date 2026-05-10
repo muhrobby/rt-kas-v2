@@ -1,30 +1,31 @@
 "use client"
 
-import { useEffect, useState } from "react"
-
 import { AdminReminders } from "@/features/admin-dashboard/components/admin-reminders"
 import { CashflowCard } from "@/features/admin-dashboard/components/cashflow-card"
 import { DashboardMetrics } from "@/features/admin-dashboard/components/dashboard-metrics"
 import { RecentActivityCard } from "@/features/admin-dashboard/components/recent-activity-card"
-import { getDashboardSummaryAction } from "@/lib/actions/dashboard"
+import type { DashboardSummary } from "@/features/admin-dashboard/lib/dashboard-data"
 
-export function AdminDashboardView() {
-  const [data, setData] = useState<Awaited<ReturnType<typeof getDashboardSummaryAction>> | null>(null)
+interface AdminDashboardViewProps {
+  initialData: DashboardSummary | null
+}
 
-  useEffect(() => {
-    getDashboardSummaryAction().then(setData)
-  }, [])
-
+export function AdminDashboardView({ initialData: data }: AdminDashboardViewProps) {
   if (!data) {
     return (
-      <main className="space-y-3.5 p-6 md:p-7">
-        <p className="text-[12px] text-kanvas-ink-3">Memuat data...</p>
+      <main className="space-y-3.5 p-4 md:p-6 lg:p-7">
+        <section className="rounded-xl border border-kanvas-line bg-white p-5">
+          <p className="text-sm font-semibold text-kanvas-ink">Dashboard belum bisa dimuat</p>
+          <p className="mt-1 text-[12px] text-kanvas-ink-3">
+            Terjadi kendala saat mengambil ringkasan kas. Silakan muat ulang halaman atau coba beberapa saat lagi.
+          </p>
+        </section>
       </main>
     )
   }
 
   return (
-    <main className="space-y-3.5 p-6 md:p-7">
+    <main className="space-y-3.5 p-4 md:p-6 lg:p-7">
       <DashboardMetrics
         saldoKas={data.saldoKas}
         pemasukanBulanIni={data.pemasukanBulanIni}
@@ -42,7 +43,7 @@ export function AdminDashboardView() {
         <RecentActivityCard logTerbaru={data.logTerbaru} />
       </section>
 
-      <AdminReminders />
+      <AdminReminders reminders={data.reminders} />
     </main>
   )
 }

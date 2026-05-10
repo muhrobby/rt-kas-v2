@@ -76,7 +76,7 @@ export async function listWargaAction(input: { search?: string; status?: "semua"
   }
 }
 
-export async function createWargaAction(input: CreateWargaInput): Promise<ActionResult<{ id: number }>> {
+export async function createWargaAction(input: CreateWargaInput): Promise<ActionResult<{ id: number; temporaryPassword?: string }>> {
   const admin = await requireAdmin()
 
   try {
@@ -96,7 +96,7 @@ export async function createWargaAction(input: CreateWargaInput): Promise<Action
         })
         .returning({ id: warga.id })
 
-      await createWargaUserAccount(
+      const { temporaryPassword } = await createWargaUserAccount(
         {
           wargaId: newWarga.id,
           nama: payload.nama,
@@ -112,7 +112,7 @@ export async function createWargaAction(input: CreateWargaInput): Promise<Action
         keterangan: `Menambahkan warga ${payload.nama} (${payload.blok})`,
       })
 
-      return newWarga
+      return { id: newWarga.id, temporaryPassword }
     })
 
     revalidatePath("/admin/warga")

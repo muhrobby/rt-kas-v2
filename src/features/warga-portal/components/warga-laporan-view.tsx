@@ -41,7 +41,7 @@ export function WargaLaporanView({ data }: WargaLaporanViewProps) {
           <p className="text-[16px] text-kanvas-ink">Pemasukan vs Pengeluaran</p>
           <span className="text-[11px] text-kanvas-ink-3">Jan - Des {data.tahun}</span>
         </div>
-        <BarsInOutChart data={data.monthlyCashflow} height={122} barWidth={20} gap={16} />
+        <BarsInOutChart data={data.monthlyCashflow} height={220} />
       </AppCard>
 
       <section>
@@ -49,25 +49,25 @@ export function WargaLaporanView({ data }: WargaLaporanViewProps) {
         <div className="space-y-2">
           {data.cashflowDenganSaldo.map((row) => (
             <AppCard key={`row-${row.bulan}`} className="p-3">
-              <div className="flex items-center justify-between gap-2">
-                <div>
+              <div className="flex items-start justify-between gap-2">
+                <div className="min-w-0">
                   <p className="text-[13px] font-semibold text-kanvas-ink">{row.bulan} {data.tahun}</p>
                   <p className="text-[11px] text-kanvas-ink-4">Saldo {formatRupiah(row.saldo ?? 0)}</p>
+                  <div className="mt-1.5 flex flex-wrap gap-1">
+                    <AppPill tone="ok">+{formatRupiah(row.pemasukan).replace("Rp ", "")}</AppPill>
+                    <AppPill tone="danger">-{formatRupiah(row.pengeluaran).replace("Rp ", "")}</AppPill>
+                  </div>
                 </div>
-                <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
-                  <AppPill tone="ok">+{formatRupiah(row.pemasukan).replace("Rp ", "")}</AppPill>
-                  <AppPill tone="danger">-{formatRupiah(row.pengeluaran).replace("Rp ", "")}</AppPill>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setSelectedMonth(row.bulan)
-                      setDrilldownOpen(true)
-                    }}
-                    className="text-[11px] font-semibold text-kanvas-terra"
-                  >
-                    Rincian
-                  </button>
-                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedMonth(row.bulan)
+                    setDrilldownOpen(true)
+                  }}
+                  className="shrink-0 rounded px-2 py-1.5 text-[11px] font-semibold text-kanvas-terra"
+                >
+                  Rincian
+                </button>
               </div>
             </AppCard>
           ))}

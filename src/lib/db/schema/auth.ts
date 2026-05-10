@@ -12,6 +12,7 @@ export const user = pgTable(
     displayUsername: text("display_username"),
     role: text("role").default("user"),
     wargaId: integer("warga_id"),
+    mustChangePassword: boolean("must_change_password").notNull().default(false),
     createdAt: timestamp("created_at").notNull().defaultNow(),
     updatedAt: timestamp("updated_at").notNull().defaultNow(),
   },

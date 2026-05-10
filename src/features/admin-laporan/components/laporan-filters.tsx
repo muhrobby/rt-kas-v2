@@ -23,18 +23,22 @@ interface LaporanFiltersProps {
   year: number
   startMonth: number
   endMonth: number
+  saldoAwal: number
   onYearChange: (value: number) => void
   onStartMonthChange: (value: number) => void
   onEndMonthChange: (value: number) => void
+  onSaldoAwalChange: (value: number) => void
 }
 
 export function LaporanFilters({
   year,
   startMonth,
   endMonth,
+  saldoAwal,
   onYearChange,
   onStartMonthChange,
   onEndMonthChange,
+  onSaldoAwalChange,
 }: LaporanFiltersProps) {
   const currentYear = new Date().getFullYear()
   const yearOptions = useMemo(() => {
@@ -83,6 +87,20 @@ export function LaporanFilters({
           onChange={(val) => onEndMonthChange(Number(val))}
           options={monthOptions}
           placeholder="Pilih bulan..."
+        />
+      </label>
+
+      <label className="block">
+        <p className="mb-1 text-[11px] font-semibold tracking-[0.6px] text-kanvas-ink-4 uppercase">Saldo Awal (Rp)</p>
+        <input
+          type="number"
+          min={0}
+          value={saldoAwal}
+          onChange={(e) => {
+            const val = Number(e.target.value)
+            onSaldoAwalChange(Number.isFinite(val) && val >= 0 ? Math.floor(val) : 0)
+          }}
+          className="w-full rounded-lg border border-kanvas-line bg-white px-3 py-2 text-[13px] text-kanvas-ink focus:outline-none focus:ring-1 focus:ring-kanvas-terra"
         />
       </label>
     </section>

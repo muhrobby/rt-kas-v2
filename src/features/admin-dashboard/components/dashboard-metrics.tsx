@@ -37,10 +37,10 @@ interface DashboardMetricsProps {
   totalWargaAktif: number
 }
 
-const currentDate = new Date()
-const formattedDate = `${currentDate.getDate()} ${currentDate.toLocaleString("id-ID", { month: "short" }) } ${currentDate.getFullYear()}`
-
 export function DashboardMetrics({ saldoKas, pemasukanBulanIni, pengeluaranBulanIni, totalWargaAktif }: DashboardMetricsProps) {
+  // Dihitung di dalam komponen agar tidak stale setelah berganti hari tanpa restart server
+  const currentDate = new Date()
+  const formattedDate = `${currentDate.getDate()} ${currentDate.toLocaleString("id-ID", { month: "short" })} ${currentDate.getFullYear()}`
   return (
     <section className="grid grid-cols-1 gap-3.5 md:grid-cols-2 xl:grid-cols-4">
       <MetricCard label="Saldo Kas" value={formatRupiah(saldoKas)} hint={`per ${formattedDate}`} accent="var(--kanvas-terra)" />

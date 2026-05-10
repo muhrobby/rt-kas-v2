@@ -1,23 +1,51 @@
 import { requireAdmin } from "@/lib/auth/permissions"
 import { createLaporanExcel } from "@/lib/export/excel"
 import { getLaporanKeuangan } from "@/lib/services/laporan-service"
-import { z } from "zod"
-
-const querySchema = z.object({
-  startMonth: z.coerce.number().int().min(0).max(11).default(0),
-  startYear: z.coerce.number().int().min(2000).max(2100),
-  endMonth: z.coerce.number().int().min(0).max(11).default(11),
-  endYear: z.coerce.number().int().min(2000).max(2100),
-  saldoAwal: z.coerce.number().min(0).default(0),
-})
+import { laporanQuerySchema } from "@/lib/validations/export"
+import { rateLimit } from "@/lib/rate-limit/limiter"
+import { rateLimitKeys } from "@/lib/rate-limit/keys"
+import { writeAuditLog } from "@/lib/services/audit-log-service"
+import { headers } from "next/headers"
 
 export async function GET(request: Request) {
-  await requireAdmin()
+  const admin = await requireAdmin()
 
   try {
+    const headersList = await headers()
+    const ip = headersList.get("x-forwarded-for") || "127.0.0.1"
+    const key = rateLimitKeys.exportLaporan(admin.id, ip)
+    
+    // Allow 10 exports per 10 minutes
+    const result = await rateLimit(key, 10, 10 * 60 * 1000)
+    
+    if (!result.success) {
+      // Optional: log abuse attempt silently without failing the request flow early
+      try {
+        await writeAuditLog({
+          userId: admin.id,
+          modul: "Laporan",
+          aksi: "export_excel",
+          keterangan: `Rate limited export laporan keuangan. IP: ${ip}`,
+        })
+      } catch (e) {
+        console.error("[AUDIT_LOG_ERROR]", e)
+      }
+
+      return Response.json(
+        { error: "Terlalu banyak permintaan export. Silakan coba lagi nanti." },
+        { 
+          status: 429,
+          headers: {
+            "Retry-After": Math.ceil((result.reset - Date.now()) / 1000).toString(),
+          }
+        }
+      )
+    }
+
     const { searchParams } = new URL(request.url)
     const nowYear = new Date().getFullYear()
-    const parsed = querySchema.parse({
+    
+    const parsed = laporanQuerySchema.safeParse({
       startMonth: searchParams.get("startMonth") ?? "0",
       startYear: searchParams.get("startYear") ?? String(nowYear),
       endMonth: searchParams.get("endMonth") ?? "11",
@@ -25,13 +53,31 @@ export async function GET(request: Request) {
       saldoAwal: searchParams.get("saldoAwal") ?? "0",
     })
 
-    const result = await getLaporanKeuangan(parsed)
+    if (!parsed.success) {
+      return Response.json({ 
+        error: parsed.error.issues[0]?.message || "Parameter export laporan tidak valid." 
+      }, { status: 400 })
+    }
 
-    const buffer = createLaporanExcel(result.rows, {
-      totalPemasukan: result.totalPemasukan,
-      totalPengeluaran: result.totalPengeluaran,
-      saldoPeriode: result.saldoPeriode,
+    const resultLaporan = await getLaporanKeuangan(parsed.data)
+
+    const buffer = await createLaporanExcel(resultLaporan.rows, {
+      totalPemasukan: resultLaporan.totalPemasukan,
+      totalPengeluaran: resultLaporan.totalPengeluaran,
+      saldoPeriode: resultLaporan.saldoPeriode,
     })
+
+    // Write audit log on success
+    try {
+      await writeAuditLog({
+        userId: admin.id,
+        modul: "Laporan",
+        aksi: "export_excel",
+        keterangan: `Export laporan keuangan Excel periode ${parsed.data.startMonth + 1}/${parsed.data.startYear} s.d ${parsed.data.endMonth + 1}/${parsed.data.endYear}`,
+      })
+    } catch (e) {
+      console.error("[AUDIT_LOG_ERROR]", e)
+    }
 
     return new Response(new Uint8Array(buffer), {
       headers: {
@@ -39,7 +85,8 @@ export async function GET(request: Request) {
         "Content-Disposition": 'attachment; filename="laporan.xlsx"',
       },
     })
-  } catch {
-    return Response.json({ error: "Parameter export laporan tidak valid." }, { status: 400 })
+  } catch (error) {
+    console.error("[EXPORT_LAPORAN_ERROR]", error)
+    return Response.json({ error: "Gagal memproses export laporan." }, { status: 500 })
   }
 }

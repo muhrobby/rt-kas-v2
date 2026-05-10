@@ -1,11 +1,32 @@
-import * as XLSX from "xlsx"
+import ExcelJS from "exceljs"
 
-export function createExcelWorkbook(data: object[], sheetName = "Sheet1"): Buffer {
-  const worksheet = XLSX.utils.json_to_sheet(data)
-  const workbook = XLSX.utils.book_new()
-  XLSX.utils.book_append_sheet(workbook, worksheet, sheetName)
-  const buffer = XLSX.write(workbook, { type: "buffer", bookType: "xlsx" })
-  return buffer
+function sanitizeSheetName(name: string): string {
+  return name.replace(/[\\\/\?\*\[\]]/g, "").slice(0, 31)
+}
+
+function escapeFormula(value: unknown): unknown {
+  if (typeof value === "string" && /^[=+\-@]/.test(value)) {
+    return `'${value}`
+  }
+  return value
+}
+
+export async function createExcelWorkbook(data: object[], sheetName = "Sheet1"): Promise<Buffer> {
+  const workbook = new ExcelJS.Workbook()
+  const worksheet = workbook.addWorksheet(sanitizeSheetName(sheetName))
+
+  if (data.length > 0) {
+    const headers = Object.keys(data[0])
+    worksheet.addRow(headers)
+
+    data.forEach((item) => {
+      const row = Object.values(item).map(escapeFormula)
+      worksheet.addRow(row)
+    })
+  }
+
+  const buffer = await workbook.xlsx.writeBuffer()
+  return Buffer.from(buffer)
 }
 
 type LaporanTotals = {
@@ -14,68 +35,51 @@ type LaporanTotals = {
   saldoPeriode: number
 }
 
-export function createLaporanExcel(
+export async function createLaporanExcel(
   rows: {
     bulan: string
     tahun: number
-    bulanNum: number
     pemasukan: number
     pengeluaran: number
     saldo: number
   }[],
   totals: LaporanTotals,
-): Buffer {
-  const formattedRows = rows.map((row) => ({
-    Bulan: `${row.bulan} ${row.tahun}`,
-    "Pemasukan (Rp)": row.pemasukan,
-    "Pengeluaran (Rp)": row.pengeluaran,
-    "Saldo (Rp)": row.saldo,
-  }))
+): Promise<Buffer> {
+  const workbook = new ExcelJS.Workbook()
+  const worksheet = workbook.addWorksheet("Laporan Kas")
 
-  const summaryRow = {
-    Bulan: "TOTAL",
-    "Pemasukan (Rp)": totals.totalPemasukan,
-    "Pengeluaran (Rp)": totals.totalPengeluaran,
-    "Saldo (Rp)": totals.saldoPeriode,
-  }
+  worksheet.columns = [
+    { header: "Bulan", key: "bulan", width: 20 },
+    { header: "Pemasukan (Rp)", key: "pemasukan", width: 20, style: { numFmt: "#,##0.00" } },
+    { header: "Pengeluaran (Rp)", key: "pengeluaran", width: 20, style: { numFmt: "#,##0.00" } },
+    { header: "Saldo (Rp)", key: "saldo", width: 20, style: { numFmt: "#,##0.00" } },
+  ]
 
-  const dataWithSummary = [...formattedRows, summaryRow]
+  rows.forEach((row) => {
+    worksheet.addRow({
+      bulan: `${row.bulan} ${row.tahun}`,
+      pemasukan: row.pemasukan,
+      pengeluaran: row.pengeluaran,
+      saldo: row.saldo,
+    })
+  })
 
-  const worksheet = XLSX.utils.json_to_sheet(dataWithSummary)
+  worksheet.addRow({
+    bulan: "TOTAL",
+    pemasukan: totals.totalPemasukan,
+    pengeluaran: totals.totalPengeluaran,
+    saldo: totals.saldoPeriode,
+  })
 
-  const cols = ["A", "B", "C", "D"]
-  const currencyFmt = '#.##0,00'
+  // Styling header
+  worksheet.getRow(1).font = { bold: true }
+  worksheet.getRow(rows.length + 2).font = { bold: true }
 
-  for (const col of cols.slice(1)) {
-    for (let i = 2; i <= formattedRows.length + 2; i++) {
-      const cell = worksheet[`${col}${i}`]
-      if (cell) {
-        cell.z = currencyFmt
-      }
-    }
-  }
-
-  const range = XLSX.utils.decode_range(worksheet["!ref"] || "A1")
-  for (let col = 0; col <= range.e.c; col++) {
-    const colLetter = XLSX.utils.encode_col(col)
-    let maxWidth = 12
-    for (let row = 0; row <= range.e.r; row++) {
-      const cell = worksheet[colLetter + (row + 1)]
-      if (cell && cell.v) {
-        const cellWidth = String(cell.v).length
-        if (cellWidth > maxWidth) maxWidth = cellWidth
-      }
-    }
-    worksheet["!cols"] = worksheet["!cols"] || []
-    worksheet["!cols"][col] = { wch: maxWidth + 2 }
-  }
-
-  const workbook = XLSX.utils.book_new()
-  XLSX.utils.book_append_sheet(workbook, worksheet, "Laporan Kas")
-  return XLSX.write(workbook, { type: "buffer", bookType: "xlsx" })
+  const buffer = await workbook.xlsx.writeBuffer()
+  return Buffer.from(buffer)
 }
 
-export function createLogAktivitasExcel(
+export async function createLogAktivitasExcel(
   logs: {
     tanggalWaktu: string
     petugas: string
@@ -83,41 +87,30 @@ export function createLogAktivitasExcel(
     aksi: string
     detail: string
   }[],
-): Buffer {
-  const formattedLogs = logs.map((log) => ({
-    "Tanggal & Waktu": new Date(log.tanggalWaktu),
-    Petugas: log.petugas,
-    Modul: log.modul,
-    Aksi: log.aksi,
-    Detail: log.detail,
-  }))
+): Promise<Buffer> {
+  const workbook = new ExcelJS.Workbook()
+  const worksheet = workbook.addWorksheet("Log Aktivitas")
 
-  const worksheet = XLSX.utils.json_to_sheet(formattedLogs)
+  worksheet.columns = [
+    { header: "Tanggal & Waktu", key: "tanggal", width: 25, style: { numFmt: "dd/mm/yyyy hh:mm:ss" } },
+    { header: "Petugas", key: "petugas", width: 20 },
+    { header: "Modul", key: "modul", width: 20 },
+    { header: "Aksi", key: "aksi", width: 15 },
+    { header: "Detail", key: "detail", width: 50 },
+  ]
 
-  for (let i = 2; i <= logs.length + 1; i++) {
-    const cell = worksheet[`A${i}`]
-    if (cell) {
-      cell.t = "d"
-      cell.z = "dd/mm/yyyy hh:mm:ss"
-    }
-  }
+  logs.forEach((log) => {
+    worksheet.addRow({
+      tanggal: new Date(log.tanggalWaktu),
+      petugas: escapeFormula(log.petugas),
+      modul: escapeFormula(log.modul),
+      aksi: escapeFormula(log.aksi),
+      detail: escapeFormula(log.detail),
+    })
+  })
 
-  const range = XLSX.utils.decode_range(worksheet["!ref"] || "A1")
-  for (let col = 0; col <= range.e.c; col++) {
-    const colLetter = XLSX.utils.encode_col(col)
-    let maxWidth = 12
-    for (let row = 0; row <= range.e.r; row++) {
-      const cell = worksheet[colLetter + (row + 1)]
-      if (cell && cell.v) {
-        const cellWidth = String(cell.v).length
-        if (cellWidth > maxWidth) maxWidth = cellWidth
-      }
-    }
-    worksheet["!cols"] = worksheet["!cols"] || []
-    worksheet["!cols"][col] = { wch: maxWidth + 2 }
-  }
+  worksheet.getRow(1).font = { bold: true }
 
-  const workbook = XLSX.utils.book_new()
-  XLSX.utils.book_append_sheet(workbook, worksheet, "Log Aktivitas")
-  return XLSX.write(workbook, { type: "buffer", bookType: "xlsx" })
+  const buffer = await workbook.xlsx.writeBuffer()
+  return Buffer.from(buffer)
 }

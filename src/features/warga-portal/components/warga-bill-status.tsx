@@ -9,13 +9,15 @@ interface WargaBillStatusProps {
 export function WargaBillStatus({ items }: WargaBillStatusProps) {
   return (
     <section className="space-y-2">
-      {items.map((item) => (
-        <AppCard key={`${item.kategori}-${item.nominal}`} className="p-3">
+      {items.map((item, index) => (
+        <AppCard key={item.transaksiId || `${item.kategori}-${item.nominal}-${index}`} className="p-3">
           <div className="flex items-start justify-between gap-2">
             <div>
               <p className="text-[13px] font-semibold text-kanvas-ink">{item.kategori}</p>
               <p className="text-[11px] text-kanvas-ink-4">
-                {item.tipeTagihan === "bulanan" ? "Iuran bulanan" : `Sekali bayar${item.jatuhTempoLabel ? ` · tempo ${item.jatuhTempoLabel}` : ""}`}
+                {item.tipeTagihan === "bulanan"
+                  ? `Iuran bulanan${item.periodeLabel ? ` · ${item.periodeLabel}` : ""}`
+                  : `Sekali bayar${item.periodeLabel ? ` · ${item.periodeLabel}` : ""}`}
               </p>
             </div>
 
