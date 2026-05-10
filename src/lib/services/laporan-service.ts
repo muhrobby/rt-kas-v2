@@ -40,11 +40,11 @@ export type LaporanResult = {
 }
 
 function getStartOfMonth(year: number, month: number) {
-  return new Date(year, month, 1)
+  return new Date(year, month - 1, 1)
 }
 
 function getEndOfMonth(year: number, month: number) {
-  return new Date(year, month + 1, 0, 23, 59, 59, 999)
+  return new Date(year, month, 0, 23, 59, 59, 999)
 }
 
 export async function getLaporanKeuangan(
@@ -88,14 +88,14 @@ export async function getLaporanKeuangan(
         continue
       }
       year = trx.tahunTagihan
-      monthNum = parseInt(trx.bulanTagihan, 10) - 1
+      monthNum = parseInt(trx.bulanTagihan, 10)
     } else {
       const trxDate = new Date(trx.waktuTransaksi)
       year = trxDate.getFullYear()
-      monthNum = trxDate.getMonth()
+      monthNum = trxDate.getMonth() + 1
     }
 
-    if (monthNum < 0 || monthNum > 11) {
+    if (monthNum < 1 || monthNum > 12) {
       continue
     }
 
@@ -103,7 +103,7 @@ export async function getLaporanKeuangan(
 
     if (!monthMap.has(key)) {
       monthMap.set(key, {
-        bulan: monthNames[monthNum],
+        bulan: monthNames[monthNum - 1],
         tahun: year,
         bulanNum: monthNum,
         pemasukan: 0,

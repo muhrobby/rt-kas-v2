@@ -8,6 +8,7 @@ interface ExportButtonsProps {
   onExportExcel?: () => void
   pdfDisabled?: boolean
   excelDisabled?: boolean
+  hidePdf?: boolean
 }
 
 export function ExportButtons({
@@ -16,6 +17,7 @@ export function ExportButtons({
   onExportExcel,
   pdfDisabled = false,
   excelDisabled = false,
+  hidePdf = false,
 }: ExportButtonsProps) {
   const { pushToast } = useToast()
 
@@ -32,20 +34,21 @@ export function ExportButtons({
       pushToast(`Export Excel ${contextLabel} akan aktif setelah backend selesai`, "warn")
     } else {
       onExportExcel()
-      pushToast(`Export Excel ${contextLabel} berhasil diunduh`, "ok")
     }
   }
 
   return (
     <div className="flex flex-wrap items-center gap-2">
-      <AppButton
-        variant="outline"
-        size="sm"
-        leading={<KanvasIcons.print size={12} />}
-        onClick={handleExportPDF}
-      >
-        Export PDF
-      </AppButton>
+      {!hidePdf && (
+        <AppButton
+          variant="outline"
+          size="sm"
+          leading={<KanvasIcons.print size={12} />}
+          onClick={handleExportPDF}
+        >
+          Export PDF
+        </AppButton>
+      )}
       <AppButton
         variant="outline"
         size="sm"

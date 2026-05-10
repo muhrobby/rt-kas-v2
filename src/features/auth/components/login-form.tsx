@@ -13,11 +13,6 @@ function normalizePhone(raw: string) {
   return `0${digits}`
 }
 
-function toLegacy62(phone: string) {
-  if (phone.startsWith("0")) return `62${phone.slice(1)}`
-  return phone
-}
-
 export function LoginForm() {
   const router = useRouter()
   const [phone, setPhone] = useState("")
@@ -50,24 +45,9 @@ export function LoginForm() {
       })
 
       if (!response.ok) {
-        // Backward compatibility for accounts previously stored as 62...
-        const legacyResponse = await fetch("/api/auth/sign-in/username", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            username: toLegacy62(normalized),
-            password,
-            rememberMe: true,
-          }),
-        })
-
-        if (!legacyResponse.ok) {
-          const payload = (await legacyResponse.json().catch(() => null)) as { message?: string } | null
-          setError(payload?.message ?? "Login gagal. Periksa nomor telepon/password.")
-          return
-        }
+        const payload = (await response.json().catch(() => null)) as { message?: string } | null
+        setError(payload?.message ?? "Login gagal. Periksa nomor telepon/password.")
+        return
       }
 
       router.replace("/")

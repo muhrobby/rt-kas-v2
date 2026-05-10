@@ -15,9 +15,9 @@ import { LaporanDetailModal } from "@/features/admin-laporan/components/laporan-
 const PAGE_SIZE = 6
 
 export function AdminLaporanView() {
-  const [year, setYear] = useState(2026)
-  const [startMonth, setStartMonth] = useState(0)
-  const [endMonth, setEndMonth] = useState(3)
+  const [year, setYear] = useState(() => new Date().getFullYear())
+  const [startMonth, setStartMonth] = useState(() => 1)
+  const [endMonth, setEndMonth] = useState(() => new Date().getMonth() + 1)
   const [saldoAwal, setSaldoAwal] = useState(0)
   const [currentPage, setCurrentPage] = useState(1)
   const [laporanData, setLaporanData] = useState<LaporanResult | null>(null)
@@ -128,8 +128,8 @@ export function AdminLaporanView() {
         endMonth={endMonth}
         saldoAwal={saldoAwal}
         onYearChange={(val) => { setYear(val); setCurrentPage(1) }}
-        onStartMonthChange={(value) => { setStartMonth(Math.max(0, Math.min(11, value))); setCurrentPage(1) }}
-        onEndMonthChange={(value) => { setEndMonth(Math.max(0, Math.min(11, value))); setCurrentPage(1) }}
+        onStartMonthChange={(value) => { setStartMonth(Math.max(1, Math.min(12, value))); setCurrentPage(1) }}
+        onEndMonthChange={(value) => { setEndMonth(Math.max(1, Math.min(12, value))); setCurrentPage(1) }}
         onSaldoAwalChange={(val) => { setSaldoAwal(val); setCurrentPage(1) }}
       />
 
