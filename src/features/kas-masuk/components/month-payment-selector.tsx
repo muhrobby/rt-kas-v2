@@ -48,7 +48,7 @@ export function MonthPaymentSelector({
             onClick={() => onToggle(monthValue)}
             className="rounded-md px-1 py-1.5 text-[11px] font-semibold transition"
             style={{
-              background: active ? "var(--kanvas-terra)" : paid ? "var(--kanvas-line-2)" : notEligible ? "var(--kanvas-bg-2)" : "transparent",
+              background: active ? "var(--kanvas-terra)" : paid ? "var(--kanvas-line-2)" : notEligible ? "var(--kanvas-line-2)" : "transparent",
               color: active ? "#ffffff" : paid ? "var(--kanvas-ink-4)" : notEligible ? "var(--kanvas-ink-3)" : "var(--kanvas-ink-2)",
               textDecoration: paid ? "line-through" : "none",
               opacity: disabled ? 0.55 : 1,

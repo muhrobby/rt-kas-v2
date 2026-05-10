@@ -6,7 +6,6 @@ import { ExportButtons } from "@/components/shared/export-buttons"
 import { paginateItems } from "@/lib/pagination"
 import { getLogAktivitasAction } from "@/lib/actions/log-aktivitas"
 import type { LogAktivitas } from "@/types/rt-kas"
-import type { PdfLogData } from "@/types/pdf-log"
 
 import { LogFilters } from "@/features/log-aktivitas/components/log-filters"
 import { LogTable } from "@/features/log-aktivitas/components/log-table"
@@ -97,28 +96,21 @@ export function LogAktivitasView() {
     return result
   }, [filteredRows, currentPage])
 
-  const handleExportPDF = useCallback(() => {
-    if (!filteredRows.length) return
-    const pdfData: PdfLogData = {
-      rows: filteredRows,
-      totalItems: filteredRows.length,
-      filters: {
-        modul: filters.modul === "semua" ? undefined : filters.modul,
-        aksi: filters.aksi === "semua" ? undefined : filters.aksi,
-        petugas: filters.petugas === "semua" ? undefined : filters.petugas,
-        tanggal: filters.tanggal || undefined,
-        query: filters.query || undefined,
-      },
-      generatedAt: new Date().toISOString(),
-    }
-    console.log("PDF Log data:", pdfData)
-  }, [filteredRows, filters])
+  const handleExportExcel = useCallback(() => {
+    const params = new URLSearchParams()
+    if (filters.modul !== "semua") params.append("modul", filters.modul)
+    if (filters.aksi !== "semua") params.append("aksi", filters.aksi)
+    if (filters.petugas !== "semua") params.append("petugas", filters.petugas)
+    if (filters.tanggal) params.append("tanggal", filters.tanggal)
+    if (filters.query) params.append("query", filters.query)
+    window.open(`/api/export/log-aktivitas?${params.toString()}`, "_blank")
+  }, [filters])
 
   return (
     <main className="space-y-3.5 p-6 md:p-7">
       <div className="flex items-center justify-between gap-2">
         <p className="text-[13px] text-kanvas-ink-3">Riwayat aktivitas pengurus dan transaksi</p>
-        <ExportButtons contextLabel="log aktivitas" onExportPDF={handleExportPDF} />
+        <ExportButtons contextLabel="log aktivitas" onExportExcel={handleExportExcel} hidePdf />
       </div>
 
       <LogFilters

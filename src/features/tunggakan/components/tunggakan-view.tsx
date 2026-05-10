@@ -33,8 +33,14 @@ function mapBackendToTunggakanWarga(data: BackendTunggakanSummary["data"][number
 
 export function TunggakanView() {
   const [kategori, setKategori] = useState("semua")
-  const [periodeStart, setPeriodeStart] = useState("2026-04")
-  const [periodeEnd, setPeriodeEnd] = useState("2026-04")
+  const [periodeStart, setPeriodeStart] = useState(() => {
+    const d = new Date()
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`
+  })
+  const [periodeEnd, setPeriodeEnd] = useState(() => {
+    const d = new Date()
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`
+  })
   const [selectedDetail, setSelectedDetail] = useState<TunggakanWarga | null>(null)
   const [detailOpen, setDetailOpen] = useState(false)
   const [currentPage, setCurrentPage] = useState(1)

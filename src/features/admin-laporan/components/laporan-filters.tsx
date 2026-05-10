@@ -52,7 +52,7 @@ export function LaporanFilters({
   const monthOptions = useMemo(
     () =>
       MONTH_NAMES.map((name, index) => ({
-        id: String(index),
+        id: String(index + 1),
         label: name,
       })),
     [],

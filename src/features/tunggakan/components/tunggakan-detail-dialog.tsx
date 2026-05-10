@@ -97,9 +97,6 @@ export function TunggakanDetailDialog({ open, data, onClose }: TunggakanDetailDi
           <AppButton variant="outline" onClick={onClose}>
             Tutup
           </AppButton>
-          <AppButton variant="primary" leading={<KanvasIcons.whatsapp size={13} />}>
-            WhatsApp Tagihan
-          </AppButton>
         </div>
       </div>
     </AppModal>

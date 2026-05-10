@@ -60,7 +60,7 @@ export function LaporanDetailModal({ open, onClose, data }: LaporanDetailModalPr
                 <div className="mt-2 border-t border-kanvas-line pt-2">
                   <div className="flex justify-between text-[13px] font-semibold">
                     <span>Total Pengeluaran</span>
-                    <span className="text-kanvas-error">{formatRupiah(data.pengeluaran)}</span>
+                    <span className="text-kanvas-danger">{formatRupiah(data.pengeluaran)}</span>
                   </div>
                 </div>
               </div>

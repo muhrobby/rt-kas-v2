@@ -37,6 +37,11 @@ export function KasKeluarFormModal({
   const [values, setValues] = useState<KasKeluarFormValues>(initialValues)
   const [errors, setErrors] = useState({ kategoriId: "", nominal: "", tanggal: "" })
 
+  const todayISO = (() => {
+    const d = new Date()
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`
+  })()
+
   const updateValue = <K extends keyof KasKeluarFormValues>(key: K, value: KasKeluarFormValues[K]) => {
     setValues((state) => ({ ...state, [key]: value }))
   }
@@ -114,6 +119,8 @@ export function KasKeluarFormModal({
             <AppField label="Tanggal Transaksi">
               <AppInput
                 type="date"
+                min="2000-01-01"
+                max={todayISO}
                 value={values.tanggal}
                 onChange={(value) => updateValue("tanggal", value)}
               />
