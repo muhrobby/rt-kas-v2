@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 
-import { BarsInOutChart, AppCard, AppPill } from "@/components/kanvas"
+import { BarsInOutChart, AppButton, AppCard, AppPill } from "@/components/kanvas"
 import { formatRupiah } from "@/lib/format/currency"
 import type { WargaLaporanTransparansi } from "@/lib/services/warga-portal-service"
 
@@ -32,7 +32,7 @@ export function WargaLaporanView({ data }: WargaLaporanViewProps) {
         </AppCard>
         <AppCard className="p-3">
           <p className="text-[10px] font-semibold tracking-[0.6px] text-kanvas-ink-4 uppercase">Selisih YTD</p>
-          <p className="mt-1 text-[22px] text-kanvas-info">{ytdLabel}</p>
+          <p className={`mt-1 text-[22px] ${ytdDelta >= 0 ? "text-kanvas-success" : "text-kanvas-danger"}`}>{ytdLabel}</p>
         </AppCard>
       </section>
 
@@ -58,16 +58,16 @@ export function WargaLaporanView({ data }: WargaLaporanViewProps) {
                     <AppPill tone="danger">-{formatRupiah(row.pengeluaran).replace("Rp ", "")}</AppPill>
                   </div>
                 </div>
-                <button
-                  type="button"
+                <AppButton
+                  variant="outline"
+                  size="sm"
                   onClick={() => {
                     setSelectedMonth(row.bulan)
                     setDrilldownOpen(true)
                   }}
-                  className="shrink-0 rounded px-2 py-1.5 text-[11px] font-semibold text-kanvas-terra"
                 >
                   Rincian
-                </button>
+                </AppButton>
               </div>
             </AppCard>
           ))}

@@ -1,12 +1,13 @@
 "use client"
 
-import { useEffect, useMemo, useState, useTransition } from "react"
+import { useMemo, useState, useTransition } from "react"
 
 import { useToast } from "@/components/kanvas"
 import { paginateItems } from "@/lib/pagination"
 import { createWargaFromForm, deleteWargaById, fetchWargaList, updateWargaFromForm, updateWargaPengurusFromTable } from "@/features/warga-management/lib/warga-actions-client"
 
 import { DeleteWargaDialog } from "@/features/warga-management/components/delete-warga-dialog"
+import { TogglePengurusDialog } from "@/features/warga-management/components/toggle-pengurus-dialog"
 import { WargaFormModal } from "@/features/warga-management/components/warga-form-modal"
 import { TemporaryPasswordDialog } from "@/features/warga-management/components/temporary-password-dialog"
 import { WargaTable } from "@/features/warga-management/components/warga-table"
@@ -40,10 +41,15 @@ function mapWargaToFormValues(warga: Warga): WargaFormValues {
   }
 }
 
-export function WargaManagementView() {
+interface WargaManagementViewProps {
+  initialData: Warga[]
+  initialError: string
+}
+
+export function WargaManagementView({ initialData, initialError }: WargaManagementViewProps) {
   const { pushToast } = useToast()
   const [filters, setFilters] = useState<WargaFilters>(defaultFilters)
-  const [wargaData, setWargaData] = useState<Warga[]>([])
+  const [wargaData, setWargaData] = useState<Warga[]>(initialData)
   const [formOpen, setFormOpen] = useState(false)
   const [formMode, setFormMode] = useState<WargaFormMode>("add")
   const [selectedWarga, setSelectedWarga] = useState<Warga | null>(null)
@@ -51,22 +57,12 @@ export function WargaManagementView() {
   const [currentPage, setCurrentPage] = useState(1)
   const [serverError, setServerError] = useState("")
   const [fieldErrors, setFieldErrors] = useState<Partial<Record<keyof WargaFormValues, string[]>>>({})
-  const [isLoading, startTransition] = useTransition()
+  const [, startTransition] = useTransition()
   const [isDeleting, setIsDeleting] = useState(false)
   const [updatingPengurusId, setUpdatingPengurusId] = useState<string | null>(null)
+  const [togglePengurusTarget, setTogglePengurusTarget] = useState<Warga | null>(null)
+  const [isTogglingPengurus, setIsTogglingPengurus] = useState(false)
   const [tempPasswordData, setTempPasswordData] = useState<{ nama: string, telp: string, password?: string } | null>(null)
-
-  useEffect(() => {
-    startTransition(async () => {
-      try {
-        const rows = await fetchWargaList({})
-        setWargaData(rows)
-      } catch (error) {
-        const message = error instanceof Error ? error.message : "Gagal memuat data warga"
-        setServerError(message)
-      }
-    })
-  }, [])
 
   const filteredWarga = useMemo(() => filterWarga(wargaData, filters), [wargaData, filters])
 
@@ -178,26 +174,46 @@ export function WargaManagementView() {
     setSelectedWarga(null)
   }
 
-  const handleTogglePengurus = async (warga: Warga) => {
+  const handleTogglePengurus = (warga: Warga) => {
+    setTogglePengurusTarget(warga)
+  }
+
+  const handleTogglePengurusConfirm = async (warga: Warga, role: string) => {
+    setIsTogglingPengurus(true)
     setUpdatingPengurusId(warga.id)
     const nextIsPengurus = !warga.isPengurus
-    const nextRolePengurus = nextIsPengurus ? warga.rolePengurus ?? "Pengurus" : undefined
     const result = await updateWargaPengurusFromTable(Number(warga.id), {
       isPengurus: nextIsPengurus,
-      rolePengurus: nextRolePengurus,
+      rolePengurus: nextIsPengurus ? (role.trim() || "Pengurus") : undefined,
     })
     setUpdatingPengurusId(null)
+    setIsTogglingPengurus(false)
     if (!result.ok) {
       pushToast(result.error || "Gagal mengubah status pengurus", "error")
       return
     }
+    setTogglePengurusTarget(null)
     await reloadList()
     pushToast(nextIsPengurus ? `${warga.nama} dijadikan pengurus` : `${warga.nama} bukan lagi pengurus`)
   }
 
   return (
     <main className="space-y-3.5 p-6 md:p-7">
-      {isLoading ? <p className="text-[12px] text-kanvas-ink-3">Memuat data warga...</p> : null}
+      {initialError ? (
+        <div className="flex items-center justify-between rounded-lg border border-kanvas-danger-soft bg-kanvas-danger-soft px-4 py-3 text-[12px] text-kanvas-danger">
+          <span>{initialError}</span>
+          <button
+            type="button"
+            className="ml-3 font-semibold underline"
+            onClick={() => startTransition(async () => {
+              const rows = await fetchWargaList({})
+              setWargaData(rows)
+            })}
+          >
+            Coba lagi
+          </button>
+        </div>
+      ) : null}
 
       <WargaToolbar
         query={filters.query}
@@ -255,6 +271,15 @@ export function WargaManagementView() {
         wargaTelp={tempPasswordData?.telp ?? ""}
         password={tempPasswordData?.password ?? ""}
         onClose={() => setTempPasswordData(null)}
+      />
+
+      <TogglePengurusDialog
+        key={togglePengurusTarget?.id ?? "none"}
+        open={!!togglePengurusTarget}
+        warga={togglePengurusTarget}
+        onClose={() => setTogglePengurusTarget(null)}
+        onConfirm={handleTogglePengurusConfirm}
+        submitting={isTogglingPengurus}
       />
     </main>
   )

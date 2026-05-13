@@ -180,8 +180,15 @@ export function KasMasukFormModal({
                   <AppInput
                     type="number"
                     min={2020}
+                    max={new Date().getFullYear() + 1}
                     value={String(values.tahun)}
-                    onChange={(value) => updateYear(Number(value || new Date().getFullYear()))}
+                    onChange={(value) => {
+                      const currentYear = new Date().getFullYear()
+                      const parsed = Number(value)
+                      const num = Number.isFinite(parsed) ? parsed : currentYear
+                      const maxYear = currentYear + 1
+                      updateYear(Math.min(Math.max(num, 2020), maxYear))
+                    }}
                   />
                 </AppField>
                 <AppField label="Bulan Dipilih">

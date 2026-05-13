@@ -1,11 +1,13 @@
 "use client"
 
 import { useMemo, useState, useTransition } from "react"
+import { useRouter } from "next/navigation"
 
 import { AppButton, AppCard, AppPill, KanvasIcons } from "@/components/kanvas"
 import type { PdfBranding } from "@/lib/branding/format-branding"
 import { formatRupiah } from "@/lib/format/currency"
 import { getMyKuitansiAction } from "@/lib/actions/warga-portal"
+import { BULAN } from "@/lib/constants/months"
 import type { WargaHistoryPeriod } from "@/types/rt-kas"
 
 import { KuitansiDialog } from "@/features/warga-portal/components/kuitansi-dialog"
@@ -24,14 +26,37 @@ interface KuitansiSelection {
 interface WargaRiwayatViewProps {
   periods: WargaHistoryPeriod[]
   error?: string | null
+  filterBulan?: number
+  filterTahun?: number
 }
 
-export function WargaRiwayatView({ periods, error }: WargaRiwayatViewProps) {
+const CURRENT_YEAR = new Date().getFullYear()
+const YEAR_OPTIONS = Array.from({ length: CURRENT_YEAR - 2019 }, (_, i) => CURRENT_YEAR - i)
+
+export function WargaRiwayatView({ periods, error, filterBulan, filterTahun }: WargaRiwayatViewProps) {
+  const router = useRouter()
   const [selectedPeriod, setSelectedPeriod] = useState(periods[0]?.periode ?? "")
   const [selectedReceipt, setSelectedReceipt] = useState<KuitansiSelection | null>(null)
   const [receiptOpen, setReceiptOpen] = useState(false)
   const [receiptError, setReceiptError] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
+
+  // Toolbar filter state (controlled, not yet applied)
+  const [toolbarBulan, setToolbarBulan] = useState<string>(filterBulan ? String(filterBulan) : "")
+  const [toolbarTahun, setToolbarTahun] = useState<string>(filterTahun ? String(filterTahun) : "")
+
+  const canSubmit = toolbarBulan !== "" && toolbarTahun !== ""
+
+  const handleFilter = () => {
+    if (!canSubmit) return
+    router.push(`/warga/riwayat?bulan=${toolbarBulan}&tahun=${toolbarTahun}`)
+  }
+
+  const handleReset = () => {
+    setToolbarBulan("")
+    setToolbarTahun("")
+    router.push("/warga/riwayat")
+  }
 
   const activePeriod = useMemo(
     () => periods.find((period) => period.periode === selectedPeriod) ?? periods[0],
@@ -44,6 +69,44 @@ export function WargaRiwayatView({ periods, error }: WargaRiwayatViewProps) {
         <h1 className="text-[24px] text-kanvas-ink">Riwayat Pembayaran</h1>
         <p className="text-[12px] text-kanvas-ink-3">Pilih periode untuk melihat status pembayaran iuran.</p>
       </section>
+
+      {/* Filter toolbar */}
+      <div className="flex flex-wrap items-end gap-2 rounded-xl border border-kanvas-line bg-white p-3">
+        <div>
+          <p className="mb-1 text-[11px] font-semibold tracking-[0.5px] text-kanvas-ink-4 uppercase">Bulan</p>
+          <select
+            value={toolbarBulan}
+            onChange={(e) => setToolbarBulan(e.target.value)}
+            className="h-[38px] rounded-lg border border-kanvas-line bg-white px-2.5 text-[13px] text-kanvas-ink"
+          >
+            <option value="">Pilih bulan</option>
+            {BULAN.map((nama, i) => (
+              <option key={i + 1} value={String(i + 1)}>{nama}</option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <p className="mb-1 text-[11px] font-semibold tracking-[0.5px] text-kanvas-ink-4 uppercase">Tahun</p>
+          <select
+            value={toolbarTahun}
+            onChange={(e) => setToolbarTahun(e.target.value)}
+            className="h-[38px] rounded-lg border border-kanvas-line bg-white px-2.5 text-[13px] text-kanvas-ink"
+          >
+            <option value="">Pilih tahun</option>
+            {YEAR_OPTIONS.map((y) => (
+              <option key={y} value={String(y)}>{y}</option>
+            ))}
+          </select>
+        </div>
+        <AppButton variant="primary" size="sm" onClick={handleFilter} disabled={!canSubmit}>
+          Lihat
+        </AppButton>
+        {(filterBulan || filterTahun) ? (
+          <AppButton variant="ghost" size="sm" onClick={handleReset}>
+            Reset
+          </AppButton>
+        ) : null}
+      </div>
 
       <div className="flex gap-1.5 overflow-x-auto pb-2">
         {periods.map((period) => {
@@ -68,7 +131,7 @@ export function WargaRiwayatView({ periods, error }: WargaRiwayatViewProps) {
 
       <section className="space-y-2">
         {error ? (
-          <AppCard className="border-dashed p-3 text-[12px] text-destructive">
+          <AppCard className="border-dashed p-3 text-[12px] text-kanvas-danger">
             {error}
           </AppCard>
         ) : null}
@@ -133,7 +196,7 @@ export function WargaRiwayatView({ periods, error }: WargaRiwayatViewProps) {
       </section>
 
       {receiptError ? (
-        <AppCard className="border-dashed p-3 text-[12px] text-destructive">
+        <AppCard className="border-dashed p-3 text-[12px] text-kanvas-danger">
           {receiptError}
         </AppCard>
       ) : null}

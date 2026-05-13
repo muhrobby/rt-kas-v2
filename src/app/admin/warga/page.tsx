@@ -1,5 +1,38 @@
+import { listWargaAction } from "@/lib/actions/warga"
 import { WargaManagementView } from "@/features/warga-management/components/warga-management-view"
+import type { Warga } from "@/types/rt-kas"
 
-export default function AdminWargaPage() {
-  return <WargaManagementView />
+function toUiWarga(row: {
+  id: number; nama: string; blok: string; telp: string
+  statusHunian: "tetap" | "kontrak"; jumlahAnggota: number
+  tglBatasDomisili: string | null; tglPindah: string | null
+  isPengurus: boolean; rolePengurus: string | null; createdAt: Date
+}): Warga {
+  return {
+    id: String(row.id),
+    nama: row.nama,
+    blok: row.blok,
+    telp: row.telp,
+    statusHunian: row.statusHunian,
+    domisili: row.createdAt ? new Date(row.createdAt).toISOString().slice(0, 10) : "",
+    pindah: row.tglBatasDomisili ?? undefined,
+    isPengurus: row.isPengurus,
+    rolePengurus: row.rolePengurus ?? undefined,
+    jumlahAnggota: row.jumlahAnggota,
+  }
+}
+
+export default async function AdminWargaPage() {
+  let initialData: Warga[] = []
+  let initialError = ""
+
+  try {
+    const result = await listWargaAction({})
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    initialData = result.data.map((row) => toUiWarga(row as any))
+  } catch {
+    initialError = "Gagal memuat data warga. Coba muat ulang halaman."
+  }
+
+  return <WargaManagementView initialData={initialData} initialError={initialError} />
 }

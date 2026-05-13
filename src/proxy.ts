@@ -6,11 +6,21 @@ import { eq } from "drizzle-orm";
 
 const PUBLIC_PATHS = ["/login", "/api/auth", "/unauthorized"];
 
+function withPathnameRequestHeader(request: NextRequest, pathname: string) {
+  const requestHeaders = new Headers(request.headers)
+  requestHeaders.set("x-pathname", pathname)
+  return NextResponse.next({
+    request: {
+      headers: requestHeaders,
+    },
+  })
+}
+
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   if (PUBLIC_PATHS.some((p) => pathname.startsWith(p))) {
-    return NextResponse.next();
+    return withPathnameRequestHeader(request, pathname)
   }
 
   let session: Awaited<ReturnType<typeof auth.api.getSession>> | null = null
@@ -22,14 +32,14 @@ export async function proxy(request: NextRequest) {
     if (pathname.startsWith("/admin") || pathname.startsWith("/warga") || pathname === "/") {
       return NextResponse.redirect(new URL("/login", request.url))
     }
-    return NextResponse.next()
+    return withPathnameRequestHeader(request, pathname)
   }
 
   if (!session) {
     if (pathname.startsWith("/admin") || pathname.startsWith("/warga")) {
       return NextResponse.redirect(new URL("/login", request.url));
     }
-    return NextResponse.next();
+    return withPathnameRequestHeader(request, pathname)
   }
 
   const [sessionUser] = await db
@@ -49,10 +59,10 @@ export async function proxy(request: NextRequest) {
 
   // Force change password redirect
   if (sessionUser.mustChangePassword) {
-    const changePasswordPath = sessionUser.role === "admin" 
-      ? "/admin/change-password" 
+    const changePasswordPath = sessionUser.role === "admin"
+      ? "/admin/change-password"
       : "/warga/change-password";
-    
+
     // Don't redirect if already on change-password page
     if (pathname !== changePasswordPath) {
       return NextResponse.redirect(new URL(changePasswordPath, request.url));
@@ -77,7 +87,7 @@ export async function proxy(request: NextRequest) {
     }
   }
 
-  return NextResponse.next();
+  return withPathnameRequestHeader(request, pathname)
 }
 
 export const config = {

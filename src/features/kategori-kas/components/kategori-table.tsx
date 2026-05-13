@@ -45,7 +45,7 @@ export function KategoriTable({ kategori, onEdit, onDelete, pagination }: Katego
               <div className="mt-2 flex flex-wrap items-center gap-1.5">
                 <AppPill tone={toneForArus(item.jenisArus)}>{item.jenisArus === "masuk" ? "Masuk" : "Keluar"}</AppPill>
                 <AppPill tone="neutral">{labelTipe(item.tipeTagihan)}</AppPill>
-                <p className="text-[11px] text-kanvas-ink-4">Dibuat {item.createdAt ?? "22 Apr 2026"}</p>
+                <p className="text-[11px] text-kanvas-ink-4">Dibuat {item.createdAt ?? "—"}</p>
               </div>
 
               <div className="mt-3 flex flex-wrap justify-end gap-2">
@@ -61,7 +61,7 @@ export function KategoriTable({ kategori, onEdit, onDelete, pagination }: Katego
                 <button
                   type="button"
                   onClick={() => onDelete(item)}
-                  className="inline-flex items-center gap-1 rounded-md border border-kanvas-danger-soft bg-kanvas-info-soft px-2.5 py-1.5 text-xs font-semibold text-kanvas-danger"
+                  className="inline-flex items-center gap-1 rounded-md border border-kanvas-danger-soft bg-kanvas-danger-soft px-2.5 py-1.5 text-xs font-semibold text-kanvas-danger"
                   aria-label={`Hapus ${item.nama}`}
                 >
                   <KanvasIcons.trash size={12} />
@@ -109,7 +109,7 @@ export function KategoriTable({ kategori, onEdit, onDelete, pagination }: Katego
 
                     <p className="font-medium text-kanvas-ink">{formatRupiah(item.nominalDefault)}</p>
 
-                    <p className="text-[12px] text-kanvas-ink-3">{item.createdAt ?? "22 Apr 2026"}</p>
+                    <p className="text-[12px] text-kanvas-ink-3">{item.createdAt ?? "—"}</p>
 
                     <div className="flex justify-end gap-1">
                       <button

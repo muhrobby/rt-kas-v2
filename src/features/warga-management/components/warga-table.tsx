@@ -76,8 +76,9 @@ function WargaRow({
           <button
             type="button"
             onClick={() => onTogglePengurus(warga)}
-            className="inline-flex items-center gap-1"
+            className="inline-flex cursor-pointer items-center gap-1 rounded-md ring-offset-1 hover:ring-2 hover:ring-kanvas-line focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-kanvas-terra"
             aria-label={`Toggle pengurus ${warga.nama}`}
+            aria-pressed={warga.isPengurus}
             disabled={updatingPengurusId === warga.id}
           >
             {updatingPengurusId === warga.id ? (

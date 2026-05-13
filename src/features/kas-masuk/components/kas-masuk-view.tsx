@@ -249,7 +249,7 @@ export function KasMasukView() {
         }}
       />
 
-      {receiptError ? <AppCard className="border-dashed p-3 text-[12px] text-destructive">{receiptError}</AppCard> : null}
+      {receiptError ? <AppCard className="border-dashed p-3 text-[12px] text-kanvas-danger">{receiptError}</AppCard> : null}
 
       <KuitansiDialog
         open={receiptOpen}

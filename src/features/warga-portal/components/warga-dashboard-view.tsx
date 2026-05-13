@@ -51,14 +51,22 @@ export function WargaDashboardView({ data }: WargaDashboardViewProps) {
         <WargaBillStatus items={data.billStatusCurrent} />
       </section>
 
-      <AppCard className="flex items-start gap-2 border-dashed bg-kanvas-paper-2 p-3.5">
-        <KanvasIcons.alert size={16} />
-        <p className="text-[12px] leading-relaxed text-kanvas-ink-3">
-          {data.contractWarning.show
-            ? data.contractWarning.message
-            : "Hubungi Bendahara untuk pembayaran tunai atau transfer. Bukti bayar akan muncul di menu Riwayat."}
-        </p>
-      </AppCard>
+      {data.contractWarning.show ? (
+        <AppCard className="flex items-start gap-2.5 border-kanvas-warning bg-kanvas-warning-soft p-3.5">
+          <KanvasIcons.alert size={16} className="mt-0.5 shrink-0 text-kanvas-warning" strokeWidth={2} />
+          <div>
+            <p className="text-[12px] font-semibold text-kanvas-warning">Kontrak akan berakhir</p>
+            <p className="mt-0.5 text-[12px] leading-relaxed text-kanvas-ink-2">{data.contractWarning.message}</p>
+          </div>
+        </AppCard>
+      ) : (
+        <AppCard className="flex items-start gap-2 border-dashed bg-kanvas-paper-2 p-3.5">
+          <KanvasIcons.alert size={16} />
+          <p className="text-[12px] leading-relaxed text-kanvas-ink-3">
+            Hubungi Bendahara untuk pembayaran tunai atau transfer. Bukti bayar akan muncul di menu Riwayat.
+          </p>
+        </AppCard>
+      )}
 
       <Link href="/warga/riwayat" className="inline-flex items-center gap-1 text-[12px] font-semibold text-kanvas-terra">
         Lihat riwayat pembayaran

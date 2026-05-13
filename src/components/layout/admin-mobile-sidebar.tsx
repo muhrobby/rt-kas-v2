@@ -1,20 +1,19 @@
 "use client"
 
-import { useEffect, useState } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 
 import { AppPill, KanvasIcons } from "@/components/kanvas"
 import { adminNavItems } from "@/lib/constants/nav"
 import { formatRupiah } from "@/lib/format/currency"
-import { getDashboardSummaryAction } from "@/lib/actions/dashboard"
-import { useTunggakanCount } from "@/hooks/use-tunggakan-count"
 import type { AppBranding } from "@/lib/branding/format-branding"
 
 interface AdminMobileSidebarProps {
   branding: AppBranding
   open: boolean
   onClose: () => void
+  saldoKas: number | null
+  tunggakanCount: number | null
 }
 
 const iconMap = {
@@ -28,17 +27,9 @@ const iconMap = {
   gear: KanvasIcons.gear,
 } as const
 
-export function AdminMobileSidebar({ branding, open, onClose }: AdminMobileSidebarProps) {
+export function AdminMobileSidebar({ branding, open, onClose, saldoKas, tunggakanCount }: AdminMobileSidebarProps) {
   const pathname = usePathname()
-  const tunggakanCount = useTunggakanCount()
-  const [saldoKas, setSaldoKas] = useState<number | null>(null)
   const brandInitial = branding.appName.trim().charAt(0).toUpperCase() || "K"
-
-  useEffect(() => {
-    getDashboardSummaryAction().then((data) => {
-      setSaldoKas(data.saldoKas)
-    })
-  }, [])
 
   return (
     <div className={`fixed inset-0 z-50 lg:hidden ${open ? "" : "pointer-events-none"}`} aria-hidden={!open}>
