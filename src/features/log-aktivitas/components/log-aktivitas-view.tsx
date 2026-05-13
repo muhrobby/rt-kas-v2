@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react"
 
 import { ExportButtons } from "@/components/shared/export-buttons"
 import { paginateItems } from "@/lib/pagination"
-import { getLogAktivitasAction } from "@/lib/actions/log-aktivitas"
+import { getLogAktivitasAction, getLogFiltersAction } from "@/lib/actions/log-aktivitas"
 import type { LogAktivitas } from "@/types/rt-kas"
 
 import { LogFilters } from "@/features/log-aktivitas/components/log-filters"
@@ -21,15 +21,26 @@ const initialFilters: LogFilterState = {
   query: "",
 }
 
-const STATIC_MODUL_OPTIONS = ["Kas Masuk", "Kas Keluar", "Warga", "Kategori", "Login", "Pengaturan"]
-const STATIC_AKSI_OPTIONS = ["tambah", "edit", "hapus", "login", "logout"]
-
 export function LogAktivitasView() {
   const [filters, setFilters] = useState<LogFilterState>(initialFilters)
   const [currentPage, setCurrentPage] = useState(1)
   const [logData, setLogData] = useState<{ data: LogAktivitas[]; total: number } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [modulOptions, setModulOptions] = useState<string[]>([])
+  const [aksiOptions, setAksiOptions] = useState<string[]>([])
+  const [petugasOptions, setPetugasOptions] = useState<{ id: string; nama: string }[]>([])
+
+  // Fetch filter options once on mount
+  useEffect(() => {
+    getLogFiltersAction().then((result) => {
+      if (result.ok) {
+        setModulOptions(result.data.modul)
+        setAksiOptions(result.data.aksi)
+        setPetugasOptions(result.data.petugas)
+      }
+    })
+  }, [])
 
   useEffect(() => {
     let cancelled = false
@@ -115,9 +126,9 @@ export function LogAktivitasView() {
 
       <LogFilters
         filters={filters}
-        modulOptions={STATIC_MODUL_OPTIONS}
-        aksiOptions={STATIC_AKSI_OPTIONS}
-        petugasOptions={["semua"]}
+        modulOptions={modulOptions}
+        aksiOptions={aksiOptions}
+        petugasOptions={petugasOptions}
         onChange={(patch) => {
           setFilters((state) => ({ ...state, ...patch }))
           setCurrentPage(1)
@@ -130,7 +141,7 @@ export function LogAktivitasView() {
         </div>
       ) : error ? (
         <div className="flex items-center justify-center py-12">
-          <p className="text-[13px] text-red-500">{error}</p>
+          <p className="text-[13px] text-kanvas-danger">{error}</p>
         </div>
       ) : (
         <LogTable
