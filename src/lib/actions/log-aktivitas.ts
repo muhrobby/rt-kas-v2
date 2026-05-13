@@ -1,11 +1,22 @@
 "use server"
 
 import { requireAdmin } from "@/lib/auth/permissions"
-import { listLogAktivitasWithCount, type LogAktivitasFilters } from "@/lib/services/log-aktivitas-service"
+import { getLogFilters, listLogAktivitasWithCount, type LogAktivitasFilters } from "@/lib/services/log-aktivitas-service"
 
 type ActionResult<T> =
   | { ok: true; data: T }
   | { ok: false; error: string }
+
+export async function getLogFiltersAction(): Promise<ActionResult<Awaited<ReturnType<typeof getLogFilters>>>> {
+  try {
+    await requireAdmin()
+    const result = await getLogFilters()
+    return { ok: true, data: result }
+  } catch (error) {
+    if (error instanceof Error && error.message === "NEXT_REDIRECT") throw error
+    return { ok: false, error: "Gagal memuat filter." }
+  }
+}
 
 export async function getLogAktivitasAction(
   filter: LogAktivitasFilters = {},

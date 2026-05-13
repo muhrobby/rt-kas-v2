@@ -63,6 +63,13 @@ export function WargaShell({ branding, children, profile }: WargaShellProps) {
               <p className="max-w-[92px] truncate text-[11px] font-semibold text-kanvas-ink sm:max-w-none sm:text-[12px]">{me.nama}</p>
               <p className="text-[10px] text-kanvas-ink-4 sm:text-[10.5px]">Blok {me.blok}</p>
             </div>
+            <Link
+              href="/warga/change-password"
+              className="md:hidden rounded p-1 text-kanvas-ink-3"
+              aria-label="Ganti Password"
+            >
+              <KanvasIcons.shield size={14} />
+            </Link>
             <LogoutButton
               className="rounded p-1 text-kanvas-ink-3 disabled:cursor-not-allowed disabled:opacity-50"
               iconOnly

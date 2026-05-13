@@ -19,12 +19,22 @@ interface KuitansiDialogProps {
   open: boolean
   data: KuitansiData | null
   onClose: () => void
-  onDownloadPdf?: (data: KuitansiData) => void
+  onDownloadPdf?: (data: KuitansiData) => Promise<void> | void
 }
 
 export function KuitansiDialog({ open, data, onClose, onDownloadPdf }: KuitansiDialogProps) {
   const { pushToast } = useToast()
   const rtRwLabel = data?.branding?.rtRwLabel ?? "-"
+
+  const handleDownload = async () => {
+    if (!data || !onDownloadPdf) return
+    try {
+      await onDownloadPdf(data)
+      pushToast("PDF kuitansi berhasil diunduh", "ok")
+    } catch {
+      pushToast("Gagal membuat PDF kuitansi. Coba lagi.", "error")
+    }
+  }
 
   return (
     <AppModal open={open} onClose={onClose} width={460}>
@@ -64,15 +74,8 @@ export function KuitansiDialog({ open, data, onClose, onDownloadPdf }: KuitansiD
           <AppButton
             variant="primary"
             leading={<KanvasIcons.download size={13} />}
-            onClick={() => {
-              if (!data) return
-              if (onDownloadPdf) {
-                onDownloadPdf(data)
-                pushToast("PDF kuitansi berhasil diunduh", "ok")
-                return
-              }
-              pushToast("Download PDF akan aktif setelah backend/export selesai", "warn")
-            }}
+            onClick={handleDownload}
+            disabled={!onDownloadPdf}
           >
             Download PDF
           </AppButton>

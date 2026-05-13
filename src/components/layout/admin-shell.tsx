@@ -18,17 +18,25 @@ export interface AdminShellUser {
 interface AdminShellProps extends PropsWithChildren {
   branding: AppBranding
   user?: AdminShellUser
+  saldoKas?: number | null
+  tunggakanCount?: number | null
 }
 
-export function AdminShell({ branding, children, user }: AdminShellProps) {
+export function AdminShell({ branding, children, user, saldoKas = null, tunggakanCount = null }: AdminShellProps) {
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false)
 
   return (
     <div className="flex min-h-svh min-w-0 bg-kanvas-paper">
-      <AdminMobileSidebar branding={branding} open={mobileSidebarOpen} onClose={() => setMobileSidebarOpen(false)} />
+      <AdminMobileSidebar
+        branding={branding}
+        open={mobileSidebarOpen}
+        onClose={() => setMobileSidebarOpen(false)}
+        saldoKas={saldoKas}
+        tunggakanCount={tunggakanCount}
+      />
 
       <div className="hidden lg:flex">
-        <AdminSidebar branding={branding} />
+        <AdminSidebar branding={branding} saldoKas={saldoKas} tunggakanCount={tunggakanCount} />
       </div>
 
       <div className="flex min-w-0 flex-1 flex-col">

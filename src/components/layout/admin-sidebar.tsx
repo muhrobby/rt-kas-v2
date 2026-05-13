@@ -1,14 +1,11 @@
 "use client"
 
-import { useEffect, useState } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 
 import { AppPill, KanvasIcons } from "@/components/kanvas"
 import { adminNavItems } from "@/lib/constants/nav"
 import { formatRupiah } from "@/lib/format/currency"
-import { getDashboardSummaryAction } from "@/lib/actions/dashboard"
-import { useTunggakanCount } from "@/hooks/use-tunggakan-count"
 import type { AppBranding } from "@/lib/branding/format-branding"
 
 const iconMap = {
@@ -24,19 +21,13 @@ const iconMap = {
 
 interface AdminSidebarProps {
   branding: AppBranding
+  saldoKas: number | null
+  tunggakanCount: number | null
 }
 
-export function AdminSidebar({ branding }: AdminSidebarProps) {
+export function AdminSidebar({ branding, saldoKas, tunggakanCount }: AdminSidebarProps) {
   const pathname = usePathname()
-  const tunggakanCount = useTunggakanCount()
-  const [saldoKas, setSaldoKas] = useState<number | null>(null)
   const brandInitial = branding.appName.trim().charAt(0).toUpperCase() || "K"
-
-  useEffect(() => {
-    getDashboardSummaryAction().then((data) => {
-      setSaldoKas(data.saldoKas)
-    })
-  }, [])
 
   return (
     <aside className="sticky top-0 flex h-svh w-[220px] shrink-0 flex-col border-r border-kanvas-line bg-kanvas-paper-2 px-3.5 py-5 xl:w-[232px]">

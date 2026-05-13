@@ -8,7 +8,7 @@ interface LogFiltersProps {
   filters: LogFilterState
   modulOptions: string[]
   aksiOptions: string[]
-  petugasOptions: string[]
+  petugasOptions: { id: string; nama: string }[]
   onChange: (patch: Partial<LogFilterState>) => void
 }
 
@@ -24,9 +24,7 @@ export function LogFilters({ filters, modulOptions, aksiOptions, petugasOptions,
         >
           <option value="semua">Semua</option>
           {modulOptions.map((option) => (
-            <option key={option} value={option}>
-              {option}
-            </option>
+            <option key={option} value={option}>{option}</option>
           ))}
         </select>
       </label>
@@ -40,9 +38,7 @@ export function LogFilters({ filters, modulOptions, aksiOptions, petugasOptions,
         >
           <option value="semua">Semua</option>
           {aksiOptions.map((option) => (
-            <option key={option} value={option}>
-              {option}
-            </option>
+            <option key={option} value={option}>{option}</option>
           ))}
         </select>
       </label>
@@ -55,10 +51,8 @@ export function LogFilters({ filters, modulOptions, aksiOptions, petugasOptions,
           className="h-[42px] w-full rounded-lg border border-kanvas-line bg-white px-3 text-[13px] text-kanvas-ink"
         >
           <option value="semua">Semua</option>
-          {petugasOptions.map((option) => (
-            <option key={option} value={option}>
-              {option}
-            </option>
+          {petugasOptions.map((p) => (
+            <option key={p.id} value={p.id}>{p.nama}</option>
           ))}
         </select>
       </label>

@@ -94,6 +94,31 @@ export async function listLogAktivitas(
   return results
 }
 
+export type LogFiltersResult = {
+  modul: string[]
+  aksi: string[]
+  petugas: { id: string; nama: string }[]
+}
+
+export async function getLogFilters(): Promise<LogFiltersResult> {
+  const [modulRows, aksiRows, petugasRows] = await Promise.all([
+    db.selectDistinct({ modul: logAktivitas.modul }).from(logAktivitas).orderBy(logAktivitas.modul),
+    db.selectDistinct({ aksi: logAktivitas.aksi }).from(logAktivitas).orderBy(logAktivitas.aksi),
+    db
+      .select({ id: logAktivitas.userId, nama: user.name })
+      .from(logAktivitas)
+      .innerJoin(user, eq(user.id, logAktivitas.userId))
+      .groupBy(logAktivitas.userId, user.name)
+      .orderBy(user.name),
+  ])
+
+  return {
+    modul: modulRows.map((r) => r.modul),
+    aksi: aksiRows.map((r) => r.aksi),
+    petugas: petugasRows.map((r) => ({ id: r.id, nama: r.nama ?? r.id })),
+  }
+}
+
 export type LogAktivitasListResult = {
   data: LogAktivitas[]
   total: number

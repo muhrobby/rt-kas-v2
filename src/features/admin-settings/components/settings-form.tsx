@@ -56,17 +56,36 @@ export function SettingsForm({
   submitting = false,
 }: SettingsFormProps) {
   const [values, setValues] = useState<SettingsFormValues>(initialValues)
+  const [hexErrors, setHexErrors] = useState<Partial<Record<"primaryColor" | "secondaryColor" | "accentColor", string>>>({})
+
+  const HEX_REGEX = /^#[0-9A-Fa-f]{6}$/
 
   const updateField = <K extends keyof SettingsFormValues>(key: K, value: SettingsFormValues[K]) => {
     setValues((state) => ({ ...state, [key]: value }))
   }
 
-  const handleSubmit = async () => {
+  const validateHex = (key: "primaryColor" | "secondaryColor" | "accentColor", value: string) => {
+    setHexErrors((prev) => ({
+      ...prev,
+      [key]: HEX_REGEX.test(value) ? undefined : "Format warna harus #RRGGBB",
+    }))
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    // Validate all hex fields before submit
+    const errors = {
+      primaryColor: HEX_REGEX.test(values.primaryColor) ? undefined : "Format warna harus #RRGGBB",
+      secondaryColor: HEX_REGEX.test(values.secondaryColor) ? undefined : "Format warna harus #RRGGBB",
+      accentColor: HEX_REGEX.test(values.accentColor) ? undefined : "Format warna harus #RRGGBB",
+    }
+    setHexErrors(errors)
+    if (Object.values(errors).some(Boolean)) return
     await onSubmit(values)
   }
 
   return (
-    <div className="rounded-xl border border-kanvas-line bg-white p-4 sm:p-6">
+    <form onSubmit={handleSubmit} className="rounded-xl border border-kanvas-line bg-white p-4 sm:p-6">
       <div className="mb-5">
         <p className="text-[11px] font-semibold tracking-[0.7px] text-kanvas-ink-4 uppercase">Pengaturan</p>
         <h1 className="mt-1 text-2xl text-kanvas-ink">Branding Aplikasi</h1>
@@ -167,17 +186,18 @@ export function SettingsForm({
                 <input
                   type="color"
                   value={values.primaryColor}
-                  onChange={(e) => updateField("primaryColor", e.target.value)}
+                  onChange={(e) => { updateField("primaryColor", e.target.value); validateHex("primaryColor", e.target.value) }}
                   className="h-10 w-14 cursor-pointer rounded-lg border border-kanvas-line bg-white p-1"
                 />
                 <AppInput
                   value={values.primaryColor}
                   onChange={(value) => updateField("primaryColor", value)}
+                  onBlur={() => validateHex("primaryColor", values.primaryColor)}
                   placeholder="#2d6bb4"
                 />
               </div>
-              {fieldErrors.primaryColor?.[0] && (
-                <p className="mt-1 text-[11px] text-kanvas-danger">{fieldErrors.primaryColor[0]}</p>
+              {(hexErrors.primaryColor || fieldErrors.primaryColor?.[0]) && (
+                <p className="mt-1 text-[11px] text-kanvas-danger">{hexErrors.primaryColor ?? fieldErrors.primaryColor?.[0]}</p>
               )}
             </AppField>
 
@@ -186,17 +206,18 @@ export function SettingsForm({
                 <input
                   type="color"
                   value={values.secondaryColor}
-                  onChange={(e) => updateField("secondaryColor", e.target.value)}
+                  onChange={(e) => { updateField("secondaryColor", e.target.value); validateHex("secondaryColor", e.target.value) }}
                   className="h-10 w-14 cursor-pointer rounded-lg border border-kanvas-line bg-white p-1"
                 />
                 <AppInput
                   value={values.secondaryColor}
                   onChange={(value) => updateField("secondaryColor", value)}
+                  onBlur={() => validateHex("secondaryColor", values.secondaryColor)}
                   placeholder="#1f4f8a"
                 />
               </div>
-              {fieldErrors.secondaryColor?.[0] && (
-                <p className="mt-1 text-[11px] text-kanvas-danger">{fieldErrors.secondaryColor[0]}</p>
+              {(hexErrors.secondaryColor || fieldErrors.secondaryColor?.[0]) && (
+                <p className="mt-1 text-[11px] text-kanvas-danger">{hexErrors.secondaryColor ?? fieldErrors.secondaryColor?.[0]}</p>
               )}
             </AppField>
 
@@ -205,17 +226,18 @@ export function SettingsForm({
                 <input
                   type="color"
                   value={values.accentColor}
-                  onChange={(e) => updateField("accentColor", e.target.value)}
+                  onChange={(e) => { updateField("accentColor", e.target.value); validateHex("accentColor", e.target.value) }}
                   className="h-10 w-14 cursor-pointer rounded-lg border border-kanvas-line bg-white p-1"
                 />
                 <AppInput
                   value={values.accentColor}
                   onChange={(value) => updateField("accentColor", value)}
+                  onBlur={() => validateHex("accentColor", values.accentColor)}
                   placeholder="#d6e7fb"
                 />
               </div>
-              {fieldErrors.accentColor?.[0] && (
-                <p className="mt-1 text-[11px] text-kanvas-danger">{fieldErrors.accentColor[0]}</p>
+              {(hexErrors.accentColor || fieldErrors.accentColor?.[0]) && (
+                <p className="mt-1 text-[11px] text-kanvas-danger">{hexErrors.accentColor ?? fieldErrors.accentColor?.[0]}</p>
               )}
             </AppField>
           </div>
@@ -258,13 +280,13 @@ export function SettingsForm({
       <div className="mt-5 flex justify-end">
         <AppButton
           variant="primary"
-          onClick={handleSubmit}
+          type="submit"
           leading={<KanvasIcons.check size={13} />}
           disabled={submitting}
         >
           {submitting ? "Menyimpan..." : "Simpan Pengaturan"}
         </AppButton>
       </div>
-    </div>
+    </form>
   )
 }

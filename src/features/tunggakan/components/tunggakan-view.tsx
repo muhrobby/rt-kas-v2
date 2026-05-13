@@ -32,7 +32,7 @@ function mapBackendToTunggakanWarga(data: BackendTunggakanSummary["data"][number
 }
 
 export function TunggakanView() {
-  const [kategori, setKategori] = useState("semua")
+  const [kategoriId, setKategoriId] = useState("semua")
   const [periodeStart, setPeriodeStart] = useState(() => {
     const d = new Date()
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`
@@ -83,11 +83,8 @@ export function TunggakanView() {
         tahunSelesai: end.tahun,
       }
 
-      if (kategori !== "semua") {
-        const selected = kategoriOptions.find((k) => k.nama === kategori)
-        if (selected) {
-          filter.kategoriId = selected.id
-        }
+      if (kategoriId !== "semua") {
+        filter.kategoriId = Number(kategoriId)
       }
 
       const result = await getTunggakanAction(filter)
@@ -100,22 +97,14 @@ export function TunggakanView() {
     }
 
     loadTunggakan()
-  }, [kategori, periodeStart, periodeEnd, kategoriOptions])
+  }, [kategoriId, periodeStart, periodeEnd, kategoriOptions])
 
   const tunggakanData: TunggakanWarga[] = useMemo(() => {
     if (!backendData) return []
     return backendData.data.map(mapBackendToTunggakanWarga)
   }, [backendData])
 
-  const filteredData = useMemo(() => {
-    if (kategori === "semua") return tunggakanData
-    return tunggakanData
-      .map((warga) => ({
-        ...warga,
-        items: warga.items.filter((item) => item.kategori === kategori),
-      }))
-      .filter((warga) => warga.items.length > 0)
-  }, [tunggakanData, kategori])
+  const filteredData = tunggakanData
 
   const paginatedData = useMemo(() => {
     const result = paginateItems(filteredData, currentPage, 8)
@@ -132,11 +121,14 @@ export function TunggakanView() {
   return (
     <main className="space-y-3.5 p-6 md:p-7">
       <TunggakanFilters
-        kategori={kategori}
+        kategoriId={kategoriId}
         periodeStart={periodeStart}
         periodeEnd={periodeEnd}
-        kategoriOptions={Array.from(new Set(kategoriOptions.map((k) => k.nama)))}
-        onKategoriChange={(val) => { setKategori(val); setCurrentPage(1) }}
+        kategoriOptions={[
+          { id: "semua", label: "Semua kategori" },
+          ...kategoriOptions.map((k) => ({ id: String(k.id), label: k.nama })),
+        ]}
+        onKategoriChange={(val) => { setKategoriId(val); setCurrentPage(1) }}
         onPeriodeStartChange={(val) => { setPeriodeStart(val); setCurrentPage(1) }}
         onPeriodeEndChange={(val) => { setPeriodeEnd(val); setCurrentPage(1) }}
       />
@@ -144,7 +136,7 @@ export function TunggakanView() {
       <TunggakanSummary totalNominal={totalNominal} jumlahWarga={jumlahWarga} periodeLabel={periodeLabel} />
 
       {error && (
-        <div className="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
+        <div className="rounded-md border border-kanvas-danger-soft bg-kanvas-danger-soft px-4 py-3 text-sm text-kanvas-danger">
           {error}
         </div>
       )}

@@ -3,6 +3,7 @@
 import { useState } from "react"
 
 import { AppButton, AppField, AppInput, AppModal, KanvasIcons } from "@/components/kanvas"
+import { normalizePhone } from "@/lib/format/phone"
 
 import type { WargaFormMode, WargaFormValues } from "@/features/warga-management/types"
 
@@ -21,6 +22,7 @@ const emptyErrorState = {
   blok: "",
   telp: "",
   pindah: "",
+  jumlahAnggota: "",
 }
 
 export function WargaFormModal({ open, mode, initialValues, onClose, onSubmit, serverError, fieldErrors }: WargaFormModalProps) {
@@ -39,10 +41,11 @@ export function WargaFormModal({ open, mode, initialValues, onClose, onSubmit, s
       blok: values.blok.trim() ? "" : "Blok wajib diisi.",
       telp: values.telp.trim() ? "" : "Nomor telepon wajib diisi.",
       pindah: values.statusHunian === "kontrak" && !values.pindah ? "Batas domisili wajib diisi untuk kontrak." : "",
+      jumlahAnggota: values.jumlahAnggota >= 1 ? "" : "Jumlah anggota minimal 1.",
     }
 
     setErrors(nextErrors)
-    return !nextErrors.nama && !nextErrors.blok && !nextErrors.telp && !nextErrors.pindah
+    return !nextErrors.nama && !nextErrors.blok && !nextErrors.telp && !nextErrors.pindah && !nextErrors.jumlahAnggota
   }
 
   const handleSubmit = async () => {
@@ -82,7 +85,11 @@ export function WargaFormModal({ open, mode, initialValues, onClose, onSubmit, s
               {errors.blok || fieldErrors?.blok?.[0] ? <p className="mt-1 text-[11px] text-kanvas-danger">{errors.blok || fieldErrors?.blok?.[0]}</p> : null}
             </AppField>
 
-            <AppField label="No. Telepon" hint="Dipakai sebagai username login">
+            <AppField label="No. Telepon" hint={
+              values.telp
+                ? <span>Preview: <span className="font-mono">{normalizePhone(values.telp)}</span></span>
+                : "Dipakai sebagai username login"
+            }>
               <AppInput value={values.telp} onChange={(value) => updateField("telp", value)} placeholder="08xx-xxxx-xxxx" />
               {errors.telp || fieldErrors?.telp?.[0] ? <p className="mt-1 text-[11px] text-kanvas-danger">{errors.telp || fieldErrors?.telp?.[0]}</p> : null}
             </AppField>
@@ -122,6 +129,7 @@ export function WargaFormModal({ open, mode, initialValues, onClose, onSubmit, s
                 onChange={(value) => updateField("jumlahAnggota", Number(value || 0))}
                 placeholder="Jumlah anggota"
               />
+              {errors.jumlahAnggota ? <p className="mt-1 text-[11px] text-kanvas-danger">{errors.jumlahAnggota}</p> : null}
             </AppField>
           </div>
 

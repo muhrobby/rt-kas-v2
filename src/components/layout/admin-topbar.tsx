@@ -24,6 +24,7 @@ const titlesByPath: Record<string, { subtitle: string; title: string }> = {
   "/admin/laporan": { subtitle: "", title: "Laporan Keuangan" },
   "/admin/log-aktivitas": { subtitle: "Audit trail", title: "Log Aktivitas" },
   "/admin/settings": { subtitle: "Branding aplikasi", title: "Pengaturan" },
+  "/admin/change-password": { subtitle: "Keamanan akun", title: "Ganti Password" },
 }
 
 export function AdminTopbar({ branding, user, onOpenSidebar }: AdminTopbarProps) {
@@ -47,15 +48,6 @@ export function AdminTopbar({ branding, user, onOpenSidebar }: AdminTopbarProps)
       </div>
 
       <div className="flex shrink-0 items-center gap-2">
-        <button
-          type="button"
-          aria-label="Notifikasi"
-          className="relative inline-flex h-9 w-9 items-center justify-center rounded-full border border-kanvas-line bg-white text-kanvas-ink-2"
-        >
-          <KanvasIcons.bell size={15} />
-          <span className="absolute top-[9px] right-[10px] h-1.5 w-1.5 rounded-full bg-kanvas-terra" />
-        </button>
-
         <div className="flex items-center gap-2 rounded-full border border-kanvas-line bg-white py-1 pr-2 pl-1 sm:pr-2.5">
           <div className="flex h-7 w-7 items-center justify-center rounded-full bg-kanvas-ink text-[11px] font-bold text-kanvas-paper-2">
             {user?.initials ?? "U"}

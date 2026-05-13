@@ -40,12 +40,18 @@ export function MonthPaymentSelector({
         const active = selectedMonths.includes(monthValue)
         const disabled = paid || notEligible
 
+        const title = paid
+          ? "Sudah dibayar pada bulan ini"
+          : notEligible
+            ? `Tagihan belum mulai untuk warga ini (tagihan pertama: ${BULAN_SINGKAT[firstBillMonth - 1]} ${firstBillYear})`
+            : undefined
+
         return (
           <button
             key={monthLabel}
             type="button"
-            disabled={disabled}
-            onClick={() => onToggle(monthValue)}
+            onClick={() => { if (!disabled) onToggle(monthValue) }}
+            title={title}
             className="rounded-md px-1 py-1.5 text-[11px] font-semibold transition"
             style={{
               background: active ? "var(--kanvas-terra)" : paid ? "var(--kanvas-line-2)" : notEligible ? "var(--kanvas-line-2)" : "transparent",
