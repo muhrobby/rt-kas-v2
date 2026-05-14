@@ -125,7 +125,7 @@ async function getDashboardReminders(): Promise<DashboardSummary["reminders"]> {
 
 async function getKontrakAkanHabis(today: Date): Promise<DashboardSummary["reminders"]["kontrakAkanHabis"]> {
   const warningLimit = new Date(today)
-  warningLimit.setDate(warningLimit.getDate() + 120)
+  warningLimit.setDate(warningLimit.getDate() + 90)
 
   const rows = await db
     .select({

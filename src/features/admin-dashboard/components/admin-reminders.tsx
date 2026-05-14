@@ -43,7 +43,7 @@ export function AdminReminders({ reminders }: AdminRemindersProps) {
       </AppCard>
 
       <AppCard className="p-5 xl:col-span-1">
-        <p className="text-[11px] font-semibold tracking-[0.6px] text-kanvas-ink-4 uppercase">Aksi Cepat</p>
+        <p className="text-[11px] font-semibold tracking-[0.6px] text-kanvas-ink-4 uppercase">Navigasi Cepat</p>
         <p className="mt-0.5 text-lg text-kanvas-ink">Operasi harian pengurus</p>
         <div className="mt-3 grid grid-cols-1 gap-2">
           {quickActions.map((action) => {
@@ -70,7 +70,10 @@ export function AdminReminders({ reminders }: AdminRemindersProps) {
         <div className="mt-3 space-y-2.5">
           <div className="rounded-lg border border-kanvas-line-2 bg-kanvas-paper-2 p-2.5">
             <div className="mb-1.5 flex flex-wrap items-center justify-between gap-1.5">
-              <p className="text-[12px] font-semibold text-kanvas-ink">Kontrak hampir habis</p>
+              <div>
+                <p className="text-[12px] font-semibold text-kanvas-ink">Kontrak akan berakhir</p>
+                <p className="text-[10px] text-kanvas-ink-4">dalam 90 hari ke depan</p>
+              </div>
               <AppPill tone="olive" style={{ fontSize: 9.5, padding: "1px 6px" }}>
                 {reminders.kontrakAkanHabis.length} rumah
               </AppPill>

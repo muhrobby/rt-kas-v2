@@ -1,6 +1,5 @@
 "use client"
 
-import { useState } from "react"
 import type { ButtonHTMLAttributes, CSSProperties, PropsWithChildren, ReactNode } from "react"
 
 import { cn } from "@/lib/utils"
@@ -30,6 +29,34 @@ const sizes: Record<AppButtonSize, { py: number; px: number; fs: number }> = {
   lg: { py: 12, px: 18, fs: 14 },
 }
 
+// Unique class prefix per variant to scope CSS rules
+const variantClass: Record<AppButtonVariant, string> = {
+  primary: "appbtn-primary",
+  dark: "appbtn-dark",
+  outline: "appbtn-outline",
+  ghost: "appbtn-ghost",
+  danger: "appbtn-danger",
+}
+
+// Inject global CSS once per variant using a module-level set
+const injected = new Set<string>()
+
+function injectVariantStyle(variant: AppButtonVariant) {
+  if (typeof document === "undefined") return
+  const cls = variantClass[variant]
+  if (injected.has(cls)) return
+  injected.add(cls)
+
+  const p = palettes[variant]
+  const style = document.createElement("style")
+  style.dataset.appbtn = cls
+  style.textContent = `
+    .${cls}:not(:disabled):hover { background: ${p.hover} !important; }
+    .${cls}:focus-visible { outline: 2px solid ${p.border}; outline-offset: 2px; }
+  `
+  document.head.appendChild(style)
+}
+
 export function AppButton({
   children,
   className,
@@ -41,21 +68,25 @@ export function AppButton({
   disabled,
   ...props
 }: AppButtonProps) {
-  const [hover, setHover] = useState(false)
   const palette = palettes[variant]
   const buttonSize = sizes[size]
+
+  // Inject CSS rule for this variant (no-op if already injected)
+  injectVariantStyle(variant)
 
   return (
     <button
       type="button"
-      className={cn("inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-lg font-semibold", className)}
-      onMouseEnter={() => setHover(true)}
-      onMouseLeave={() => setHover(false)}
+      className={cn(
+        "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-lg font-semibold",
+        variantClass[variant],
+        className,
+      )}
       disabled={disabled}
       style={{
         padding: `${buttonSize.py}px ${buttonSize.px}px`,
         fontSize: buttonSize.fs,
-        background: hover ? palette.hover : palette.bg,
+        background: palette.bg,
         color: palette.fg,
         border: `1px solid ${palette.border}`,
         cursor: disabled ? "not-allowed" : "pointer",

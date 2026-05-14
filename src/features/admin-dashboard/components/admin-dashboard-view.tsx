@@ -8,9 +8,10 @@ import type { DashboardSummary } from "@/features/admin-dashboard/lib/dashboard-
 
 interface AdminDashboardViewProps {
   initialData: DashboardSummary | null
+  formattedDate: string
 }
 
-export function AdminDashboardView({ initialData: data }: AdminDashboardViewProps) {
+export function AdminDashboardView({ initialData: data, formattedDate }: AdminDashboardViewProps) {
   if (!data) {
     return (
       <main className="space-y-3.5 p-4 md:p-6 lg:p-7">
@@ -31,6 +32,7 @@ export function AdminDashboardView({ initialData: data }: AdminDashboardViewProp
         pemasukanBulanIni={data.pemasukanBulanIni}
         pengeluaranBulanIni={data.pengeluaranBulanIni}
         totalWargaAktif={data.totalWargaAktif}
+        formattedDate={formattedDate}
       />
 
       <section className="grid grid-cols-1 gap-3.5 xl:grid-cols-3">

@@ -1,6 +1,7 @@
 "use client"
 
-import { AppInput } from "@/components/kanvas"
+import { AppCombobox, AppInput } from "@/components/kanvas"
+import type { AppComboboxOption } from "@/components/kanvas"
 
 import type { LogFilterState } from "@/features/log-aktivitas/lib/log-filters"
 
@@ -13,49 +14,37 @@ interface LogFiltersProps {
 }
 
 export function LogFilters({ filters, modulOptions, aksiOptions, petugasOptions, onChange }: LogFiltersProps) {
+  const modulComboOptions: AppComboboxOption[] = [
+    { id: "semua", label: "Semua" },
+    ...modulOptions.map((m) => ({ id: m, label: m })),
+  ]
+
+  const aksiComboOptions: AppComboboxOption[] = [
+    { id: "semua", label: "Semua" },
+    ...aksiOptions.map((a) => ({ id: a, label: a })),
+  ]
+
+  const petugasComboOptions: AppComboboxOption[] = [
+    { id: "semua", label: "Semua" },
+    ...petugasOptions.map((p) => ({ id: p.id, label: p.nama })),
+  ]
+
   return (
     <section className="grid grid-cols-1 gap-2.5 rounded-xl border border-kanvas-line bg-white p-3.5 lg:grid-cols-5">
-      <label>
+      <div>
         <p className="mb-1 text-[11px] font-semibold tracking-[0.6px] text-kanvas-ink-4 uppercase">Modul</p>
-        <select
-          value={filters.modul}
-          onChange={(event) => onChange({ modul: event.target.value })}
-          className="h-[42px] w-full rounded-lg border border-kanvas-line bg-white px-3 text-[13px] text-kanvas-ink"
-        >
-          <option value="semua">Semua</option>
-          {modulOptions.map((option) => (
-            <option key={option} value={option}>{option}</option>
-          ))}
-        </select>
-      </label>
+        <AppCombobox value={filters.modul} onChange={(value) => onChange({ modul: value })} options={modulComboOptions} placeholder="Semua" />
+      </div>
 
-      <label>
+      <div>
         <p className="mb-1 text-[11px] font-semibold tracking-[0.6px] text-kanvas-ink-4 uppercase">Aksi</p>
-        <select
-          value={filters.aksi}
-          onChange={(event) => onChange({ aksi: event.target.value })}
-          className="h-[42px] w-full rounded-lg border border-kanvas-line bg-white px-3 text-[13px] text-kanvas-ink"
-        >
-          <option value="semua">Semua</option>
-          {aksiOptions.map((option) => (
-            <option key={option} value={option}>{option}</option>
-          ))}
-        </select>
-      </label>
+        <AppCombobox value={filters.aksi} onChange={(value) => onChange({ aksi: value })} options={aksiComboOptions} placeholder="Semua" />
+      </div>
 
-      <label>
+      <div>
         <p className="mb-1 text-[11px] font-semibold tracking-[0.6px] text-kanvas-ink-4 uppercase">Petugas</p>
-        <select
-          value={filters.petugas}
-          onChange={(event) => onChange({ petugas: event.target.value })}
-          className="h-[42px] w-full rounded-lg border border-kanvas-line bg-white px-3 text-[13px] text-kanvas-ink"
-        >
-          <option value="semua">Semua</option>
-          {petugasOptions.map((p) => (
-            <option key={p.id} value={p.id}>{p.nama}</option>
-          ))}
-        </select>
-      </label>
+        <AppCombobox value={filters.petugas} onChange={(value) => onChange({ petugas: value })} options={petugasComboOptions} placeholder="Semua" />
+      </div>
 
       <label>
         <p className="mb-1 text-[11px] font-semibold tracking-[0.6px] text-kanvas-ink-4 uppercase">Tanggal</p>

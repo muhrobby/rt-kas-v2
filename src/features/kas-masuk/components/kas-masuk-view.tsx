@@ -72,6 +72,10 @@ export function KasMasukView() {
 
   const [selectedKategori, setSelectedKategori] = useState<KategoriOptionUi | null>(null)
 
+  // Filter state
+  const [filterWargaId, setFilterWargaId] = useState("")
+  const [filterTahun, setFilterTahun] = useState("")
+
   useEffect(() => {
     startTransition(async () => {
       const [warga, kategori, transaksi] = await Promise.all([
@@ -136,10 +140,12 @@ export function KasMasukView() {
     [loadPaidMonths, selectedKategoriId, selectedWargaId],
   )
 
-  const transaksiMasuk = useMemo(
-    () => transactions.filter((trx) => trx.jenisArus === "masuk"),
-    [transactions],
-  )
+  const transaksiMasuk = useMemo(() => {
+    let rows = transactions.filter((trx) => trx.jenisArus === "masuk")
+    if (filterWargaId) rows = rows.filter((trx) => trx.wargaId === filterWargaId)
+    if (filterTahun) rows = rows.filter((trx) => String(trx.tahunTagihan) === filterTahun)
+    return rows
+  }, [transactions, filterWargaId, filterTahun])
 
   const paginatedTransaksi = useMemo(() => {
     const result = paginateItems(transaksiMasuk, currentPage, 8)
@@ -234,6 +240,12 @@ export function KasMasukView() {
         totalTransaksi={transaksiMasuk.length}
         totalNominal={totalNominalMasuk}
         onOpenForm={openForm}
+        wargaOptions={wargaOptions.map((w) => ({ id: w.id, label: w.label }))}
+        filterWargaId={filterWargaId}
+        filterTahun={filterTahun}
+        onFilterWargaChange={(id) => { setFilterWargaId(id); setCurrentPage(1) }}
+        onFilterTahunChange={(t) => { setFilterTahun(t); setCurrentPage(1) }}
+        onResetFilter={() => { setFilterWargaId(""); setFilterTahun(""); setCurrentPage(1) }}
       />
 
       <RecentKasMasukTable

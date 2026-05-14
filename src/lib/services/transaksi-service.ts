@@ -3,7 +3,7 @@ import "server-only"
 import { and, count, desc, eq, ilike, or } from "drizzle-orm"
 
 import { db } from "@/lib/db"
-import { kategoriKas, transaksi, warga } from "@/lib/db/schema"
+import { kategoriKas, transaksi, user, warga } from "@/lib/db/schema"
 
 export type ListTransaksiFilters = {
   search?: string
@@ -77,10 +77,12 @@ export async function listTransaksi(filters: ListTransaksiFilters = {}) {
         jenisArus: kategoriKas.jenisArus,
         tipeTagihan: kategoriKas.tipeTagihan,
       },
+      userName: user.name,
     })
     .from(transaksi)
     .leftJoin(warga, eq(transaksi.wargaId, warga.id))
     .leftJoin(kategoriKas, eq(transaksi.kategoriId, kategoriKas.id))
+    .leftJoin(user, eq(transaksi.userId, user.id))
     .where(conditions.length > 0 ? and(...conditions) : undefined)
     .orderBy(desc(transaksi.waktuTransaksi), desc(transaksi.id))
     .limit(filters.limit ?? 100)
@@ -90,6 +92,7 @@ export async function listTransaksi(filters: ListTransaksiFilters = {}) {
     wargaNama: row.warga?.nama ?? null,
     wargaBlok: row.warga?.blok ?? null,
     kategoriNama: row.kategori?.nama ?? null,
+    userName: row.userName ?? null,
   }))
 }
 

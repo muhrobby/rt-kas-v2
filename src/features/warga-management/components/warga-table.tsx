@@ -142,7 +142,7 @@ function WargaRow({
           <AppButton variant="outline" size="sm" onClick={() => onEdit(warga)} leading={<KanvasIcons.edit size={12} />}>
             Edit
           </AppButton>
-          <AppButton variant="danger" size="sm" onClick={() => onDelete(warga)} leading={<KanvasIcons.trash size={12} />}>
+          <AppButton variant="danger" size="sm" className="ml-auto" onClick={() => onDelete(warga)} leading={<KanvasIcons.trash size={12} />}>
             Hapus
           </AppButton>
         </div>

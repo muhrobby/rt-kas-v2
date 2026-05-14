@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 
 import { AppButton, AppField, AppInput, AppModal, KanvasIcons } from "@/components/kanvas"
 import { normalizePhone } from "@/lib/format/phone"
@@ -30,6 +30,12 @@ export function WargaFormModal({ open, mode, initialValues, onClose, onSubmit, s
   const [errors, setErrors] = useState(emptyErrorState)
   const [submitting, setSubmitting] = useState(false)
   const title = mode === "add" ? "Tambah Warga Baru" : "Edit Data Warga"
+
+  useEffect(() => {
+    if (values.statusHunian === "tetap") {
+      setValues((state) => ({ ...state, pindah: "" }))
+    }
+  }, [values.statusHunian])
 
   const updateField = <K extends keyof WargaFormValues>(key: K, value: WargaFormValues[K]) => {
     setValues((state) => ({ ...state, [key]: value }))

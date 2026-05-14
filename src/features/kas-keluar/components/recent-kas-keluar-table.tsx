@@ -3,11 +3,10 @@
 import { AppCard } from "@/components/kanvas"
 import { PaginationControls } from "@/components/shared/pagination-controls"
 import { formatRupiah } from "@/lib/format/currency"
-import type { TransaksiKas } from "@/types/rt-kas"
 import type { TransaksiKeluarUi } from "@/features/kas-keluar/lib/kas-keluar-actions-client"
 
 interface RecentKasKeluarTableProps {
-  transactions: (TransaksiKas | TransaksiKeluarUi)[]
+  transactions: TransaksiKeluarUi[]
   pagination?: {
     page: number
     totalPages: number
@@ -21,6 +20,7 @@ interface RecentKasKeluarTableProps {
 export function RecentKasKeluarTable({ transactions, pagination }: RecentKasKeluarTableProps) {
   return (
     <AppCard className="overflow-hidden p-0">
+      {/* Mobile */}
       <div className="lg:hidden">
         {transactions.length > 0 ? (
           transactions.map((trx) => (
@@ -29,17 +29,10 @@ export function RecentKasKeluarTable({ transactions, pagination }: RecentKasKelu
                 <p className="text-[13px] font-semibold text-kanvas-ink">{trx.kategoriNama}</p>
                 <p className="text-right text-[13px] font-semibold text-kanvas-ink">{formatRupiah(trx.nominal)}</p>
               </div>
-
               <div className="mt-2 space-y-1 text-[12px] text-kanvas-ink-3">
-                <p>
-                  <span className="font-semibold text-kanvas-ink-2">Tanggal:</span> {trx.tanggal}
-                </p>
-                <p>
-                  <span className="font-semibold text-kanvas-ink-2">Periode:</span> {trx.periodeLabel ?? trx.tanggal}
-                </p>
-                <p className="break-words">
-                  <span className="font-semibold text-kanvas-ink-2">Catatan:</span> {trx.catatan ?? "-"}
-                </p>
+                <p><span className="font-semibold text-kanvas-ink-2">Tanggal:</span> {trx.tanggal}</p>
+                <p><span className="font-semibold text-kanvas-ink-2">Petugas:</span> {trx.petugasNama ?? "-"}</p>
+                <p className="break-words"><span className="font-semibold text-kanvas-ink-2">Catatan:</span> {trx.catatan ?? "-"}</p>
               </div>
             </div>
           ))
@@ -48,28 +41,30 @@ export function RecentKasKeluarTable({ transactions, pagination }: RecentKasKelu
         )}
       </div>
 
+      {/* Desktop */}
       <div className="hidden lg:block">
         <div className="overflow-x-auto">
-          <div className="min-w-[720px]">
-            <div className="grid grid-cols-[100px_1.4fr_1fr_1fr_1.2fr] border-b border-kanvas-line bg-kanvas-paper px-4 py-2.5 text-[10px] font-bold tracking-[0.7px] text-kanvas-ink-3 uppercase">
+          <div className="min-w-[760px]">
+            <div className="grid grid-cols-[100px_1.4fr_1fr_1fr_1fr_1.2fr] border-b border-kanvas-line bg-kanvas-paper px-4 py-2.5 text-[10px] font-bold tracking-[0.7px] text-kanvas-ink-3 uppercase">
               <div>Tanggal</div>
               <div>Kategori</div>
               <div>Periode</div>
               <div className="text-right">Nominal</div>
+              <div>Petugas</div>
               <div>Catatan</div>
             </div>
-
             <div>
               {transactions.length > 0 ? (
                 transactions.map((trx) => (
                   <div
                     key={trx.id}
-                    className="grid grid-cols-[100px_1.4fr_1fr_1fr_1.2fr] items-center border-b border-kanvas-line-2 px-4 py-2.5 text-[13px] text-kanvas-ink-2"
+                    className="grid grid-cols-[100px_1.4fr_1fr_1fr_1fr_1.2fr] items-center border-b border-kanvas-line-2 px-4 py-2.5 text-[13px] text-kanvas-ink-2"
                   >
                     <p className="text-[12px] text-kanvas-ink-3">{trx.tanggal}</p>
                     <p className="font-semibold text-kanvas-ink">{trx.kategoriNama}</p>
                     <p className="text-[12px] text-kanvas-ink-3">{trx.periodeLabel ?? trx.tanggal}</p>
                     <p className="text-right font-semibold text-kanvas-ink">{formatRupiah(trx.nominal)}</p>
+                    <p className="text-[12px] text-kanvas-ink-3">{trx.petugasNama ?? "-"}</p>
                     <p className="text-[12px] text-kanvas-ink-3">{trx.catatan ?? "-"}</p>
                   </div>
                 ))

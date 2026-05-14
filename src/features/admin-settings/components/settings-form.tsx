@@ -24,6 +24,7 @@ export interface SettingsFormValues {
 interface SettingsFormProps {
   initialValues: SettingsFormValues
   onSubmit: (values: SettingsFormValues) => Promise<void>
+  onValuesChange?: (values: SettingsFormValues) => void
   serverError?: string
   fieldErrors?: Record<string, string[]>
   submitting?: boolean
@@ -51,6 +52,7 @@ export function mapSettingsToFormValues(
 export function SettingsForm({
   initialValues,
   onSubmit,
+  onValuesChange,
   serverError,
   fieldErrors = {},
   submitting = false,
@@ -61,7 +63,11 @@ export function SettingsForm({
   const HEX_REGEX = /^#[0-9A-Fa-f]{6}$/
 
   const updateField = <K extends keyof SettingsFormValues>(key: K, value: SettingsFormValues[K]) => {
-    setValues((state) => ({ ...state, [key]: value }))
+    setValues((state) => {
+      const next = { ...state, [key]: value }
+      onValuesChange?.(next)
+      return next
+    })
   }
 
   const validateHex = (key: "primaryColor" | "secondaryColor" | "accentColor", value: string) => {

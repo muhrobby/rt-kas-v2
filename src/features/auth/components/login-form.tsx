@@ -17,6 +17,7 @@ export function LoginForm() {
   const router = useRouter()
   const [phone, setPhone] = useState("")
   const [password, setPassword] = useState("")
+  const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState("")
   const [submitting, setSubmitting] = useState(false)
 
@@ -76,8 +77,13 @@ export function LoginForm() {
               value={password}
               onChange={setPassword}
               placeholder="••••••••"
-              type="password"
+              type={showPassword ? "text" : "password"}
               leading={<KanvasIcons.shield size={14} />}
+              trailing={
+                <button type="button" tabIndex={-1} onClick={() => setShowPassword((v) => !v)} className="cursor-pointer">
+                  {showPassword ? <KanvasIcons.eyeOff size={14} /> : <KanvasIcons.eye size={14} />}
+                </button>
+              }
             />
           </AppField>
 

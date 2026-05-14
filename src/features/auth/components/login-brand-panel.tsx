@@ -38,8 +38,12 @@ export function LoginBrandPanel({ branding }: LoginBrandPanelProps) {
         <span>{branding.rtRwLabel}</span>
         <span>-</span>
         <span>{branding.address || branding.organizationName}</span>
-        <span>-</span>
-        <span>v0.0.1</span>
+        {process.env.NEXT_PUBLIC_APP_VERSION ? (
+          <>
+            <span>-</span>
+            <span>v{process.env.NEXT_PUBLIC_APP_VERSION}</span>
+          </>
+        ) : null}
       </div>
     </section>
   )

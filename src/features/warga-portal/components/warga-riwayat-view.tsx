@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo, useState, useTransition } from "react"
+import { useEffect, useMemo, useRef, useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
 
 import { AppButton, AppCard, AppPill, KanvasIcons } from "@/components/kanvas"
@@ -63,6 +63,15 @@ export function WargaRiwayatView({ periods, error, filterBulan, filterTahun }: W
     [periods, selectedPeriod],
   )
 
+  const scrollContainerRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const container = scrollContainerRef.current
+    if (!container) return
+    const activePill = container.querySelector<HTMLElement>("[data-active-pill]")
+    activePill?.scrollIntoView({ inline: "center", block: "nearest" })
+  }, [selectedPeriod])
+
   return (
     <main className="space-y-3.5 p-4 md:p-6">
       <section>
@@ -108,7 +117,7 @@ export function WargaRiwayatView({ periods, error, filterBulan, filterTahun }: W
         ) : null}
       </div>
 
-      <div className="flex gap-1.5 overflow-x-auto pb-2">
+      <div ref={scrollContainerRef} className="flex gap-1.5 overflow-x-auto pb-2">
         {periods.map((period) => {
           const active = selectedPeriod === period.periode
           return (
@@ -116,6 +125,7 @@ export function WargaRiwayatView({ periods, error, filterBulan, filterTahun }: W
               key={period.periode}
               type="button"
               onClick={() => setSelectedPeriod(period.periode)}
+              {...(active ? { "data-active-pill": "" } : {})}
               className="shrink-0 rounded-full border px-3 py-1.5 text-[12px] font-semibold whitespace-nowrap"
               style={{
                 borderColor: active ? "var(--kanvas-terra)" : "var(--kanvas-line)",
@@ -152,7 +162,7 @@ export function WargaRiwayatView({ periods, error, filterBulan, filterTahun }: W
               <div className="text-right">
                 <p className="text-[13px] font-semibold text-kanvas-ink">{formatRupiah(item.nominal)}</p>
                 <div className="mt-1">
-                  {item.status === "lunas" ? <AppPill tone="ok">Lunas</AppPill> : item.status === "belum-tempo" ? <AppPill tone="neutral">Belum Tempo</AppPill> : <AppPill tone="warn">Belum</AppPill>}
+                  {item.status === "lunas" ? <AppPill tone="ok">Lunas</AppPill> : item.status === "belum-tempo" ? <AppPill tone="terra">Belum Tempo</AppPill> : <AppPill tone="warn">Belum</AppPill>}
                 </div>
               </div>
             </div>

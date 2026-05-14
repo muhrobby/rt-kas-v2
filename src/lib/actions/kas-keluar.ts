@@ -52,6 +52,7 @@ export async function listTransaksiKeluarAction() {
       bulanTagihan: row.bulanTagihan,
       tahunTagihan: row.tahunTagihan,
       keterangan: row.keterangan,
+      userName: row.userName,
     })),
   }
 }

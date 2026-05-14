@@ -18,6 +18,7 @@ export interface TransaksiKeluarUi {
   keterangan: string | null
   catatan?: string | null
   periodeLabel?: string
+  petugasNama: string | null
 }
 
 export async function fetchKategoriKeluarOptions(): Promise<KategoriKeluarOptionUi[]> {
@@ -44,6 +45,7 @@ export async function fetchTransaksiKeluar(): Promise<TransaksiKeluarUi[]> {
     keterangan: row.keterangan,
     catatan: row.keterangan ?? undefined,
     periodeLabel: new Date(row.tanggal).toISOString().slice(0, 10),
+    petugasNama: row.userName ?? null,
   }))
 }
 

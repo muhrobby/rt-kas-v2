@@ -1,10 +1,11 @@
 "use client"
 
-import { useEffect, useState, useTransition } from "react"
+import { useEffect, useMemo, useState, useTransition } from "react"
 import Link from "next/link"
 
 import { AppCard, KanvasIcons, useToast } from "@/components/kanvas"
 import { getAppSettingsAction, updateAppSettingsAction } from "@/lib/actions/app-settings"
+import { formatRtRwLabel } from "@/lib/branding/format-branding"
 import { SettingsForm, type SettingsFormValues, mapSettingsToFormValues } from "@/features/admin-settings/components/settings-form"
 import { SettingsPreviewCard } from "@/features/admin-settings/components/settings-preview-card"
 
@@ -13,6 +14,7 @@ export function SettingsView() {
   const [settings, setSettings] = useState<Awaited<ReturnType<typeof getAppSettingsAction>>["data"] | null>(null)
   const [serverError, setServerError] = useState("")
   const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({})
+  const [previewValues, setPreviewValues] = useState<SettingsFormValues | null>(null)
   const [isLoading, startTransition] = useTransition()
 
   useEffect(() => {
@@ -40,6 +42,16 @@ export function SettingsView() {
     pushToast("Pengaturan berhasil disimpan")
   }
 
+  const previewSettings = useMemo(() => {
+    if (!settings) return null
+    const vals = previewValues ?? mapSettingsToFormValues(settings)
+    return {
+      ...settings,
+      ...vals,
+      rtRwLabel: formatRtRwLabel(vals.rtNumber, vals.rwNumber),
+    }
+  }, [settings, previewValues])
+
   return (
     <main className="space-y-3.5 p-6 md:p-7">
       <AppCard className="flex items-center justify-between p-4">
@@ -62,6 +74,7 @@ export function SettingsView() {
             <SettingsForm
               initialValues={mapSettingsToFormValues(settings)}
               onSubmit={handleSubmit}
+              onValuesChange={setPreviewValues}
               serverError={serverError}
               fieldErrors={fieldErrors}
               submitting={isLoading}
@@ -72,7 +85,7 @@ export function SettingsView() {
         </div>
 
         <div>
-          {settings && <SettingsPreviewCard settings={settings} />}
+          {previewSettings && <SettingsPreviewCard settings={previewSettings} />}
         </div>
       </div>
     </main>

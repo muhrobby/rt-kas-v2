@@ -133,7 +133,7 @@ function getContractWarning(profile: WargaPortalProfile): WargaContractWarning {
   return { show: false, expired: false, daysRemaining, message: null }
 }
 
-async function getWargaProfile(wargaId: number) {
+export async function getWargaProfile(wargaId: number) {
   const [row] = await db.select().from(warga).where(eq(warga.id, wargaId)).limit(1)
   if (!row) {
     throw new Error("Data warga tidak ditemukan.")
