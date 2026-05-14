@@ -54,8 +54,8 @@ export function WargaLaporanView({ data }: WargaLaporanViewProps) {
                   <p className="text-[13px] font-semibold text-kanvas-ink">{row.bulan} {data.tahun}</p>
                   <p className="text-[11px] text-kanvas-ink-4">Saldo {formatRupiah(row.saldo ?? 0)}</p>
                   <div className="mt-1.5 flex flex-wrap gap-1">
-                    <AppPill tone="ok">+{formatRupiah(row.pemasukan).replace("Rp ", "")}</AppPill>
-                    <AppPill tone="danger">-{formatRupiah(row.pengeluaran).replace("Rp ", "")}</AppPill>
+                    <AppPill tone="ok">{formatRupiah(row.pemasukan)}</AppPill>
+                    <AppPill tone="danger">{formatRupiah(row.pengeluaran)}</AppPill>
                   </div>
                 </div>
                 <AppButton

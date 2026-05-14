@@ -8,6 +8,7 @@ import { getKuitansiForWarga } from "@/lib/services/kuitansi-service"
 import {
   getWargaDashboardData,
   getWargaLaporanTransparansi,
+  getWargaProfile,
   getWargaRiwayatPembayaran,
   getWargaRiwayatPembayaranPeriods,
   type WargaLaporanFilter,
@@ -57,6 +58,11 @@ function getSessionWargaId(currentUser: Awaited<ReturnType<typeof requireWarga>>
 export async function getMyDashboardAction() {
   const currentUser = await requireWarga()
   return getWargaDashboardData(getSessionWargaId(currentUser))
+}
+
+export async function getMyProfileAction() {
+  const currentUser = await requireWarga()
+  return getWargaProfile(getSessionWargaId(currentUser))
 }
 
 export async function getMyRiwayatAction(filter?: Partial<WargaRiwayatFilter>): Promise<ActionResult<Awaited<ReturnType<typeof getWargaRiwayatPembayaranPeriods>>>> {

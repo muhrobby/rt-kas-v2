@@ -31,7 +31,7 @@ export function WargaBillStatus({ items }: WargaBillStatusProps) {
                 ) : item.status === "belum" ? (
                   <AppPill tone="warn">Belum bayar</AppPill>
                 ) : (
-                  <AppPill tone="neutral">Belum jatuh tempo</AppPill>
+                  <AppPill tone="terra">Belum jatuh tempo</AppPill>
                 )}
               </div>
             </div>

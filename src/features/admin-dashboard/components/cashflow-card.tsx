@@ -59,7 +59,7 @@ export function CashflowCard({ cashflowBulanan, cashflowDenganSaldo }: CashflowC
             {cashflowDenganSaldo.map((entry) => (
               <div key={`saldo-${entry.bulan}`} className="min-w-[64px] text-center">
                 <p className="text-[10px] font-semibold tracking-[0.5px] text-kanvas-ink-4 uppercase">Saldo {entry.bulan}</p>
-                <p className="mt-0.5 text-[13px] font-semibold text-kanvas-ink">{formatRupiah(entry.saldo ?? 0).replace("Rp ", "")}</p>
+                <p className="mt-0.5 text-[13px] font-semibold text-kanvas-ink">{formatRupiah(entry.saldo ?? 0)}</p>
               </div>
             ))}
           </div>

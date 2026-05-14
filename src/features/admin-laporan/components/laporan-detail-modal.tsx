@@ -1,6 +1,6 @@
 "use client"
 
-import { AppModal } from "@/components/kanvas"
+import { AppButton, AppModal } from "@/components/kanvas"
 import { formatRupiah } from "@/lib/format/currency"
 import type { MonthlyCashflowRow } from "@/lib/services/laporan-service"
 
@@ -78,12 +78,9 @@ export function LaporanDetailModal({ open, onClose, data }: LaporanDetailModalPr
         </div>
 
         <div className="mt-5 flex justify-end">
-          <button
-            onClick={onClose}
-            className="rounded-lg bg-kanvas-ink px-4 py-2 text-[13px] font-medium text-white hover:opacity-90"
-          >
+          <AppButton variant="outline" onClick={onClose}>
             Tutup
-          </button>
+          </AppButton>
         </div>
       </div>
     </AppModal>

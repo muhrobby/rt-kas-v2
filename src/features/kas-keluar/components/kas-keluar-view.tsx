@@ -37,6 +37,10 @@ export function KasKeluarView() {
   const [submitting, setSubmitting] = useState(false)
   const [isLoading, startTransition] = useTransition()
 
+  // Filter state
+  const [filterKategoriId, setFilterKategoriId] = useState("")
+  const [filterTahun, setFilterTahun] = useState("")
+
   useEffect(() => {
     startTransition(async () => {
       const [kategori, transaksi] = await Promise.all([
@@ -48,10 +52,12 @@ export function KasKeluarView() {
     })
   }, [])
 
-  const transaksiKeluar = useMemo(
-    () => transactions.filter((trx) => trx.jenisArus === "keluar"),
-    [transactions],
-  )
+  const transaksiKeluar = useMemo(() => {
+    let rows = transactions.filter((trx) => trx.jenisArus === "keluar")
+    if (filterKategoriId) rows = rows.filter((trx) => trx.kategoriId === filterKategoriId)
+    if (filterTahun) rows = rows.filter((trx) => trx.tanggal.startsWith(filterTahun))
+    return rows
+  }, [transactions, filterKategoriId, filterTahun])
 
   const paginatedTransaksi = useMemo(() => {
     const result = paginateItems(transaksiKeluar, currentPage, 8)
@@ -105,6 +111,12 @@ export function KasKeluarView() {
         totalTransaksi={transaksiKeluar.length}
         totalNominal={totalNominalKeluar}
         onOpenForm={() => setFormOpen(true)}
+        kategoriOptions={kategoriOptions.map((k) => ({ id: k.id, label: k.label }))}
+        filterKategoriId={filterKategoriId}
+        filterTahun={filterTahun}
+        onFilterKategoriChange={(id) => { setFilterKategoriId(id); setCurrentPage(1) }}
+        onFilterTahunChange={(t) => { setFilterTahun(t); setCurrentPage(1) }}
+        onResetFilter={() => { setFilterKategoriId(""); setFilterTahun(""); setCurrentPage(1) }}
       />
 
       <RecentKasKeluarTable

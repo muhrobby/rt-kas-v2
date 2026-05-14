@@ -4,14 +4,15 @@ import Link from "next/link"
 
 import { AppCard, AppPill, KanvasIcons } from "@/components/kanvas"
 
-function toneByModul(modul: string): "terra" | "plum" | "olive" {
-  if (modul === "Kas Masuk") {
-    return "terra"
+function toneByModul(modul: string): "terra" | "plum" | "olive" | "neutral" | "warn" {
+  switch (modul) {
+    case "Kas Masuk": return "terra"
+    case "Kas Keluar": return "plum"
+    case "Warga": return "neutral"
+    case "Kategori": return "olive"
+    case "Autentikasi": return "warn"
+    default: return "olive"
   }
-  if (modul === "Kas Keluar") {
-    return "plum"
-  }
-  return "olive"
 }
 
 interface LogEntry {

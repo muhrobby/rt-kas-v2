@@ -135,6 +135,12 @@ export function LogAktivitasView() {
         }}
       />
 
+      {!isLoading && !error && logData && logData.data.length >= 1000 && (
+        <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-2.5 text-[13px] text-amber-800">
+          Menampilkan 1000 log terbaru. Gunakan filter untuk mempersempit hasil.
+        </div>
+      )}
+
       {isLoading ? (
         <div className="flex items-center justify-center py-12">
           <p className="text-[13px] text-kanvas-ink-4">Memuat...</p>

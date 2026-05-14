@@ -149,7 +149,7 @@ export function KasMasukFormModal({
               onChange={(value) => {
                 onKategoriChange(value)
                 const next = kategoriOptions.find((item) => item.id === value)
-                if (next) {
+                if (next && values.nominal === 0) {
                   updateValue("nominal", next.nominal)
                 }
               }}
@@ -175,32 +175,23 @@ export function KasMasukFormModal({
 
           {selectedKategori?.tipeTagihan === "bulanan" || selectedKategori?.tipeTagihan === "sekali" ? (
             <>
-              <div className="grid grid-cols-1 gap-2.5 md:grid-cols-2 md:gap-3">
-                <AppField label="Tahun">
-                  <AppInput
-                    type="number"
-                    min={2020}
-                    max={new Date().getFullYear() + 1}
-                    value={String(values.tahun)}
-                    onChange={(value) => {
-                      const currentYear = new Date().getFullYear()
-                      const parsed = Number(value)
-                      const num = Number.isFinite(parsed) ? parsed : currentYear
-                      const maxYear = currentYear + 1
-                      updateYear(Math.min(Math.max(num, 2020), maxYear))
-                    }}
-                  />
-                </AppField>
-                <AppField label="Bulan Dipilih">
-                  <div className="rounded-lg border border-kanvas-line bg-white px-3 py-2.5 text-[13px] text-kanvas-ink">
-                    {values.bulan.length > 0
-                      ? `${values.bulan.map((month) => BULAN_SINGKAT[month - 1]).join(", ")} ${values.tahun}`
-                      : "Belum ada bulan dipilih"}
-                  </div>
-                </AppField>
-              </div>
+              <AppField label="Tahun">
+                <AppInput
+                  type="number"
+                  min={2020}
+                  max={new Date().getFullYear() + 1}
+                  value={String(values.tahun)}
+                  onChange={(value) => {
+                    const currentYear = new Date().getFullYear()
+                    const parsed = Number(value)
+                    const num = Number.isFinite(parsed) ? parsed : currentYear
+                    const maxYear = currentYear + 1
+                    updateYear(Math.min(Math.max(num, 2020), maxYear))
+                  }}
+                />
+              </AppField>
 
-              <AppField label="Selector Bulan" hint={selectedKategori?.tipeTagihan === "bulanan" ? "Bulan tercoret = sudah dibayar. Bulan tersamarkan = belum eligible." : "Bulan tercoret = sudah dibayar."}>
+              <AppField label={`Pilih Bulan Pembayaran${values.bulan.length > 0 ? ` (${values.bulan.length} bulan dipilih)` : ""}`} hint={selectedKategori?.tipeTagihan === "sekali" ? "Pilih satu bulan periode kategori ini berlaku. Bulan tercoret = sudah dibayar." : "Bulan tercoret = sudah dibayar. Bulan tersamarkan = belum eligible."}>
                 {loadingPaidMonths ? (
                   <p className="text-[11px] text-kanvas-ink-3">Memuat...</p>
                 ) : (

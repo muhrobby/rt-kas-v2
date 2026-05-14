@@ -155,6 +155,11 @@ export function KategoriFormModal({
                   )
                 })}
               </div>
+              <p className="mt-1 text-[11px] text-kanvas-ink-3">
+                {values.tipeTagihan === "bulanan"
+                  ? "Ditagih setiap bulan (Jan–Des)"
+                  : "Ditagih sekali pada bulan tertentu"}
+              </p>
             </AppField>
           </div>
 

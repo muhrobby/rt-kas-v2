@@ -4,11 +4,12 @@ import { cn } from "@/lib/utils"
 
 interface AppInputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, "onChange"> {
   leading?: ReactNode
+  trailing?: ReactNode
   value?: string
   onChange?: (value: string) => void
 }
 
-export function AppInput({ className, leading, value, onChange, ...props }: AppInputProps) {
+export function AppInput({ className, leading, trailing, value, onChange, ...props }: AppInputProps) {
   return (
     <div
       className={cn(
@@ -23,6 +24,7 @@ export function AppInput({ className, leading, value, onChange, ...props }: AppI
         className="min-w-0 flex-1 bg-transparent text-[13px] text-kanvas-ink outline-none"
         {...props}
       />
+      {trailing ? <span className="text-kanvas-ink-4">{trailing}</span> : null}
     </div>
   )
 }

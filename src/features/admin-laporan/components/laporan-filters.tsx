@@ -58,6 +58,11 @@ export function LaporanFilters({
     [],
   )
 
+  const endMonthOptions = useMemo(
+    () => monthOptions.filter((m) => Number(m.id) >= startMonth),
+    [monthOptions, startMonth],
+  )
+
   return (
     <section className="grid grid-cols-1 gap-2.5 rounded-xl border border-kanvas-line bg-white p-3.5 sm:grid-cols-2 lg:grid-cols-3">
       <label className="block">
@@ -85,7 +90,7 @@ export function LaporanFilters({
         <AppCombobox
           value={String(endMonth)}
           onChange={(val) => onEndMonthChange(Number(val))}
-          options={monthOptions}
+          options={endMonthOptions}
           placeholder="Pilih bulan..."
         />
       </label>
