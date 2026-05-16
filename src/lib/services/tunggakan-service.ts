@@ -185,15 +185,17 @@ function formatPeriode(bulan: number, tahun: number): string {
 export async function getTunggakan(filter: TunggakanFilterInput): Promise<TunggakanSummary> {
   const { bulanMulai, tahunMulai, bulanSelesai, tahunSelesai, kategoriId } = filter
 
-  const allWarga = await getActiveWarga()
+  const [allWarga, kategorisBulanan, kategorisSekali] = await Promise.all([
+    getActiveWarga(),
+    getKategoriBulanan(),
+    getKategoriSekali(),
+  ])
+
   if (allWarga.length === 0) {
     return { totalWarga: 0, totalNominal: 0, data: [] }
   }
 
   const wargaIds = allWarga.map((w) => w.id)
-
-  const kategorisBulanan = await getKategoriBulanan()
-  const kategorisSekali = await getKategoriSekali()
 
   const filteredBulanan = kategoriId
     ? kategorisBulanan.filter((k) => k.id === kategoriId)
@@ -209,17 +211,18 @@ export async function getTunggakan(filter: TunggakanFilterInput): Promise<Tungga
 
   const bulanCombinations = generateMonthYearCombinations(bulanMulai, tahunMulai, bulanSelesai, tahunSelesai)
 
-  const paidBulanan = await getPaidBulanan(
-    wargaIds,
-    filteredBulanan.map((k) => k.id),
-  )
-
   const filteredSekaliWithNominal = filteredSekali.filter((kat) => kat.nominalDefault > 0)
 
-  const paidSekaliMap = await getPaidSekaliMap(
-    wargaIds,
-    filteredSekaliWithNominal.map((k) => k.id),
-  )
+  const [paidBulanan, paidSekaliMap] = await Promise.all([
+    getPaidBulanan(
+      wargaIds,
+      filteredBulanan.map((k) => k.id),
+    ),
+    getPaidSekaliMap(
+      wargaIds,
+      filteredSekaliWithNominal.map((k) => k.id),
+    ),
+  ])
 
   const wargaTunggakanMap = new Map<
     number,

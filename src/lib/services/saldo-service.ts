@@ -51,39 +51,43 @@ export async function getSaldoSummary(): Promise<SaldoSummary> {
   const currentMonth = now.getMonth()
   const startOfMonth = getStartOfMonth(currentYear, currentMonth)
 
-  const [pemasukanResult] = await db
-    .select({ total: count(), sum: sql<number>`coalesce(sum(${transaksi.nominal}), 0)` })
-    .from(transaksi)
-    .where(
-      and(
-        eq(transaksi.tipeArus, "masuk"),
-        gte(transaksi.waktuTransaksi, startOfMonth),
+  const [
+    [pemasukanResult],
+    [pengeluaranResult],
+    [allPemasukan],
+    [allPengeluaran],
+    [wargaCount],
+  ] = await Promise.all([
+    db
+      .select({ total: count(), sum: sql<number>`coalesce(sum(${transaksi.nominal}), 0)` })
+      .from(transaksi)
+      .where(
+        and(
+          eq(transaksi.tipeArus, "masuk"),
+          gte(transaksi.waktuTransaksi, startOfMonth),
+        ),
       ),
-    )
-
-  const [pengeluaranResult] = await db
-    .select({ total: count(), sum: sql<number>`coalesce(sum(${transaksi.nominal}), 0)` })
-    .from(transaksi)
-    .where(
-      and(
-        eq(transaksi.tipeArus, "keluar"),
-        gte(transaksi.waktuTransaksi, startOfMonth),
+    db
+      .select({ total: count(), sum: sql<number>`coalesce(sum(${transaksi.nominal}), 0)` })
+      .from(transaksi)
+      .where(
+        and(
+          eq(transaksi.tipeArus, "keluar"),
+          gte(transaksi.waktuTransaksi, startOfMonth),
+        ),
       ),
-    )
-
-  const [allPemasukan] = await db
-    .select({ sum: sql<number>`coalesce(sum(${transaksi.nominal}), 0)` })
-    .from(transaksi)
-    .where(eq(transaksi.tipeArus, "masuk"))
-
-  const [allPengeluaran] = await db
-    .select({ sum: sql<number>`coalesce(sum(${transaksi.nominal}), 0)` })
-    .from(transaksi)
-    .where(eq(transaksi.tipeArus, "keluar"))
-
-  const [wargaCount] = await db
-    .select({ total: count() })
-    .from(warga)
+    db
+      .select({ sum: sql<number>`coalesce(sum(${transaksi.nominal}), 0)` })
+      .from(transaksi)
+      .where(eq(transaksi.tipeArus, "masuk")),
+    db
+      .select({ sum: sql<number>`coalesce(sum(${transaksi.nominal}), 0)` })
+      .from(transaksi)
+      .where(eq(transaksi.tipeArus, "keluar")),
+    db
+      .select({ total: count() })
+      .from(warga),
+  ])
 
   return {
     saldoKas: Number(allPemasukan?.sum ?? 0) - Number(allPengeluaran?.sum ?? 0),

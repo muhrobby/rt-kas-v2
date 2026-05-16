@@ -1,8 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
-import { db } from "@/lib/db";
-import { user } from "@/lib/db/schema";
-import { eq } from "drizzle-orm";
 
 const PUBLIC_PATHS = ["/login", "/api/auth", "/unauthorized", "/api/health"];
 
@@ -42,25 +39,12 @@ export async function proxy(request: NextRequest) {
     return withPathnameRequestHeader(request, pathname)
   }
 
-  const [sessionUser] = await db
-    .select({
-      id: user.id,
-      role: user.role,
-      wargaId: user.wargaId,
-      mustChangePassword: user.mustChangePassword,
-    })
-    .from(user)
-    .where(eq(user.id, session.user.id))
-    .limit(1)
-
-  if (!sessionUser) {
-    return NextResponse.redirect(new URL("/login", request.url));
-  }
+  const { role, wargaId, mustChangePassword } = session.user;
 
   // Force change password redirect
   // Exclude API routes so sign-out and other API calls still work
-  if (sessionUser.mustChangePassword && !pathname.startsWith("/api/")) {
-    const changePasswordPath = sessionUser.role === "admin"
+  if (mustChangePassword && !pathname.startsWith("/api/")) {
+    const changePasswordPath = role === "admin"
       ? "/admin/change-password"
       : "/warga/change-password";
 
@@ -72,18 +56,18 @@ export async function proxy(request: NextRequest) {
 
   if (pathname === "/") {
     const redirectUrl =
-      sessionUser.role === "admin"
+      role === "admin"
         ? new URL("/admin/dashboard", request.url)
         : new URL("/warga/dashboard", request.url);
     return NextResponse.redirect(redirectUrl);
   }
 
-  if (pathname.startsWith("/admin") && sessionUser.role !== "admin") {
+  if (pathname.startsWith("/admin") && role !== "admin") {
     return NextResponse.redirect(new URL("/unauthorized", request.url));
   }
 
   if (pathname.startsWith("/warga")) {
-    if (sessionUser.role !== "user" || !sessionUser.wargaId) {
+    if (role !== "user" || !wargaId) {
       return NextResponse.redirect(new URL("/unauthorized", request.url));
     }
   }
