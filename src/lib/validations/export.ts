@@ -34,5 +34,5 @@ export const logAktivitasQuerySchema = z.object({
   return data.tanggal || data.modul || data.petugas || data.aksi || data.query
 }, {
   message: "Minimal satu filter (misalnya tanggal atau modul) harus diisi untuk melakukan export log aktivitas.",
-  path: ["root"]
+  path: ["tanggal"]
 })

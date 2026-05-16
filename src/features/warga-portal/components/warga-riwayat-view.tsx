@@ -7,6 +7,7 @@ import { AppButton, AppCard, AppPill, KanvasIcons } from "@/components/kanvas"
 import type { PdfBranding } from "@/lib/branding/format-branding"
 import { formatRupiah } from "@/lib/format/currency"
 import { getMyKuitansiAction } from "@/lib/actions/warga-portal"
+import { generateKuitansiPDF } from "@/lib/export/pdf"
 import { BULAN } from "@/lib/constants/months"
 import type { WargaHistoryPeriod } from "@/types/rt-kas"
 
@@ -211,7 +212,7 @@ export function WargaRiwayatView({ periods, error, filterBulan, filterTahun }: W
         </AppCard>
       ) : null}
 
-      <KuitansiDialog open={receiptOpen} data={selectedReceipt} onClose={() => setReceiptOpen(false)} />
+      <KuitansiDialog open={receiptOpen} data={selectedReceipt} onClose={() => setReceiptOpen(false)} onDownloadPdf={generateKuitansiPDF} />
     </main>
   )
 }

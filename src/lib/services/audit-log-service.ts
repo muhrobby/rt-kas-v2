@@ -9,10 +9,14 @@ export type AuditLogAksi = "tambah" | "edit" | "hapus" | "login" | "logout" | "e
 type WriteAuditLogInput = Pick<NewLogAktivitas, "userId" | "modul" | "aksi" | "keterangan">
 
 export async function writeAuditLog(input: WriteAuditLogInput): Promise<void> {
-  await db.insert(logAktivitas).values({
-    userId: input.userId,
-    modul: input.modul,
-    aksi: input.aksi,
-    keterangan: input.keterangan,
-  })
+  db.insert(logAktivitas)
+    .values({
+      userId: input.userId,
+      modul: input.modul,
+      aksi: input.aksi,
+      keterangan: input.keterangan,
+    })
+    .catch(() => {
+      // Non-blocking: audit log failure must not fail the parent action
+    })
 }

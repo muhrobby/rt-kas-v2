@@ -1,6 +1,6 @@
 import "server-only"
 
-import { and, eq, gte, lte } from "drizzle-orm"
+import { and, eq, gte, isNotNull, lte, or } from "drizzle-orm"
 
 import { db } from "@/lib/db"
 import { kategoriKas, transaksi } from "@/lib/db/schema"
@@ -55,6 +55,9 @@ export async function getLaporanKeuangan(
   const startDate = getStartOfMonth(startYear, startMonth)
   const endDate = getEndOfMonth(endYear, endMonth)
 
+  // Kas masuk: filter by bulanTagihan/tahunTagihan (billing period), not waktuTransaksi.
+  // Kas keluar: filter by waktuTransaksi (transaction date).
+  // Using OR so a single query covers both, with each branch scoped to its tipeArus.
   const rows = await db
     .select({
       tipeArus: transaksi.tipeArus,
@@ -68,9 +71,21 @@ export async function getLaporanKeuangan(
     .from(transaksi)
     .leftJoin(kategoriKas, eq(transaksi.kategoriId, kategoriKas.id))
     .where(
-      and(
-        gte(transaksi.waktuTransaksi, startDate),
-        lte(transaksi.waktuTransaksi, endDate),
+      or(
+        // Kas masuk: match by billing period (tahunTagihan + bulanTagihan)
+        and(
+          eq(transaksi.tipeArus, "masuk"),
+          isNotNull(transaksi.tahunTagihan),
+          isNotNull(transaksi.bulanTagihan),
+          gte(transaksi.tahunTagihan, startYear),
+          lte(transaksi.tahunTagihan, endYear),
+        ),
+        // Kas keluar: match by transaction date
+        and(
+          eq(transaksi.tipeArus, "keluar"),
+          gte(transaksi.waktuTransaksi, startDate),
+          lte(transaksi.waktuTransaksi, endDate),
+        ),
       ),
     )
 
@@ -78,6 +93,10 @@ export async function getLaporanKeuangan(
   const monthMap = new Map<string, RawMonthlyRow & { rincianPemasukan: KategoriBreakdown[], rincianPengeluaran: KategoriBreakdown[] }>()
   let totalPemasukan = 0
   let totalPengeluaran = 0
+
+  // Precompute period indices for boundary checks
+  const startPeriodIndex = startYear * 12 + startMonth
+  const endPeriodIndex = endYear * 12 + endMonth
 
   for (const trx of rows) {
     let year: number
@@ -89,6 +108,10 @@ export async function getLaporanKeuangan(
       }
       year = trx.tahunTagihan
       monthNum = parseInt(trx.bulanTagihan, 10)
+      if (monthNum < 1 || monthNum > 12) continue
+      // Exclude masuk rows outside the requested billing period range
+      const periodIndex = year * 12 + (monthNum - 1)
+      if (periodIndex < startPeriodIndex || periodIndex > endPeriodIndex) continue
     } else {
       const trxDate = new Date(trx.waktuTransaksi)
       year = trxDate.getFullYear()

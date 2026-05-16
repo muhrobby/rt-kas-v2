@@ -25,14 +25,22 @@ export function WargaLaporanView({ data }: WargaLaporanViewProps) {
           <p className="text-[12px] text-kanvas-ink-3">Rekap kas RT {data.tahun}, terbuka untuk seluruh warga.</p>
         </section>
 
-      <section className="grid grid-cols-1 gap-2 md:grid-cols-2">
+      <section className="grid grid-cols-2 gap-2 md:grid-cols-4">
         <AppCard className="p-3">
           <p className="text-[10px] font-semibold tracking-[0.6px] text-kanvas-ink-4 uppercase">Saldo Kas</p>
-          <p className="mt-1 text-[22px] text-kanvas-ink">{formatRupiah(data.summary.saldoKas)}</p>
+          <p className="mt-1 text-[18px] text-kanvas-ink">{formatRupiah(data.summary.saldoKas)}</p>
+        </AppCard>
+        <AppCard className="p-3">
+          <p className="text-[10px] font-semibold tracking-[0.6px] text-kanvas-ink-4 uppercase">Pemasukan</p>
+          <p className="mt-1 text-[18px] text-kanvas-success">{formatRupiah(data.summary.totalPemasukan)}</p>
+        </AppCard>
+        <AppCard className="p-3">
+          <p className="text-[10px] font-semibold tracking-[0.6px] text-kanvas-ink-4 uppercase">Pengeluaran</p>
+          <p className="mt-1 text-[18px] text-kanvas-danger">{formatRupiah(data.summary.totalPengeluaran)}</p>
         </AppCard>
         <AppCard className="p-3">
           <p className="text-[10px] font-semibold tracking-[0.6px] text-kanvas-ink-4 uppercase">Selisih YTD</p>
-          <p className={`mt-1 text-[22px] ${ytdDelta >= 0 ? "text-kanvas-success" : "text-kanvas-danger"}`}>{ytdLabel}</p>
+          <p className={`mt-1 text-[18px] ${ytdDelta >= 0 ? "text-kanvas-success" : "text-kanvas-danger"}`}>{ytdLabel}</p>
         </AppCard>
       </section>
 
@@ -41,7 +49,11 @@ export function WargaLaporanView({ data }: WargaLaporanViewProps) {
           <p className="text-[16px] text-kanvas-ink">Pemasukan vs Pengeluaran</p>
           <span className="text-[11px] text-kanvas-ink-3">Jan - Des {data.tahun}</span>
         </div>
-        <BarsInOutChart data={data.monthlyCashflow} height={220} />
+        <div className="overflow-x-auto">
+          <div className="min-w-[480px]">
+            <BarsInOutChart data={data.monthlyCashflow} height={220} />
+          </div>
+        </div>
       </AppCard>
 
       <section>

@@ -33,6 +33,22 @@ export const auth = betterAuth({
   },
   databaseHooks: {
     session: {
+      create: {
+        before: async (session) => {
+          // Audit log login — non-blocking, tidak memblokir sign-in jika gagal
+          try {
+            await writeAuditLog({
+              userId: session.userId,
+              modul: "Autentikasi",
+              aksi: "login",
+              keterangan: "Pengguna berhasil masuk",
+            });
+          } catch {
+            // Do not block sign-in if audit logging fails.
+          }
+          return { data: session };
+        },
+      },
       delete: {
         after: async (deletedSession) => {
           try {

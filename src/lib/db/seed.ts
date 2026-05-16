@@ -58,7 +58,8 @@ async function main() {
       password: adminPasswordHash,
     })
     .onConflictDoNothing();
-  console.log(`Admin user ready: 08123456789 / ${seedPassword}`);
+  // JANGAN log password ke console — password hanya diketahui dari SEED_ADMIN_PASSWORD env var
+  console.log("Admin user ready. Username: 08123456789");
 
   console.log("Seeding kategori kas...");
   await db
@@ -197,7 +198,7 @@ async function main() {
     keterangan: "Bayar listrik pos ronda",
   });
 
-  await db.insert(transaksi).values(transaksiData);
+  await db.insert(transaksi).values(transaksiData).onConflictDoNothing();
   console.log(`Transaksi seeded: ${transaksiData.length} entries.`);
 
   console.log("\nSeed complete.");

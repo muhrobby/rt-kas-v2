@@ -1,6 +1,7 @@
 import jsPDF from "jspdf"
 import { defaultAppSettings } from "@/lib/constants/app-settings"
 import { formatRupiah } from "@/lib/format/currency"
+import { formatRtRwLabel } from "@/lib/branding/format-branding"
 import type { MonthlyCashflowRow } from "@/lib/services/laporan-service"
 import type { PdfBranding } from "@/lib/branding/format-branding"
 
@@ -9,7 +10,7 @@ type RGB = [number, number, number]
 const defaultPdfBranding: PdfBranding = {
   appName: defaultAppSettings.appName,
   organizationName: defaultAppSettings.organizationName,
-  rtRwLabel: defaultAppSettings.organizationName,
+  rtRwLabel: formatRtRwLabel(defaultAppSettings.rtNumber, defaultAppSettings.rwNumber),
   address: defaultAppSettings.address,
   phone: defaultAppSettings.phone,
   email: defaultAppSettings.email,

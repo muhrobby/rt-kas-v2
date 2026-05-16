@@ -1,9 +1,9 @@
 export const defaultAppSettings = {
   id: 1,
   appName: "RT Kas",
-  organizationName: "RT 01 / RW 010",
+  organizationName: "Organisasi RT",
   rtNumber: "01",
-  rwNumber: "010",
+  rwNumber: "001",
   address: null as string | null,
   phone: null as string | null,
   email: null as string | null,

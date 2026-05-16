@@ -4,7 +4,7 @@ import { db } from "@/lib/db";
 import { user } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 
-const PUBLIC_PATHS = ["/login", "/api/auth", "/unauthorized"];
+const PUBLIC_PATHS = ["/login", "/api/auth", "/unauthorized", "/api/health"];
 
 function withPathnameRequestHeader(request: NextRequest, pathname: string) {
   const requestHeaders = new Headers(request.headers)
@@ -58,7 +58,8 @@ export async function proxy(request: NextRequest) {
   }
 
   // Force change password redirect
-  if (sessionUser.mustChangePassword) {
+  // Exclude API routes so sign-out and other API calls still work
+  if (sessionUser.mustChangePassword && !pathname.startsWith("/api/")) {
     const changePasswordPath = sessionUser.role === "admin"
       ? "/admin/change-password"
       : "/warga/change-password";

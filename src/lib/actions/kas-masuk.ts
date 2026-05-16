@@ -6,7 +6,6 @@ import { requireAdmin } from "@/lib/auth/permissions"
 import { db } from "@/lib/db"
 import { kategoriKas, transaksi, warga } from "@/lib/db/schema"
 import { writeAuditLog } from "@/lib/services/audit-log-service"
-import { hasPaidMonthly, hasPaidSekali } from "@/lib/services/transaksi-service"
 import { listWarga } from "@/lib/services/warga-service"
 import { getFirstBillablePeriod, isPeriodEligible } from "@/lib/billing/billing-eligibility"
 import {
@@ -14,7 +13,7 @@ import {
   createKasMasukSchema,
 } from "@/lib/validations/transaksi"
 import { ZodError } from "zod"
-import { eq } from "drizzle-orm"
+import { and, count, eq } from "drizzle-orm"
 import { BULAN } from "@/lib/constants/months"
 
 type ActionResult<T> =
@@ -48,13 +47,16 @@ export async function listWargaAction(input: { search?: string; status?: "semua"
 
 export async function listKategoriAction() {
   await requireAdmin()
-  const rows = await db.select({
-    id: kategoriKas.id,
-    nama: kategoriKas.namaKategori,
-    jenisArus: kategoriKas.jenisArus,
-    tipeTagihan: kategoriKas.tipeTagihan,
-    nominalDefault: kategoriKas.nominalDefault,
-  }).from(kategoriKas)
+  const rows = await db
+    .select({
+      id: kategoriKas.id,
+      nama: kategoriKas.namaKategori,
+      jenisArus: kategoriKas.jenisArus,
+      tipeTagihan: kategoriKas.tipeTagihan,
+      nominalDefault: kategoriKas.nominalDefault,
+    })
+    .from(kategoriKas)
+    .where(eq(kategoriKas.jenisArus, "masuk"))
   return { ok: true as const, data: rows }
 }
 
@@ -197,19 +199,27 @@ export async function createKasMasukAction(input: CreateKasMasukInput): Promise<
       }
     }
 
-    for (const bulan of daftarBulan) {
-      const paid = kategori.tipeTagihan === "bulanan"
-        ? await hasPaidMonthly(parsed.wargaId, parsed.kategoriId, Number(bulan), tahun)
-        : await hasPaidSekali(parsed.wargaId, parsed.kategoriId, Number(bulan), tahun)
-      if (paid) {
-        return {
-          ok: false,
-          error: `Warga sudah membayar ${kategori.namaKategori} untuk bulan ${bulan}/${tahun}.`,
+    const created = await db.transaction(async (tx) => {
+      for (const bulan of daftarBulan) {
+        const [dupRow] = await tx
+          .select({ total: count() })
+          .from(transaksi)
+          .where(
+            and(
+              eq(transaksi.wargaId, parsed.wargaId),
+              eq(transaksi.kategoriId, parsed.kategoriId),
+              eq(transaksi.bulanTagihan, String(bulan)),
+              eq(transaksi.tahunTagihan, tahun),
+              eq(transaksi.tipeArus, "masuk"),
+            ),
+          )
+          .limit(1)
+        if ((dupRow?.total ?? 0) > 0) {
+          throw Object.assign(new Error("DUPLICATE"), { bulan })
         }
       }
-    }
 
-    const createdRows = await db
+      const createdRows = await tx
         .insert(transaksi)
         .values(
           daftarBulan.map((bulan) => ({
@@ -225,7 +235,8 @@ export async function createKasMasukAction(input: CreateKasMasukInput): Promise<
         )
         .returning({ id: transaksi.id })
 
-    const created = createdRows[0]
+      return createdRows[0]
+    })
 
     await writeAuditLog({
       userId: admin.id,
@@ -243,7 +254,16 @@ export async function createKasMasukAction(input: CreateKasMasukInput): Promise<
 
     return { ok: true, data: created }
   } catch (error) {
-    if (error instanceof Error && "code" in error && error.code === "23505") {
+    if (error instanceof Error && error.message === "DUPLICATE") {
+      const bulan = (error as Error & { bulan?: string }).bulan
+      return {
+        ok: false,
+        error: bulan
+          ? `Pembayaran untuk bulan ${bulan} sudah tercatat (duplikat).`
+          : "Pembayaran untuk warga dan kategori ini sudah tercatat (duplikat).",
+      }
+    }
+    if (error instanceof Error && "code" in error && (error as NodeJS.ErrnoException).code === "23505") {
       return {
         ok: false,
         error: "Pembayaran untuk warga dan kategori ini sudah tercatat (duplikat).",

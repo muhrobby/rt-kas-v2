@@ -5,8 +5,11 @@ import * as schema from "./schema";
 
 const connectionString = process.env.DATABASE_URL!;
 
+// Supabase Transaction Pooler (port 6543) + Vercel serverless:
+// Setiap function invocation adalah proses baru — max: 1 mencegah connection exhaustion.
+// Di development, max: 3 cukup untuk local postgres.
 const client = postgres(connectionString, {
-  max: process.env.NODE_ENV === "production" ? 10 : 3,
+  max: process.env.NODE_ENV === "production" ? 1 : 3,
   idle_timeout: 20,
   connect_timeout: 10,
 });

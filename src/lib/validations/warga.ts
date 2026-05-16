@@ -13,7 +13,19 @@ function normalizePhone(raw: string) {
 const baseWargaSchema = z.object({
   nama: z.string().trim().min(1, "Nama kepala keluarga wajib diisi."),
   blok: z.string().trim().min(1, "Blok rumah wajib diisi."),
-  telp: z.string().trim().min(8, "Nomor telepon wajib diisi."),
+  // Validasi dilakukan setelah normalisasi: nomor Indonesia minimal 10 digit (08xxxxxxxx)
+  // dan maksimal 15 digit sesuai standar E.164
+  telp: z
+    .string()
+    .trim()
+    .min(1, "Nomor telepon wajib diisi.")
+    .refine(
+      (val) => {
+        const normalized = normalizePhone(val)
+        return normalized.length >= 10 && normalized.length <= 15
+      },
+      "Nomor telepon tidak valid. Gunakan format 08xxx atau 628xxx.",
+    ),
   statusHunian: statusHunianSchema,
   jumlahAnggota: z.number().int().min(1, "Jumlah anggota minimal 1."),
   tglBatasDomisili: z.string().optional(),
