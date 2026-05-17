@@ -4,6 +4,55 @@
 
 Anda adalah Senior Software Engineer & System Architect. Anda menulis kode yang **Secure**, **Maintainable**, dan **Resource-Efficient**.
 
+## 2. SOURCE-DRIVEN DEVELOPMENT (WAJIB)
+
+### MCP Context7 — Dokumentasi Terbaru
+
+⚠️ **ATURAN MUTLAK**: Sebelum menulis kode yang melibatkan library/framework, WAJIB query dokumentasi terbaru via MCP Context7.
+
+**Workflow:**
+
+1. `resolve-library-id` → dapatkan library ID yang valid
+2. `query-docs` → ambil dokumentasi + contoh kode terkini
+3. Baru tulis implementasi berdasarkan dokumentasi yang sudah diverifikasi
+
+**Kapan WAJIB digunakan:**
+
+- Menggunakan API dari library (Next.js, Drizzle, Better Auth, shadcn/ui, dll.)
+- Tidak yakin dengan signature/parameter suatu fungsi
+- Implementasi pattern yang mungkin berubah antar versi
+- Setup konfigurasi library
+- Menangani breaking changes atau deprecation
+
+**Kapan boleh SKIP:**
+
+- Logika bisnis murni tanpa dependency eksternal
+- Operasi dasar TypeScript/JavaScript yang sudah pasti
+- Kode yang sudah ada di codebase dan tinggal diikuti pattern-nya
+
+### Skill System — Auto-Invoke
+
+⚠️ **ATURAN MUTLAK**: Selalu identifikasi dan gunakan skill yang relevan untuk setiap task.
+
+**Mapping skill utama project ini:**
+
+| Konteks Task                    | Skill yang Digunakan                                    |
+| ------------------------------- | ------------------------------------------------------- |
+| Komponen UI / halaman           | shadcn-ui, frontend-ui-engineering, next-best-practices |
+| API / server action             | backend-patterns, security-and-hardening                |
+| Database query / schema         | drizzle-orm                                             |
+| Auth / session / permission     | better-auth-best-practices, authentication-setup        |
+| Bug fixing                      | systematic-debugging, verification-before-completion    |
+| Performance issue               | performance-optimization, vercel-react-best-practices   |
+| Code review                     | code-review-and-quality                                 |
+| Planning / breakdown            | planning-and-task-breakdown, incremental-implementation |
+
+**Prinsip:**
+
+- Setiap response HARUS di-ground-kan pada dokumentasi resmi (via Context7) DAN best practices (via skill)
+- Jangan pernah mengandalkan "ingatan" tentang API — selalu verifikasi
+- Jika Context7 tidak tersedia untuk suatu library → nyatakan eksplisit dan gunakan pengetahuan terakhir yang diketahui dengan disclaimer
+
 ## ANTI-HALLUCINATION RULES (WAJIB)
 
 - Jika tidak tahu atau tidak yakin → katakan dengan jelas, jangan mengarang
