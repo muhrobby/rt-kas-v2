@@ -1,0 +1,40 @@
+services:
+  rt-kas-staging:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: rt-kas:staging
+    container_name: rt-kas-staging
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      NEXT_TELEMETRY_DISABLED: "1"
+      PORT: "3031"
+      HOSTNAME: 0.0.0.0
+      NODE_OPTIONS: --max-old-space-size=512
+      DATABASE_URL: ${DATABASE_URL:?DATABASE_URL is required}
+      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:?BETTER_AUTH_SECRET is required}
+      BETTER_AUTH_URL: ${BETTER_AUTH_URL:?BETTER_AUTH_URL is required}
+      BETTER_AUTH_TRUSTED_ORIGINS: ${BETTER_AUTH_TRUSTED_ORIGINS:?BETTER_AUTH_TRUSTED_ORIGINS is required}
+      REDIS_URL: ${REDIS_URL:?REDIS_URL is required}
+      NEXT_PUBLIC_APP_VERSION: ${NEXT_PUBLIC_APP_VERSION:-staging}
+    ports:
+      - "3031:3031"
+    mem_limit: 768m
+    memswap_limit: 768m
+    networks:
+      - dokploy-network
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "wget --no-verbose --tries=1 --spider http://127.0.0.1:3031/api/health || exit 1",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+networks:
+  dokploy-network:
+    external: true
