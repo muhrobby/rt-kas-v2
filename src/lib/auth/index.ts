@@ -6,6 +6,10 @@ import { db } from "@/lib/db";
 import { account, session, user, verification } from "@/lib/db/schema";
 import { writeAuditLog } from "@/lib/services/audit-log-service";
 
+const trustedOrigins = process.env.BETTER_AUTH_TRUSTED_ORIGINS?.split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
     provider: "pg",
@@ -88,6 +92,7 @@ export const auth = betterAuth({
   },
   secret: process.env.BETTER_AUTH_SECRET!,
   baseURL: process.env.BETTER_AUTH_URL!,
+  trustedOrigins,
 });
 
 export type AuthSession = typeof auth.$Infer.Session;
