@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache"
 
-import { requireAdmin } from "@/lib/auth/permissions"
+import { requirePermission } from "@/lib/auth/permissions"
 import { db } from "@/lib/db"
 import { kategoriKas, transaksi, warga } from "@/lib/db/schema"
 import { writeAuditLog } from "@/lib/services/audit-log-service"
@@ -25,7 +25,7 @@ type ActionResult<T> =
     }
 
 export async function listWargaAction(input: { search?: string; status?: "semua" | "tetap" | "kontrak" } = {}) {
-  await requireAdmin()
+  await requirePermission("kas_masuk.read")
   const data = await listWarga({ search: input.search, status: input.status })
   return {
     ok: true as const,
@@ -46,7 +46,7 @@ export async function listWargaAction(input: { search?: string; status?: "semua"
 }
 
 export async function listKategoriAction() {
-  await requireAdmin()
+  await requirePermission("kas_masuk.read")
   const rows = await db
     .select({
       id: kategoriKas.id,
@@ -81,7 +81,7 @@ function isValidMonth(value: string) {
 }
 
 export async function listTransaksiMasukAction() {
-  await requireAdmin()
+  await requirePermission("kas_masuk.read")
   const { listTransaksiMasuk } = await import("@/lib/services/transaksi-service")
   const rows = await listTransaksiMasuk({})
   return {
@@ -104,7 +104,7 @@ export async function listTransaksiMasukAction() {
 }
 
 export async function getPaidMonthsAction(wargaId: number, kategoriId: number, tahun: number) {
-  await requireAdmin()
+  await requirePermission("kas_masuk.read")
 
   const [wargaRow] = await db.select().from(warga).where(eq(warga.id, wargaId)).limit(1)
   if (!wargaRow) {
@@ -151,7 +151,7 @@ export async function getPaidMonthsAction(wargaId: number, kategoriId: number, t
 }
 
 export async function createKasMasukAction(input: CreateKasMasukInput): Promise<ActionResult<{ id: number }>> {
-  const admin = await requireAdmin()
+  const admin = await requirePermission("kas_masuk.write")
 
   try {
     const parsed = createKasMasukSchema.parse(input)

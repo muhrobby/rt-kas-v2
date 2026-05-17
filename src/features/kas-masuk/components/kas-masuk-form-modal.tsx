@@ -78,14 +78,28 @@ export function KasMasukFormModal({
     onYearChange?.(year)
   }
 
+  const isSelectableMonth = (month: number, year: number) => {
+    if (paidMonths.includes(month)) return false
+    if (selectedKategori?.tipeTagihan === "sekali") return true
+    if (selectedKategori?.tipeTagihan !== "bulanan") return true
+    if (notEligibleMonths.includes(month)) return false
+    if (firstBillYear != null && year < firstBillYear) return false
+    if (firstBillMonth != null && firstBillYear != null && year === firstBillYear && month < firstBillMonth) return false
+    return true
+  }
+
+  const selectedMonths = values.bulan.filter((month) => isSelectableMonth(month, values.tahun))
+
   const toggleMonth = (month: number) => {
     setValues((state) => {
+      const selectableMonths = state.bulan.filter((item) => isSelectableMonth(item, state.tahun))
+
       if (selectedKategori?.tipeTagihan === "sekali") {
-        return { ...state, bulan: state.bulan.includes(month) ? [] : [month] }
+        return { ...state, bulan: selectableMonths.includes(month) ? [] : [month] }
       }
 
-      const exists = state.bulan.includes(month)
-      const bulan = exists ? state.bulan.filter((m) => m !== month) : [...state.bulan, month].sort((a, b) => a - b)
+      const exists = selectableMonths.includes(month)
+      const bulan = exists ? selectableMonths.filter((m) => m !== month) : [...selectableMonths, month].sort((a, b) => a - b)
       return { ...state, bulan }
     })
   }
@@ -97,7 +111,7 @@ export function KasMasukFormModal({
       nominal: values.nominal > 0 ? "" : "Nominal harus lebih dari 0.",
     }
     setErrors(nextErrors)
-    if ((selectedKategori?.tipeTagihan === "bulanan" || selectedKategori?.tipeTagihan === "sekali") && values.bulan.length === 0) {
+    if ((selectedKategori?.tipeTagihan === "bulanan" || selectedKategori?.tipeTagihan === "sekali") && selectedMonths.length === 0) {
       return false
     }
     return !nextErrors.wargaId && !nextErrors.kategoriId && !nextErrors.nominal
@@ -105,7 +119,7 @@ export function KasMasukFormModal({
 
   const handleSubmit = async () => {
     if (!validate()) return
-    await onSubmit({ ...values, wargaId, kategoriId })
+    await onSubmit({ ...values, wargaId, kategoriId, bulan: selectedMonths })
   }
 
   return (
@@ -191,14 +205,14 @@ export function KasMasukFormModal({
                 />
               </AppField>
 
-              <AppField label={`Pilih Bulan Pembayaran${values.bulan.length > 0 ? ` (${values.bulan.length} bulan dipilih)` : ""}`} hint={selectedKategori?.tipeTagihan === "sekali" ? "Pilih satu bulan periode kategori ini berlaku. Bulan tercoret = sudah dibayar." : "Bulan tercoret = sudah dibayar. Bulan tersamarkan = belum eligible."}>
+              <AppField label={`Pilih Bulan Pembayaran${selectedMonths.length > 0 ? ` (${selectedMonths.length} bulan dipilih)` : ""}`} hint={selectedKategori?.tipeTagihan === "sekali" ? "Pilih satu bulan periode kategori ini berlaku. Bulan tercoret = sudah dibayar." : "Bulan tercoret = sudah dibayar. Bulan tersamarkan = belum eligible."}>
                 {loadingPaidMonths ? (
                   <p className="text-[11px] text-kanvas-ink-3">Memuat...</p>
                 ) : (
                   <MonthPaymentSelector
                     paidMonths={paidMonths}
                     notEligibleMonths={notEligibleMonths}
-                    selectedMonths={values.bulan}
+                    selectedMonths={selectedMonths}
                     onToggle={toggleMonth}
                     firstBillMonth={firstBillMonth ?? 1}
                     firstBillYear={firstBillYear ?? 2000}
@@ -217,7 +231,7 @@ export function KasMasukFormModal({
                   Tagihan warga ini mulai {BULAN_SINGKAT[firstBillMonth - 1]} {firstBillYear}.
                 </p>
               ) : null}
-              {(selectedKategori?.tipeTagihan === "bulanan" || selectedKategori?.tipeTagihan === "sekali") && values.bulan.length === 0 ? (
+              {(selectedKategori?.tipeTagihan === "bulanan" || selectedKategori?.tipeTagihan === "sekali") && selectedMonths.length === 0 ? (
                 <p className="-mt-1 text-[11px] text-kanvas-danger">Pilih minimal 1 bulan.</p>
               ) : null}
             </>

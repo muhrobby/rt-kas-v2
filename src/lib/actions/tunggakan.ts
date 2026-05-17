@@ -1,6 +1,6 @@
 "use server"
 
-import { requireAdmin } from "@/lib/auth/permissions"
+import { requirePermission } from "@/lib/auth/permissions"
 import { getTunggakan } from "@/lib/services/tunggakan-service"
 import { tunggakanFilterSchema } from "@/lib/validations/tunggakan"
 import { ZodError } from "zod"
@@ -33,7 +33,7 @@ function toActionError(error: unknown): ActionResult<never> {
 export async function getTunggakanAction(
   filter: z.infer<typeof tunggakanFilterSchema>
 ): Promise<ActionResult<Awaited<ReturnType<typeof getTunggakan>>>> {
-  await requireAdmin()
+  await requirePermission("tunggakan.read")
 
   try {
     const parsed = tunggakanFilterSchema.parse(filter)

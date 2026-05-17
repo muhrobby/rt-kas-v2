@@ -1,6 +1,6 @@
 "use server"
 
-import { requireAdmin } from "@/lib/auth/permissions"
+import { requirePermission } from "@/lib/auth/permissions"
 import { getPdfBranding } from "@/lib/branding/format-branding"
 import type { PdfBranding } from "@/lib/branding/format-branding"
 import { getAppSettings } from "@/lib/services/app-settings-service"
@@ -25,7 +25,7 @@ function toActionError(error: unknown): ActionResult<never> {
 }
 
 export async function getKuitansiAdminAction(transaksiId: number): Promise<ActionResult<KuitansiAdminPdfData>> {
-  await requireAdmin()
+  await requirePermission("kuitansi.admin.read")
   try {
     const [kuitansi, settings] = await Promise.all([getKuitansiForAdmin(transaksiId), getAppSettings()])
     return { ok: true, data: { ...kuitansi, branding: getPdfBranding(settings) } }

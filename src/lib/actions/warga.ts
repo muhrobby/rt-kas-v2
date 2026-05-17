@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache"
 
-import { requireAdmin } from "@/lib/auth/permissions"
+import { requirePermission } from "@/lib/auth/permissions"
 import { db } from "@/lib/db"
 import { user, warga } from "@/lib/db/schema"
 import { writeAuditLog } from "@/lib/services/audit-log-service"
@@ -68,7 +68,7 @@ function toActionError(error: unknown): ActionResult<never> {
 }
 
 export async function listWargaAction(input: { search?: string; status?: "semua" | "tetap" | "kontrak" } = {}) {
-  await requireAdmin()
+  await requirePermission("warga.read")
   const data = await listWarga(input)
   return {
     ok: true as const,
@@ -77,7 +77,7 @@ export async function listWargaAction(input: { search?: string; status?: "semua"
 }
 
 export async function createWargaAction(input: CreateWargaInput): Promise<ActionResult<{ id: number; temporaryPassword?: string }>> {
-  const admin = await requireAdmin()
+  const admin = await requirePermission("warga.write")
 
   try {
     const payload = parseWargaInput(input)
@@ -123,7 +123,7 @@ export async function createWargaAction(input: CreateWargaInput): Promise<Action
 }
 
 export async function updateWargaAction(id: number, input: UpdateWargaInput): Promise<ActionResult<{ id: number }>> {
-  const admin = await requireAdmin()
+  const admin = await requirePermission("warga.write")
 
   try {
     const payload = parseWargaInput(input)
@@ -182,7 +182,7 @@ export async function updateWargaAction(id: number, input: UpdateWargaInput): Pr
 }
 
 export async function deleteWargaAction(id: number): Promise<ActionResult<{ id: number }>> {
-  const admin = await requireAdmin()
+  const admin = await requirePermission("warga.delete")
 
   try {
     await db.transaction(async (tx) => {
@@ -232,7 +232,7 @@ export async function deleteWargaAction(id: number): Promise<ActionResult<{ id: 
 }
 
 export async function updateWargaPengurusAction(id: number, input: ToggleWargaPengurusInput): Promise<ActionResult<{ id: number }>> {
-  const admin = await requireAdmin()
+  const admin = await requirePermission("pengurus.manage")
 
   try {
     const parsed = toggleWargaPengurusInputSchema.parse(input)

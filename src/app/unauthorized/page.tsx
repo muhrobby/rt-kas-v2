@@ -2,13 +2,18 @@ import Link from "next/link"
 
 import { AppButton, AppCard } from "@/components/kanvas"
 import { LogoutButton } from "@/components/auth/logout-button"
-import { getCurrentUser } from "@/lib/auth/session"
+import { getAdminRoleFresh, getCurrentUser } from "@/lib/auth/session"
+import { ADMIN_ROLE_LABELS } from "@/lib/constants/admin-roles"
 
 export default async function UnauthorizedPage() {
   const currentUser = await getCurrentUser()
+  const adminRole = currentUser?.role === "admin" ? await getAdminRoleFresh(currentUser.id) : null
 
   const dashboardHref = currentUser?.role === "admin" ? "/admin/dashboard" : "/warga/dashboard"
-  const roleLabel = currentUser?.role === "admin" ? "Admin" : "Warga"
+  const roleTypeLabel = currentUser?.role === "admin" ? "sub-role" : "role"
+  const roleLabel = currentUser?.role === "admin"
+    ? adminRole ? ADMIN_ROLE_LABELS[adminRole] : "Sub-role tidak valid"
+    : "Warga"
 
   return (
     <main className="flex min-h-svh items-center justify-center bg-kanvas-paper p-6">
@@ -18,7 +23,7 @@ export default async function UnauthorizedPage() {
 
         {currentUser ? (
           <p className="mt-3 text-sm leading-relaxed text-kanvas-ink-3">
-            Akun Anda (role: <span className="font-semibold text-kanvas-ink">{roleLabel}</span>) tidak memiliki akses ke
+            Akun Anda ({roleTypeLabel}: <span className="font-semibold text-kanvas-ink">{roleLabel}</span>) tidak memiliki akses ke
             halaman yang Anda tuju.
           </p>
         ) : (

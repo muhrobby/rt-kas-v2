@@ -4,7 +4,7 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 
 import { AppPill, KanvasIcons } from "@/components/kanvas"
-import { adminNavItems } from "@/lib/constants/nav"
+import { adminNavItems, type AdminNavItem } from "@/lib/constants/nav"
 import { formatRupiah } from "@/lib/format/currency"
 import type { AppBranding } from "@/lib/branding/format-branding"
 
@@ -14,6 +14,7 @@ interface AdminMobileSidebarProps {
   onClose: () => void
   saldoKas: number | null
   tunggakanCount: number | null
+  navItems?: AdminNavItem[]
 }
 
 const iconMap = {
@@ -25,11 +26,13 @@ const iconMap = {
   alert: KanvasIcons.alert,
   log: KanvasIcons.log,
   gear: KanvasIcons.gear,
+  shield: KanvasIcons.shield,
 } as const
 
-export function AdminMobileSidebar({ branding, open, onClose, saldoKas, tunggakanCount }: AdminMobileSidebarProps) {
+export function AdminMobileSidebar({ branding, open, onClose, saldoKas, tunggakanCount, navItems }: AdminMobileSidebarProps) {
   const pathname = usePathname()
   const brandInitial = branding.appName.trim().charAt(0).toUpperCase() || "K"
+  const items = navItems ?? adminNavItems
 
   return (
     <div className={`fixed inset-0 z-50 lg:hidden ${open ? "" : "pointer-events-none"}`} aria-hidden={!open}>
@@ -62,7 +65,7 @@ export function AdminMobileSidebar({ branding, open, onClose, saldoKas, tunggaka
         </div>
 
         <nav className="flex flex-1 flex-col gap-0.5 overflow-auto">
-          {adminNavItems.map((item) => {
+          {items.map((item) => {
             const Icon = iconMap[item.icon]
             const active = pathname === item.href
 

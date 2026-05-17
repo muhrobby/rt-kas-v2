@@ -1,7 +1,6 @@
 "use server"
 
-import { requireAdmin } from "@/lib/auth/permissions"
-import { getCurrentUser } from "@/lib/auth/session"
+import { requirePermission } from "@/lib/auth/permissions"
 import { getAppSettings, updateAppSettings } from "@/lib/services/app-settings-service"
 import { formatAppSettingsForView } from "@/lib/branding/format-branding"
 import { appSettingsInputSchema, type AppSettingsInput } from "@/lib/validations/app-settings"
@@ -38,15 +37,7 @@ export async function getAppSettingsAction() {
 }
 
 export async function updateAppSettingsAction(input: AppSettingsInput): Promise<ActionResult<ReturnType<typeof formatAppSettingsForView>>> {
-  await requireAdmin()
-
-  const currentUser = await getCurrentUser()
-  if (!currentUser) {
-    return {
-      ok: false,
-      error: "Sesi tidak valid. Silakan login kembali.",
-    }
-  }
+  const currentUser = await requirePermission("settings.write")
 
   try {
     const parsed = appSettingsInputSchema.parse(input)

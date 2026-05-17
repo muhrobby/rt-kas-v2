@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache"
 
-import { requireAdmin } from "@/lib/auth/permissions"
+import { requirePermission } from "@/lib/auth/permissions"
 import { db } from "@/lib/db"
 import { kategoriKas, transaksi } from "@/lib/db/schema"
 import { writeAuditLog } from "@/lib/services/audit-log-service"
@@ -19,7 +19,7 @@ type ActionResult<T> =
     }
 
 export async function listKategoriKeluarAction() {
-  await requireAdmin()
+  await requirePermission("kas_keluar.read")
   const rows = await db
     .select({
       id: kategoriKas.id,
@@ -34,7 +34,7 @@ export async function listKategoriKeluarAction() {
 }
 
 export async function listTransaksiKeluarAction() {
-  await requireAdmin()
+  await requirePermission("kas_keluar.read")
   const { listTransaksiKeluar } = await import("@/lib/services/transaksi-service")
   const rows = await listTransaksiKeluar({})
   return {
@@ -73,7 +73,7 @@ function toActionError(error: unknown): ActionResult<never> {
 }
 
 export async function createKasKeluarAction(input: CreateKasKeluarInput): Promise<ActionResult<{ id: number }>> {
-  const admin = await requireAdmin()
+  const admin = await requirePermission("kas_keluar.write")
 
   try {
     const parsed = createKasKeluarSchema.parse(input)

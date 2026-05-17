@@ -1,4 +1,4 @@
-import { requireAdmin } from "@/lib/auth/permissions"
+import { requirePermission } from "@/lib/auth/permissions"
 import { generateLaporanPDFBytes } from "@/lib/export/pdf"
 import { getLaporanKeuangan } from "@/lib/services/laporan-service"
 import { getAppSettings } from "@/lib/services/app-settings-service"
@@ -25,7 +25,7 @@ const MONTH_NAMES = [
 ]
 
 export async function GET(request: Request) {
-  const admin = await requireAdmin()
+  const admin = await requirePermission("laporan.export")
 
   try {
     const headersList = await headers()

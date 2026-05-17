@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache"
 
-import { requireAdmin } from "@/lib/auth/permissions"
+import { requirePermission } from "@/lib/auth/permissions"
 import { db } from "@/lib/db"
 import { kategoriKas } from "@/lib/db/schema"
 import { writeAuditLog } from "@/lib/services/audit-log-service"
@@ -41,13 +41,13 @@ function toActionError(error: unknown): ActionResult<never> {
 export async function listKategoriAction(
   input: { search?: string; jenisArus?: "semua" | "masuk" | "keluar"; tipeTagihan?: "semua" | "bulanan" | "sekali" } = {},
 ) {
-  await requireAdmin()
+  await requirePermission("kategori.read")
   const data = await listKategori(input)
   return { ok: true as const, data }
 }
 
 export async function createKategoriAction(input: CreateKategoriInput): Promise<ActionResult<{ id: number }>> {
-  const admin = await requireAdmin()
+  const admin = await requirePermission("kategori.write")
 
   try {
     const parsed = createKategoriInputSchema.parse(input)
@@ -77,7 +77,7 @@ export async function createKategoriAction(input: CreateKategoriInput): Promise<
 }
 
 export async function updateKategoriAction(id: number, input: UpdateKategoriInput): Promise<ActionResult<{ id: number }>> {
-  const admin = await requireAdmin()
+  const admin = await requirePermission("kategori.write")
 
   try {
     const parsed = createKategoriInputSchema.parse(input)
@@ -113,7 +113,7 @@ export async function updateKategoriAction(id: number, input: UpdateKategoriInpu
 }
 
 export async function deleteKategoriAction(id: number): Promise<ActionResult<{ id: number }>> {
-  const admin = await requireAdmin()
+  const admin = await requirePermission("kategori.delete")
 
   try {
     const [existing] = await db

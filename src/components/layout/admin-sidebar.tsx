@@ -4,7 +4,7 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 
 import { AppPill, KanvasIcons } from "@/components/kanvas"
-import { adminNavItems } from "@/lib/constants/nav"
+import { adminNavItems, type AdminNavItem } from "@/lib/constants/nav"
 import { formatRupiah } from "@/lib/format/currency"
 import type { AppBranding } from "@/lib/branding/format-branding"
 
@@ -17,17 +17,20 @@ const iconMap = {
   alert: KanvasIcons.alert,
   log: KanvasIcons.log,
   gear: KanvasIcons.gear,
+  shield: KanvasIcons.shield,
 } as const
 
 interface AdminSidebarProps {
   branding: AppBranding
   saldoKas: number | null
   tunggakanCount: number | null
+  navItems?: AdminNavItem[]
 }
 
-export function AdminSidebar({ branding, saldoKas, tunggakanCount }: AdminSidebarProps) {
+export function AdminSidebar({ branding, saldoKas, tunggakanCount, navItems }: AdminSidebarProps) {
   const pathname = usePathname()
   const brandInitial = branding.appName.trim().charAt(0).toUpperCase() || "K"
+  const items = navItems ?? adminNavItems
 
   return (
     <aside className="sticky top-0 flex h-svh w-[220px] shrink-0 flex-col border-r border-kanvas-line bg-kanvas-paper-2 px-3.5 py-5 xl:w-[232px]">
@@ -42,7 +45,7 @@ export function AdminSidebar({ branding, saldoKas, tunggakanCount }: AdminSideba
       </div>
 
       <nav className="flex flex-1 flex-col gap-0.5">
-        {adminNavItems.map((item) => {
+        {items.map((item) => {
           const Icon = iconMap[item.icon]
           const active = pathname === item.href
           return (
