@@ -1,6 +1,6 @@
 "use server"
 
-import { requireAdmin } from "@/lib/auth/permissions"
+import { requirePermission } from "@/lib/auth/permissions"
 import { getPdfBranding } from "@/lib/branding/format-branding"
 import type { PdfBranding } from "@/lib/branding/format-branding"
 import { getAppSettings } from "@/lib/services/app-settings-service"
@@ -51,7 +51,7 @@ function toActionError(error: unknown): ActionResult<never> {
 export async function getLaporanAction(
   filter: z.infer<typeof filterSchema>,
 ): Promise<ActionResult<LaporanPdfResult>> {
-  await requireAdmin()
+  await requirePermission("laporan.read")
 
   try {
     const parsed = filterSchema.parse(filter)

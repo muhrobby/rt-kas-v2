@@ -7,6 +7,7 @@ import { AdminMobileSidebar } from "@/components/layout/admin-mobile-sidebar"
 import { AdminSidebar } from "@/components/layout/admin-sidebar"
 import { AdminTopbar } from "@/components/layout/admin-topbar"
 import type { AppBranding } from "@/lib/branding/format-branding"
+import type { AdminNavItem } from "@/lib/constants/nav"
 
 export interface AdminShellUser {
   name: string
@@ -20,9 +21,10 @@ interface AdminShellProps extends PropsWithChildren {
   user?: AdminShellUser
   saldoKas?: number | null
   tunggakanCount?: number | null
+  navItems?: AdminNavItem[]
 }
 
-export function AdminShell({ branding, children, user, saldoKas = null, tunggakanCount = null }: AdminShellProps) {
+export function AdminShell({ branding, children, user, saldoKas = null, tunggakanCount = null, navItems }: AdminShellProps) {
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false)
 
   return (
@@ -33,10 +35,11 @@ export function AdminShell({ branding, children, user, saldoKas = null, tunggaka
         onClose={() => setMobileSidebarOpen(false)}
         saldoKas={saldoKas}
         tunggakanCount={tunggakanCount}
+        navItems={navItems}
       />
 
       <div className="hidden lg:flex">
-        <AdminSidebar branding={branding} saldoKas={saldoKas} tunggakanCount={tunggakanCount} />
+        <AdminSidebar branding={branding} saldoKas={saldoKas} tunggakanCount={tunggakanCount} navItems={navItems} />
       </div>
 
       <div className="flex min-w-0 flex-1 flex-col">

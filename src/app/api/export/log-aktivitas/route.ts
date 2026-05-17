@@ -1,4 +1,4 @@
-import { requireAdmin } from "@/lib/auth/permissions"
+import { requirePermission } from "@/lib/auth/permissions"
 import { createLogAktivitasExcel } from "@/lib/export/excel"
 import { listLogAktivitas } from "@/lib/services/log-aktivitas-service"
 import { logAktivitasQuerySchema, EXPORT_LIMITS } from "@/lib/validations/export"
@@ -8,7 +8,7 @@ import { writeAuditLog } from "@/lib/services/audit-log-service"
 import { headers } from "next/headers"
 
 export async function GET(request: Request) {
-  const admin = await requireAdmin()
+  const admin = await requirePermission("log.export")
 
   try {
     const headersList = await headers()

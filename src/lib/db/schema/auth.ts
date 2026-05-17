@@ -13,12 +13,29 @@ export const user = pgTable(
     role: text("role").default("user"),
     wargaId: integer("warga_id"),
     mustChangePassword: boolean("must_change_password").notNull().default(false),
+    /**
+     * Sub-role domain untuk user dengan role 'admin'.
+     * Nilai valid: 'ketua_rt' | 'bendahara' | 'sekretaris' | 'anggota' | NULL.
+     * User dengan role 'user' wajib NULL (dijaga oleh check constraint).
+     * TASK-002: ditambahkan untuk permission granular admin.
+     */
+    adminRole: text("admin_role"),
     createdAt: timestamp("created_at").notNull().defaultNow(),
     updatedAt: timestamp("updated_at").notNull().defaultNow(),
   },
   (table) => [
     uniqueIndex("uq_user_warga_id_nonnull").on(table.wargaId).where(sql`${table.wargaId} is not null`),
     check("user_ck_role", sql`${table.role} in ('admin', 'user')`),
+    // admin_role hanya boleh salah satu nilai valid atau NULL
+    check(
+      "user_ck_admin_role",
+      sql`${table.adminRole} is null or ${table.adminRole} in ('ketua_rt', 'bendahara', 'sekretaris', 'anggota')`,
+    ),
+    // user dengan role 'user' tidak boleh memiliki admin_role
+    check(
+      "user_ck_admin_role_only_for_admin",
+      sql`not (${table.role} = 'user' and ${table.adminRole} is not null)`,
+    ),
   ],
 );
 

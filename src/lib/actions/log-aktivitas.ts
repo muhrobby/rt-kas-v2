@@ -1,6 +1,6 @@
 "use server"
 
-import { requireAdmin } from "@/lib/auth/permissions"
+import { requirePermission } from "@/lib/auth/permissions"
 import { getLogFilters, listLogAktivitasWithCount, type LogAktivitasFilters } from "@/lib/services/log-aktivitas-service"
 
 type ActionResult<T> =
@@ -9,7 +9,7 @@ type ActionResult<T> =
 
 export async function getLogFiltersAction(): Promise<ActionResult<Awaited<ReturnType<typeof getLogFilters>>>> {
   try {
-    await requireAdmin()
+    await requirePermission("log.read")
     const result = await getLogFilters()
     return { ok: true, data: result }
   } catch (error) {
@@ -27,7 +27,7 @@ export async function getLogAktivitasAction(
   offset: number
 }>> {
   try {
-    await requireAdmin()
+    await requirePermission("log.read")
 
     const result = await listLogAktivitasWithCount(filter)
 

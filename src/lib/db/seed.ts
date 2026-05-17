@@ -9,7 +9,25 @@ import { account, user } from "./schema/auth";
 import { kategoriKas } from "./schema/kategori-kas";
 import { transaksi } from "./schema/transaksi";
 import { warga } from "./schema/warga";
+import type { AdminRole } from "../constants/admin-roles";
 import { defaultAppSettings } from "../constants/app-settings";
+
+function getSeedAdminRole(rolePengurus: string | undefined): AdminRole {
+  switch (rolePengurus?.trim().toLowerCase()) {
+    case "bendahara":
+      return "bendahara";
+    case "sekretaris":
+      return "sekretaris";
+    case "anggota":
+    case "anggota pengurus":
+      return "anggota";
+    case "ketua":
+    case "ketua rt":
+    case "ketua_rt":
+    default:
+      return "ketua_rt";
+  }
+}
 
 async function main() {
   console.log("Seeding database...");
@@ -39,6 +57,7 @@ async function main() {
       username: "08123456789",
       displayUsername: "08123456789",
       role: "admin",
+      adminRole: "ketua_rt",
     })
     .onConflictDoNothing();
 
@@ -106,6 +125,7 @@ async function main() {
         username: wargaInfo.noTelp,
         displayUsername: wargaInfo.noTelp,
         role: wargaInfo.isPengurus ? "admin" : "user",
+        adminRole: wargaInfo.isPengurus ? getSeedAdminRole(wargaInfo.rolePengurus) : null,
         wargaId: w.id,
       })
       .onConflictDoNothing();

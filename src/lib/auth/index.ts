@@ -39,6 +39,17 @@ export const auth = betterAuth({
         defaultValue: false,
         input: false,
       },
+      /**
+       * Sub-role domain untuk user dengan role 'admin'.
+       * Nilai valid: 'ketua_rt' | 'bendahara' | 'sekretaris' | 'anggota' | null.
+       * User dengan role 'user' selalu null.
+       * TASK-003: di-expose ke session agar permission guard bisa membacanya.
+       */
+      adminRole: {
+        type: "string",
+        required: false,
+        input: false,
+      },
     },
   },
   emailAndPassword: {
