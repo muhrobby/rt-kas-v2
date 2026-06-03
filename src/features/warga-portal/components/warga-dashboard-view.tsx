@@ -5,6 +5,7 @@ import { formatRupiah } from "@/lib/format/currency"
 import type { WargaDashboardData } from "@/lib/services/warga-portal-service"
 
 import { WargaBillStatus } from "@/features/warga-portal/components/warga-bill-status"
+import { getWargaDashboardEmptyStateMessage } from "@/features/warga-portal/lib/portal-empty-state"
 
 interface WargaDashboardViewProps {
   data: WargaDashboardData
@@ -13,6 +14,7 @@ interface WargaDashboardViewProps {
 export function WargaDashboardView({ data }: WargaDashboardViewProps) {
   const me = data.profile
   const lunasCount = data.billStatusCurrent.filter((item) => item.status === "lunas").length
+  const emptyStateMessage = getWargaDashboardEmptyStateMessage(data.billStatusCurrent.length)
 
   return (
     <main className="space-y-3.5 p-4 md:p-6">
@@ -48,7 +50,13 @@ export function WargaDashboardView({ data }: WargaDashboardViewProps) {
           <h2 className="text-[18px] text-kanvas-ink">Tagihan Bulan Ini</h2>
           <p className="text-[11px] text-kanvas-ink-3">{lunasCount}/{data.billStatusCurrent.length} lunas</p>
         </div>
-        <WargaBillStatus items={data.billStatusCurrent} />
+        {emptyStateMessage ? (
+          <AppCard className="border-dashed p-3 text-[12px] text-kanvas-ink-3">
+            {emptyStateMessage}
+          </AppCard>
+        ) : (
+          <WargaBillStatus items={data.billStatusCurrent} />
+        )}
       </section>
 
       {data.contractWarning.show ? (

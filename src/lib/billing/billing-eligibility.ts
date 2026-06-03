@@ -1,5 +1,3 @@
-import "server-only"
-
 const TIMEZONE = "Asia/Jakarta"
 const CUTOFF_DAY = 15
 const MIN_YEAR = 2000

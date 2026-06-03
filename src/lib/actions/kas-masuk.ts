@@ -7,7 +7,8 @@ import { db } from "@/lib/db"
 import { kategoriKas, transaksi, warga } from "@/lib/db/schema"
 import { writeAuditLog } from "@/lib/services/audit-log-service"
 import { listWarga } from "@/lib/services/warga-service"
-import { getFirstBillablePeriod, isPeriodEligible } from "@/lib/billing/billing-eligibility"
+import { getFirstBillablePeriod } from "@/lib/billing/billing-eligibility"
+import { validateKasMasukBillingPeriods } from "@/lib/actions/kas-masuk-billing"
 import {
   type CreateKasMasukInput,
   createKasMasukSchema,
@@ -188,15 +189,15 @@ export async function createKasMasukAction(input: CreateKasMasukInput): Promise<
       return { ok: false, error: "Kategori sekali bayar hanya boleh memilih 1 bulan." }
     }
 
-    if (kategori.tipeTagihan === "bulanan") {
-      for (const bulan of daftarBulan) {
-        if (!isPeriodEligible(wargaRow.createdAt, Number(bulan), tahun)) {
-          return {
-            ok: false,
-            error: "Periode tagihan belum berlaku untuk warga ini.",
-          }
-        }
-      }
+    const billingCheck = validateKasMasukBillingPeriods({
+      categoryType: kategori.tipeTagihan,
+      wargaCreatedAt: wargaRow.createdAt,
+      months: daftarBulan.map((bulan) => Number(bulan)),
+      year: tahun,
+    })
+
+    if (!billingCheck.ok) {
+      return { ok: false, error: billingCheck.error }
     }
 
     const created = await db.transaction(async (tx) => {

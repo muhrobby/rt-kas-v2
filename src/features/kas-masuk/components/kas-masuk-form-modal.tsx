@@ -7,6 +7,7 @@ import { BULAN_SINGKAT } from "@/lib/constants/months"
 import { formatRupiah } from "@/lib/format/currency"
 
 import { MonthPaymentSelector } from "@/features/kas-masuk/components/month-payment-selector"
+import { filterSelectableMonths } from "@/features/kas-masuk/lib/month-eligibility"
 import type { KategoriOptionUi, WargaOptionUi } from "@/features/kas-masuk/lib/kas-masuk-actions-client"
 
 export interface KasMasukFormValues {
@@ -78,21 +79,25 @@ export function KasMasukFormModal({
     onYearChange?.(year)
   }
 
-  const isSelectableMonth = (month: number, year: number) => {
-    if (paidMonths.includes(month)) return false
-    if (selectedKategori?.tipeTagihan === "sekali") return true
-    if (selectedKategori?.tipeTagihan !== "bulanan") return true
-    if (notEligibleMonths.includes(month)) return false
-    if (firstBillYear != null && year < firstBillYear) return false
-    if (firstBillMonth != null && firstBillYear != null && year === firstBillYear && month < firstBillMonth) return false
-    return true
-  }
-
-  const selectedMonths = values.bulan.filter((month) => isSelectableMonth(month, values.tahun))
+  const selectedMonths = filterSelectableMonths(values.bulan, {
+    categoryType: selectedKategori?.tipeTagihan,
+    year: values.tahun,
+    paidMonths,
+    notEligibleMonths,
+    firstBillMonth,
+    firstBillYear,
+  })
 
   const toggleMonth = (month: number) => {
     setValues((state) => {
-      const selectableMonths = state.bulan.filter((item) => isSelectableMonth(item, state.tahun))
+      const selectableMonths = filterSelectableMonths(state.bulan, {
+        categoryType: selectedKategori?.tipeTagihan,
+        year: state.tahun,
+        paidMonths,
+        notEligibleMonths,
+        firstBillMonth,
+        firstBillYear,
+      })
 
       if (selectedKategori?.tipeTagihan === "sekali") {
         return { ...state, bulan: selectableMonths.includes(month) ? [] : [month] }
