@@ -64,6 +64,10 @@ export async function updateAppSettingsAction(input: AppSettingsInput): Promise<
     }
 
     revalidatePath("/admin/settings")
+    revalidatePath("/login")
+    revalidatePath("/", "layout")
+    revalidatePath("/admin", "layout")
+    revalidatePath("/warga", "layout")
 
     return { ok: true, data: formatAppSettingsForView(updated) }
   } catch (error) {
