@@ -46,9 +46,9 @@ export async function GET(request: Request) {
     const nowYear = new Date().getFullYear()
     
     const parsed = laporanQuerySchema.safeParse({
-      startMonth: searchParams.get("startMonth") ?? "0",
+      startMonth: searchParams.get("startMonth") ?? "1",
       startYear: searchParams.get("startYear") ?? String(nowYear),
-      endMonth: searchParams.get("endMonth") ?? "11",
+      endMonth: searchParams.get("endMonth") ?? "12",
       endYear: searchParams.get("endYear") ?? String(nowYear),
       saldoAwal: searchParams.get("saldoAwal") ?? "0",
     })
@@ -73,7 +73,7 @@ export async function GET(request: Request) {
         userId: admin.id,
         modul: "Laporan",
         aksi: "export_excel",
-        keterangan: `Export laporan keuangan Excel periode ${parsed.data.startMonth + 1}/${parsed.data.startYear} s.d ${parsed.data.endMonth + 1}/${parsed.data.endYear}`,
+        keterangan: `Export laporan keuangan Excel periode ${parsed.data.startMonth}/${parsed.data.startYear} s.d ${parsed.data.endMonth}/${parsed.data.endYear}`,
       })
     } catch (e) {
       console.error("[AUDIT_LOG_ERROR]", e)

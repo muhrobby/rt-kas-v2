@@ -20,9 +20,9 @@ type LaporanPdfResult = LaporanResult & {
 }
 
 const filterSchema = z.object({
-  startMonth: z.number().int().min(0).max(11),
+  startMonth: z.number().int().min(1).max(12),
   startYear: z.number().int().min(2000).max(2100),
-  endMonth: z.number().int().min(0).max(11),
+  endMonth: z.number().int().min(1).max(12),
   endYear: z.number().int().min(2000).max(2100),
   saldoAwal: z.number().int().min(0).optional(),
 })

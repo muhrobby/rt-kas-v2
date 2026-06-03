@@ -1,4 +1,4 @@
-import jsPDF from "jspdf"
+import { jsPDF } from "jspdf"
 import { defaultAppSettings } from "@/lib/constants/app-settings"
 import { formatRupiah } from "@/lib/format/currency"
 import { formatRtRwLabel } from "@/lib/branding/format-branding"
@@ -6,6 +6,21 @@ import type { MonthlyCashflowRow } from "@/lib/services/laporan-service"
 import type { PdfBranding } from "@/lib/branding/format-branding"
 
 type RGB = [number, number, number]
+
+const PAGE_WIDTH = 210
+const PAGE_MARGIN_X = 14
+const PAGE_BOTTOM_SAFE = 274
+const REPORT_COLORS = {
+  ink: [31, 41, 55] as RGB,
+  muted: [100, 116, 139] as RGB,
+  line: [226, 232, 240] as RGB,
+  panel: [248, 250, 252] as RGB,
+  warning: [245, 158, 11] as RGB,
+  success: [22, 101, 52] as RGB,
+  successSoft: [220, 252, 231] as RGB,
+  danger: [185, 28, 28] as RGB,
+  dangerSoft: [254, 226, 226] as RGB,
+}
 
 const defaultPdfBranding: PdfBranding = {
   appName: defaultAppSettings.appName,
@@ -69,103 +84,240 @@ function getContactLine(branding: PdfBranding): string | null {
   return [branding.address, branding.phone, branding.email].filter(Boolean).join(" | ") || null
 }
 
+function getMonthLabel(row: MonthlyCashflowRow): string {
+  return `${row.bulan} ${row.tahun}`
+}
+
+function getGeneratedAtLabel(): string {
+  return new Date().toLocaleDateString("id-ID", {
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  })
+}
+
+function setText(doc: jsPDF, color: RGB, size: number, style: "normal" | "bold" = "normal") {
+  doc.setTextColor(...color)
+  doc.setFontSize(size)
+  doc.setFont("helvetica", style)
+}
+
+function drawAmount(doc: jsPDF, value: number, x: number, y: number, color: RGB = REPORT_COLORS.ink) {
+  setText(doc, color, 8.5, "bold")
+  doc.text(formatRupiah(value), x, y, { align: "right" })
+}
+
+function drawSectionTitle(doc: jsPDF, title: string, subtitle: string, y: number, primaryColor: RGB) {
+  doc.setFillColor(...primaryColor)
+  doc.roundedRect(PAGE_MARGIN_X, y - 4, 2.5, 10, 1.2, 1.2, "F")
+  setText(doc, REPORT_COLORS.ink, 11, "bold")
+  doc.text(title, PAGE_MARGIN_X + 6, y)
+  setText(doc, REPORT_COLORS.muted, 8, "normal")
+  doc.text(subtitle, PAGE_MARGIN_X + 6, y + 5)
+}
+
+function drawMetricCard(
+  doc: jsPDF,
+  x: number,
+  y: number,
+  width: number,
+  label: string,
+  value: number,
+  accentColor: RGB,
+) {
+  doc.setFillColor(...REPORT_COLORS.panel)
+  doc.setDrawColor(...REPORT_COLORS.line)
+  doc.roundedRect(x, y, width, 22, 2.5, 2.5, "FD")
+  doc.setFillColor(...accentColor)
+  doc.roundedRect(x + 3, y + 3, 2, 16, 1, 1, "F")
+
+  setText(doc, REPORT_COLORS.muted, 6.8, "bold")
+  doc.text(label.toUpperCase(), x + 8, y + 7)
+  setText(doc, REPORT_COLORS.ink, 9.2, "bold")
+  doc.text(formatRupiah(value), x + width - 4, y + 16, { align: "right" })
+}
+
+function drawReportFooter(doc: jsPDF, branding: PdfBranding) {
+  const pageCount = doc.getNumberOfPages()
+  const generatedAt = getGeneratedAtLabel()
+
+  for (let i = 1; i <= pageCount; i++) {
+    doc.setPage(i)
+    doc.setDrawColor(...REPORT_COLORS.line)
+    doc.line(PAGE_MARGIN_X, 282, PAGE_WIDTH - PAGE_MARGIN_X, 282)
+
+    setText(doc, REPORT_COLORS.muted, 7, "normal")
+    doc.text(`Dicetak: ${generatedAt}`, PAGE_MARGIN_X, 288)
+    doc.text(`Halaman ${i} dari ${pageCount}`, PAGE_WIDTH / 2, 288, { align: "center" })
+    if (branding.receiptFooter) {
+      doc.text(branding.receiptFooter, PAGE_WIDTH - PAGE_MARGIN_X, 288, { align: "right" })
+    }
+  }
+}
+
 export function generateLaporanPDFBytes(data: PdfLaporanData): ArrayBuffer {
   const doc = new jsPDF()
   const branding = getBranding(data.branding)
   const primaryColor = hexToRgb(branding.primaryColor)
+  const saldoAkhir = data.saldoAwal + data.saldoPeriode
+  let y = 14
 
-  doc.setTextColor(...primaryColor)
-  doc.setFontSize(16)
-  doc.setFont("helvetica", "bold")
-  doc.text(`Laporan Keuangan ${branding.appName}`, 105, 20, { align: "center" })
+  const addPageIfNeeded = (height: number) => {
+    if (y + height <= PAGE_BOTTOM_SAFE) return
+    doc.addPage()
+    y = 18
+  }
 
-  doc.setTextColor(40)
-  doc.setFontSize(11)
-  doc.setFont("helvetica", "normal")
-  doc.text(branding.rtRwLabel, 105, 28, { align: "center" })
+  doc.setFillColor(...REPORT_COLORS.panel)
+  doc.rect(0, 0, PAGE_WIDTH, 45, "F")
+  doc.setFillColor(...primaryColor)
+  doc.rect(0, 0, PAGE_WIDTH, 3, "F")
 
-  doc.setFontSize(9)
-  doc.text(data.periodeLabel, 105, 35, { align: "center" })
+  setText(doc, REPORT_COLORS.muted, 7.5, "bold")
+  doc.text((branding.organizationName || branding.appName).toUpperCase(), PAGE_MARGIN_X, y)
+  setText(doc, REPORT_COLORS.ink, 17, "bold")
+  doc.text("Laporan Kas & Iuran RT", PAGE_MARGIN_X, y + 9)
+  setText(doc, REPORT_COLORS.muted, 9, "normal")
+  doc.text(data.periodeLabel, PAGE_MARGIN_X, y + 16)
+
+  setText(doc, primaryColor, 10, "bold")
+  doc.text(branding.rtRwLabel, PAGE_WIDTH - PAGE_MARGIN_X, y + 2, { align: "right" })
   const contactLine = getContactLine(branding)
   if (contactLine) {
-    doc.setFontSize(8)
-    doc.setTextColor(90)
-    doc.text(contactLine, 105, 41, { align: "center" })
+    const contactLines = doc.splitTextToSize(contactLine, 82)
+    setText(doc, REPORT_COLORS.muted, 7.5, "normal")
+    doc.text(contactLines, PAGE_WIDTH - PAGE_MARGIN_X, y + 9, { align: "right" })
   }
 
-  doc.setTextColor(40)
-  doc.setFontSize(10)
-  doc.setFont("helvetica", "bold")
-  doc.text("Saldo Awal:", 14, 52)
-  doc.setFont("helvetica", "normal")
-  doc.text(formatRupiah(data.saldoAwal), 50, 52)
+  y = 54
+  const cardWidth = (PAGE_WIDTH - PAGE_MARGIN_X * 2 - 9) / 4
+  drawMetricCard(doc, PAGE_MARGIN_X, y, cardWidth, "Saldo Awal", data.saldoAwal, primaryColor)
+  drawMetricCard(doc, PAGE_MARGIN_X + cardWidth + 3, y, cardWidth, "Pemasukan", data.totalPemasukan, REPORT_COLORS.success)
+  drawMetricCard(doc, PAGE_MARGIN_X + (cardWidth + 3) * 2, y, cardWidth, "Pengeluaran", data.totalPengeluaran, REPORT_COLORS.danger)
+  drawMetricCard(doc, PAGE_MARGIN_X + (cardWidth + 3) * 3, y, cardWidth, "Saldo Akhir", saldoAkhir, REPORT_COLORS.warning)
 
-  doc.setFont("helvetica", "bold")
-  doc.text("Total Pemasukan:", 14, 59)
-  doc.setFont("helvetica", "normal")
-  doc.text(formatRupiah(data.totalPemasukan), 50, 59)
+  y += 34
+  drawSectionTitle(doc, "Rincian Pengeluaran", "Detail penggunaan dana ditampilkan lebih dulu sebelum total pengeluaran.", y, primaryColor)
+  y += 12
 
-  doc.setFont("helvetica", "bold")
-  doc.text("Total Pengeluaran:", 14, 66)
-  doc.setFont("helvetica", "normal")
-  doc.text(formatRupiah(data.totalPengeluaran), 50, 66)
+  doc.setFillColor(...primaryColor)
+  doc.roundedRect(PAGE_MARGIN_X, y, PAGE_WIDTH - PAGE_MARGIN_X * 2, 8, 2, 2, "F")
+  setText(doc, [255, 255, 255], 7.5, "bold")
+  doc.text("URAIAN", PAGE_MARGIN_X + 4, y + 5.2)
+  doc.text("BULAN", 136, y + 5.2)
+  doc.text("NOMINAL", PAGE_WIDTH - PAGE_MARGIN_X - 4, y + 5.2, { align: "right" })
+  y += 10
 
-  doc.setFont("helvetica", "bold")
-  doc.text("Saldo Periode:", 14, 73)
-  doc.setFont("helvetica", "normal")
-  doc.text(formatRupiah(data.saldoPeriode), 50, 73)
+  let hasExpenseDetails = false
+  data.rows.forEach((row) => {
+    const details = row.rincianPengeluaran ?? []
+    if (details.length === 0) return
+    hasExpenseDetails = true
 
-  const tableData = data.rows.map((row) => [
-    `${row.bulan} ${row.tahun}`,
-    formatRupiah(row.pemasukan),
-    formatRupiah(row.pengeluaran),
-    formatRupiah(row.saldo),
-  ])
+    addPageIfNeeded(12)
+    doc.setFillColor(...REPORT_COLORS.panel)
+    doc.setDrawColor(...REPORT_COLORS.line)
+    doc.roundedRect(PAGE_MARGIN_X, y, PAGE_WIDTH - PAGE_MARGIN_X * 2, 8, 1.5, 1.5, "FD")
+    setText(doc, REPORT_COLORS.ink, 8.5, "bold")
+    doc.text(getMonthLabel(row), PAGE_MARGIN_X + 4, y + 5.2)
+    drawAmount(doc, row.pengeluaran, PAGE_WIDTH - PAGE_MARGIN_X - 4, y + 5.2, REPORT_COLORS.danger)
+    y += 9
 
-  const totalPengeluaran = data.totalPengeluaran
-  const totalPemasukan = data.totalPemasukan
-  const saldoPeriode = data.saldoPeriode
+    details.forEach((item, index) => {
+      const lines = doc.splitTextToSize(`${index + 1}. ${item.kategoriNama}`, 112)
+      const rowHeight = Math.max(7, lines.length * 4.2 + 3)
+      addPageIfNeeded(rowHeight + 2)
+      if (index % 2 === 1) {
+        doc.setFillColor(252, 252, 253)
+        doc.rect(PAGE_MARGIN_X, y - 1, PAGE_WIDTH - PAGE_MARGIN_X * 2, rowHeight, "F")
+      }
+      setText(doc, REPORT_COLORS.ink, 8.4, "normal")
+      doc.text(lines, PAGE_MARGIN_X + 6, y + 4)
+      setText(doc, REPORT_COLORS.muted, 8, "normal")
+      doc.text(getMonthLabel(row), 136, y + 4)
+      drawAmount(doc, item.nominal, PAGE_WIDTH - PAGE_MARGIN_X - 4, y + 4)
+      y += rowHeight
+    })
 
-  let yPos = 84
-  doc.setDrawColor(...primaryColor)
-  doc.line(14, yPos - 4, 196, yPos - 4)
-  doc.setFont("helvetica", "bold")
-  doc.setFontSize(10)
-  doc.text("Bulan", 14, yPos)
-  doc.text("Pemasukan", 80, yPos, { align: "right" })
-  doc.text("Pengeluaran", 130, yPos, { align: "right" })
-  doc.text("Saldo", 190, yPos, { align: "right" })
+    doc.setDrawColor(...REPORT_COLORS.line)
+    doc.line(PAGE_MARGIN_X + 6, y, PAGE_WIDTH - PAGE_MARGIN_X - 4, y)
+    y += 5
+    setText(doc, REPORT_COLORS.ink, 8.5, "bold")
+    doc.text(`Subtotal Pengeluaran ${getMonthLabel(row)}`, PAGE_MARGIN_X + 6, y)
+    drawAmount(doc, row.pengeluaran, PAGE_WIDTH - PAGE_MARGIN_X - 4, y, REPORT_COLORS.danger)
+    y += 8
+  })
 
-  yPos += 6
-  doc.setFont("helvetica", "normal")
-  doc.setFontSize(9)
-
-  for (const row of tableData) {
-    doc.text(row[0] as string, 14, yPos)
-    doc.text(row[1] as string, 80, yPos, { align: "right" })
-    doc.text(row[2] as string, 130, yPos, { align: "right" })
-    doc.text(row[3] as string, 190, yPos, { align: "right" })
-    yPos += 6
+  if (!hasExpenseDetails) {
+    addPageIfNeeded(12)
+    doc.setFillColor(...REPORT_COLORS.panel)
+    doc.setDrawColor(...REPORT_COLORS.line)
+    doc.roundedRect(PAGE_MARGIN_X, y, PAGE_WIDTH - PAGE_MARGIN_X * 2, 12, 2, 2, "FD")
+    setText(doc, REPORT_COLORS.muted, 8.5, "normal")
+    doc.text("Tidak ada pengeluaran pada periode ini.", PAGE_MARGIN_X + 5, y + 7.5)
+    y += 16
   }
 
-  yPos += 4
-  doc.setFont("helvetica", "bold")
-  doc.text("TOTAL", 14, yPos)
-  doc.text(formatRupiah(totalPemasukan), 80, yPos, { align: "right" })
-  doc.text(formatRupiah(totalPengeluaran), 130, yPos, { align: "right" })
-  doc.text(formatRupiah(saldoPeriode), 190, yPos, { align: "right" })
+  addPageIfNeeded(18)
+  doc.setFillColor(...REPORT_COLORS.dangerSoft)
+  doc.setDrawColor(...REPORT_COLORS.danger)
+  doc.roundedRect(PAGE_MARGIN_X, y, PAGE_WIDTH - PAGE_MARGIN_X * 2, 13, 2, 2, "FD")
+  setText(doc, REPORT_COLORS.danger, 10, "bold")
+  doc.text("Total Pengeluaran", PAGE_MARGIN_X + 5, y + 8.5)
+  doc.text(formatRupiah(data.totalPengeluaran), PAGE_WIDTH - PAGE_MARGIN_X - 5, y + 8.5, { align: "right" })
 
-  const pageCount = doc.getNumberOfPages()
-  for (let i = 1; i <= pageCount; i++) {
-    doc.setPage(i)
-    doc.setFontSize(8)
-    doc.setTextColor(150)
-    doc.text(`Halaman ${i} dari ${pageCount}`, 105, 290, { align: "center" })
-    doc.text(`Dicetak: ${new Date().toLocaleDateString("id-ID", { day: "2-digit", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit" })}`, 14, 290)
-    if (branding.receiptFooter) {
-      doc.text(branding.receiptFooter, 196, 290, { align: "right" })
+  y += 27
+  addPageIfNeeded(34)
+  drawSectionTitle(doc, "Rekap Bulanan & Saldo", "Ringkasan arus kas per bulan setelah seluruh rincian dicatat.", y, primaryColor)
+  y += 12
+
+  doc.setFillColor(...REPORT_COLORS.ink)
+  doc.roundedRect(PAGE_MARGIN_X, y, PAGE_WIDTH - PAGE_MARGIN_X * 2, 8, 2, 2, "F")
+  setText(doc, [255, 255, 255], 7.5, "bold")
+  doc.text("BULAN", PAGE_MARGIN_X + 4, y + 5.2)
+  doc.text("PEMASUKAN", 92, y + 5.2, { align: "right" })
+  doc.text("PENGELUARAN", 142, y + 5.2, { align: "right" })
+  doc.text("SALDO", PAGE_WIDTH - PAGE_MARGIN_X - 4, y + 5.2, { align: "right" })
+  y += 10
+
+  data.rows.forEach((row, index) => {
+    addPageIfNeeded(8)
+    if (index % 2 === 1) {
+      doc.setFillColor(252, 252, 253)
+      doc.rect(PAGE_MARGIN_X, y - 1.5, PAGE_WIDTH - PAGE_MARGIN_X * 2, 7.5, "F")
     }
-  }
+    setText(doc, REPORT_COLORS.ink, 8.3, "normal")
+    doc.text(getMonthLabel(row), PAGE_MARGIN_X + 4, y + 3.5)
+    doc.text(formatRupiah(row.pemasukan), 92, y + 3.5, { align: "right" })
+    doc.text(formatRupiah(row.pengeluaran), 142, y + 3.5, { align: "right" })
+    setText(doc, REPORT_COLORS.ink, 8.3, "bold")
+    doc.text(formatRupiah(row.saldo), PAGE_WIDTH - PAGE_MARGIN_X - 4, y + 3.5, { align: "right" })
+    y += 7.5
+  })
+
+  addPageIfNeeded(18)
+  doc.setFillColor(...REPORT_COLORS.panel)
+  doc.setDrawColor(...REPORT_COLORS.line)
+  doc.roundedRect(PAGE_MARGIN_X, y + 1, PAGE_WIDTH - PAGE_MARGIN_X * 2, 12, 2, 2, "FD")
+  setText(doc, REPORT_COLORS.ink, 8.5, "bold")
+  doc.text("Total Periode", PAGE_MARGIN_X + 4, y + 8.5)
+  doc.text(formatRupiah(data.totalPemasukan), 92, y + 8.5, { align: "right" })
+  doc.text(formatRupiah(data.totalPengeluaran), 142, y + 8.5, { align: "right" })
+  doc.text(formatRupiah(saldoAkhir), PAGE_WIDTH - PAGE_MARGIN_X - 4, y + 8.5, { align: "right" })
+
+  y += 24
+  addPageIfNeeded(24)
+  doc.setFillColor(...REPORT_COLORS.successSoft)
+  doc.setDrawColor(...REPORT_COLORS.success)
+  doc.roundedRect(PAGE_MARGIN_X, y, PAGE_WIDTH - PAGE_MARGIN_X * 2, 18, 2.5, 2.5, "FD")
+  setText(doc, REPORT_COLORS.success, 9, "bold")
+  doc.text("SALDO AKHIR KAS", PAGE_MARGIN_X + 6, y + 7)
+  setText(doc, REPORT_COLORS.success, 17, "bold")
+  doc.text(formatRupiah(saldoAkhir), PAGE_WIDTH - PAGE_MARGIN_X - 6, y + 12.5, { align: "right" })
+
+  drawReportFooter(doc, branding)
 
   return doc.output("arraybuffer") as ArrayBuffer
 }

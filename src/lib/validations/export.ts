@@ -6,9 +6,9 @@ export const EXPORT_LIMITS = {
 }
 
 export const laporanQuerySchema = z.object({
-  startMonth: z.coerce.number().int().min(0).max(11).default(0),
+  startMonth: z.coerce.number().int().min(1).max(12).default(1),
   startYear: z.coerce.number().int().min(2000).max(2100),
-  endMonth: z.coerce.number().int().min(0).max(11).default(11),
+  endMonth: z.coerce.number().int().min(1).max(12).default(12),
   endYear: z.coerce.number().int().min(2000).max(2100),
   saldoAwal: z.coerce.number().finite().min(0).default(0),
 }).refine((data) => {

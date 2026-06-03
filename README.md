@@ -73,7 +73,7 @@ npm run db:seed
 npm run dev
 ```
 
-App berjalan di `http://localhost:3000`.
+App berjalan di `http://localhost:3001`.
 
 ## Scripts
 
