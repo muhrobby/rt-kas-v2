@@ -12,6 +12,7 @@ import { BULAN } from "@/lib/constants/months"
 import type { WargaHistoryPeriod } from "@/types/rt-kas"
 
 import { KuitansiDialog } from "@/features/warga-portal/components/kuitansi-dialog"
+import { getWargaRiwayatEmptyStateMessage } from "@/features/warga-portal/lib/portal-empty-state"
 
 interface KuitansiSelection {
   refKuitansi: string
@@ -63,6 +64,7 @@ export function WargaRiwayatView({ periods, error, filterBulan, filterTahun }: W
     () => periods.find((period) => period.periode === selectedPeriod) ?? periods[0],
     [periods, selectedPeriod],
   )
+  const emptyStateMessage = activePeriod ? getWargaRiwayatEmptyStateMessage(activePeriod.items.length, activePeriod.periode) : null
 
   const scrollContainerRef = useRef<HTMLDivElement>(null)
 
@@ -146,64 +148,70 @@ export function WargaRiwayatView({ periods, error, filterBulan, filterTahun }: W
             {error}
           </AppCard>
         ) : null}
-        {activePeriod?.items.map((item, index) => (
-          <AppCard key={item.transaksiId ?? `${activePeriod.periode}-${item.kategori}-${item.nominal}-${index}`} className="p-3">
-            <div className="flex items-start justify-between gap-2">
-              <div>
-                <p className="text-[13px] font-semibold text-kanvas-ink">{item.kategori}</p>
-                <p className="text-[11px] text-kanvas-ink-4">
-                  {item.status === "lunas"
-                    ? `Dibayar ${item.tanggalBayar}${item.periodeLabel ? ` · ${item.periodeLabel}` : ""}`
-                    : item.status === "belum-tempo"
-                      ? `Belum jatuh tempo${item.periodeLabel ? ` · ${item.periodeLabel}` : ""}`
-                      : `Belum dibayar${item.periodeLabel ? ` · ${item.periodeLabel}` : ""}`}
-                </p>
-              </div>
+        {emptyStateMessage ? (
+          <AppCard className="border-dashed p-3 text-[12px] text-kanvas-ink-3">
+            {emptyStateMessage}
+          </AppCard>
+        ) : (
+          activePeriod?.items.map((item, index) => (
+            <AppCard key={item.transaksiId ?? `${activePeriod.periode}-${item.kategori}-${item.nominal}-${index}`} className="p-3">
+              <div className="flex items-start justify-between gap-2">
+                <div>
+                  <p className="text-[13px] font-semibold text-kanvas-ink">{item.kategori}</p>
+                  <p className="text-[11px] text-kanvas-ink-4">
+                    {item.status === "lunas"
+                      ? `Dibayar ${item.tanggalBayar}${item.periodeLabel ? ` · ${item.periodeLabel}` : ""}`
+                      : item.status === "belum-tempo"
+                        ? `Belum jatuh tempo${item.periodeLabel ? ` · ${item.periodeLabel}` : ""}`
+                        : `Belum dibayar${item.periodeLabel ? ` · ${item.periodeLabel}` : ""}`}
+                  </p>
+                </div>
 
-              <div className="text-right">
-                <p className="text-[13px] font-semibold text-kanvas-ink">{formatRupiah(item.nominal)}</p>
-                <div className="mt-1">
-                  {item.status === "lunas" ? <AppPill tone="ok">Lunas</AppPill> : item.status === "belum-tempo" ? <AppPill tone="terra">Belum Tempo</AppPill> : <AppPill tone="warn">Belum</AppPill>}
+                <div className="text-right">
+                  <p className="text-[13px] font-semibold text-kanvas-ink">{formatRupiah(item.nominal)}</p>
+                  <div className="mt-1">
+                    {item.status === "lunas" ? <AppPill tone="ok">Lunas</AppPill> : item.status === "belum-tempo" ? <AppPill tone="terra">Belum Tempo</AppPill> : <AppPill tone="warn">Belum</AppPill>}
+                  </div>
                 </div>
               </div>
-            </div>
 
-            {item.status === "lunas" && item.refKuitansi && item.transaksiId ? (
-              <div className="mt-2.5 flex items-center justify-between border-t border-kanvas-line-2 pt-2.5">
-                <p className="truncate text-[11px] text-kanvas-ink-4">{item.refKuitansi}</p>
-                <AppButton
-                  variant="outline"
-                  size="sm"
-                  leading={<KanvasIcons.receipt size={12} />}
-                  disabled={isPending}
-                  onClick={() => {
-                    setReceiptError(null)
-                    startTransition(async () => {
-                      const result = await getMyKuitansiAction(item.transaksiId ?? 0)
-                      if (!result.ok) {
-                        setReceiptError(result.error)
-                        return
-                      }
-                      setSelectedReceipt({
-                        refKuitansi: result.data.nomorKuitansi,
-                        kategori: result.data.kategori,
-                        tanggalBayar: result.data.tanggal,
-                        nominal: result.data.nominal,
-                        wargaNama: result.data.warga,
-                        blok: result.data.blok,
-                        petugas: result.data.petugas,
-                        branding: result.data.branding,
+              {item.status === "lunas" && item.refKuitansi && item.transaksiId ? (
+                <div className="mt-2.5 flex items-center justify-between border-t border-kanvas-line-2 pt-2.5">
+                  <p className="truncate text-[11px] text-kanvas-ink-4">{item.refKuitansi}</p>
+                  <AppButton
+                    variant="outline"
+                    size="sm"
+                    leading={<KanvasIcons.receipt size={12} />}
+                    disabled={isPending}
+                    onClick={() => {
+                      setReceiptError(null)
+                      startTransition(async () => {
+                        const result = await getMyKuitansiAction(item.transaksiId ?? 0)
+                        if (!result.ok) {
+                          setReceiptError(result.error)
+                          return
+                        }
+                        setSelectedReceipt({
+                          refKuitansi: result.data.nomorKuitansi,
+                          kategori: result.data.kategori,
+                          tanggalBayar: result.data.tanggal,
+                          nominal: result.data.nominal,
+                          wargaNama: result.data.warga,
+                          blok: result.data.blok,
+                          petugas: result.data.petugas,
+                          branding: result.data.branding,
+                        })
+                        setReceiptOpen(true)
                       })
-                      setReceiptOpen(true)
-                    })
-                  }}
-                >
-                  e-Kuitansi
-                </AppButton>
-              </div>
-            ) : null}
-          </AppCard>
-        ))}
+                    }}
+                  >
+                    e-Kuitansi
+                  </AppButton>
+                </div>
+              ) : null}
+            </AppCard>
+          ))
+        )}
       </section>
 
       {receiptError ? (
