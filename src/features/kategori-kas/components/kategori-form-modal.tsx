@@ -9,6 +9,8 @@ export interface KategoriFormValues {
   nama: string
   jenisArus: JenisArus
   tipeTagihan: TipeTagihan
+  bulanTagihan: string
+  tahunTagihan: string
   nominalDefault: number
 }
 
@@ -27,6 +29,8 @@ export function mapKategoriToFormValues(item: KategoriKas): KategoriFormValues {
     nama: item.nama,
     jenisArus: item.jenisArus,
     tipeTagihan: item.tipeTagihan,
+    bulanTagihan: item.bulanTagihan ?? "",
+    tahunTagihan: item.tahunTagihan ? String(item.tahunTagihan) : "",
     nominalDefault: item.nominalDefault,
   }
 }
@@ -34,7 +38,24 @@ export function mapKategoriToFormValues(item: KategoriKas): KategoriFormValues {
 const emptyErrors = {
   nama: "",
   nominalDefault: "",
+  bulanTagihan: "",
+  tahunTagihan: "",
 }
+
+const MONTH_OPTIONS = [
+  { value: "1", label: "Januari" },
+  { value: "2", label: "Februari" },
+  { value: "3", label: "Maret" },
+  { value: "4", label: "April" },
+  { value: "5", label: "Mei" },
+  { value: "6", label: "Juni" },
+  { value: "7", label: "Juli" },
+  { value: "8", label: "Agustus" },
+  { value: "9", label: "September" },
+  { value: "10", label: "Oktober" },
+  { value: "11", label: "November" },
+  { value: "12", label: "Desember" },
+]
 
 export function KategoriFormModal({
   open,
@@ -53,13 +74,25 @@ export function KategoriFormModal({
     setValues((state) => ({ ...state, [key]: value }))
   }
 
+  const handleTipeTagihanChange = (value: TipeTagihan) => {
+    setValues((state) => ({
+      ...state,
+      tipeTagihan: value,
+      ...(value === "bulanan" ? { bulanTagihan: "", tahunTagihan: "" } : null),
+    }))
+  }
+
   const validate = () => {
     const nextErrors = {
       nama: values.nama.trim() ? "" : "Nama kategori wajib diisi.",
       nominalDefault: values.nominalDefault >= 0 ? "" : "Nominal default tidak boleh negatif.",
+      bulanTagihan:
+        values.tipeTagihan === "sekali" && !values.bulanTagihan.trim() ? "Bulan tagihan wajib diisi." : "",
+      tahunTagihan:
+        values.tipeTagihan === "sekali" && !values.tahunTagihan.trim() ? "Tahun tagihan wajib diisi." : "",
     }
     setErrors(nextErrors)
-    return !nextErrors.nama && !nextErrors.nominalDefault
+    return !nextErrors.nama && !nextErrors.nominalDefault && !nextErrors.bulanTagihan && !nextErrors.tahunTagihan
   }
 
   const handleSubmit = async () => {
@@ -71,6 +104,8 @@ export function KategoriFormModal({
       setSubmitting(false)
     }
   }
+
+  const showPeriode = values.tipeTagihan === "sekali"
 
   return (
     <AppModal open={open} onClose={onClose} width={560}>
@@ -143,7 +178,7 @@ export function KategoriFormModal({
                     <button
                       key={option.id}
                       type="button"
-                      onClick={() => updateField("tipeTagihan", option.id as TipeTagihan)}
+                      onClick={() => handleTipeTagihanChange(option.id as TipeTagihan)}
                       className="flex-1 rounded-md px-3 py-2 text-xs font-semibold"
                       style={{
                         background: active ? "var(--kanvas-terra)" : "transparent",
@@ -162,6 +197,46 @@ export function KategoriFormModal({
               </p>
             </AppField>
           </div>
+
+          {showPeriode ? (
+            <div className="grid grid-cols-1 gap-2.5 md:grid-cols-2 md:gap-3">
+              <AppField label="Bulan Tagihan">
+                <select
+                  value={values.bulanTagihan}
+                  onChange={(e) => updateField("bulanTagihan", e.target.value)}
+                  className="h-10 w-full rounded-lg border border-kanvas-line bg-white px-3 text-sm text-kanvas-ink outline-none transition focus:border-kanvas-terra"
+                >
+                  <option value="">Pilih bulan</option>
+                  {MONTH_OPTIONS.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+                {errors.bulanTagihan || fieldErrors?.bulanTagihan?.[0] ? (
+                  <p className="mt-1 text-[11px] text-kanvas-danger">
+                    {errors.bulanTagihan || fieldErrors?.bulanTagihan?.[0]}
+                  </p>
+                ) : null}
+              </AppField>
+
+              <AppField label="Tahun Tagihan">
+                <AppInput
+                  type="number"
+                  min={2000}
+                  max={2100}
+                  value={values.tahunTagihan}
+                  onChange={(value) => updateField("tahunTagihan", value.replace(/\D/g, ""))}
+                  placeholder="2026"
+                />
+                {errors.tahunTagihan || fieldErrors?.tahunTagihan?.[0] ? (
+                  <p className="mt-1 text-[11px] text-kanvas-danger">
+                    {errors.tahunTagihan || fieldErrors?.tahunTagihan?.[0]}
+                  </p>
+                ) : null}
+              </AppField>
+            </div>
+          ) : null}
 
           <AppField label="Nominal Default">
             <AppInput

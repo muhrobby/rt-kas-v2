@@ -11,6 +11,7 @@ interface MonthPaymentSelectorProps {
   firstBillYear: number
   tahun: number
   disableEligibilityCheck?: boolean
+  lockedMonth?: number | null
 }
 
 export function MonthPaymentSelector({
@@ -22,8 +23,10 @@ export function MonthPaymentSelector({
   firstBillYear,
   tahun,
   disableEligibilityCheck = false,
+  lockedMonth = null,
 }: MonthPaymentSelectorProps) {
   const isNotEligible = (month: number): boolean => {
+    if (lockedMonth != null) return month !== lockedMonth
     if (disableEligibilityCheck) return false
     if (notEligibleMonths.includes(month)) return true
     if (tahun < firstBillYear) return true
@@ -68,5 +71,4 @@ export function MonthPaymentSelector({
     </div>
   )
 }
-
 

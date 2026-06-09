@@ -54,6 +54,8 @@ export async function listKategoriAction() {
       nama: kategoriKas.namaKategori,
       jenisArus: kategoriKas.jenisArus,
       tipeTagihan: kategoriKas.tipeTagihan,
+      bulanTagihan: kategoriKas.bulanTagihan,
+      tahunTagihan: kategoriKas.tahunTagihan,
       nominalDefault: kategoriKas.nominalDefault,
     })
     .from(kategoriKas)
@@ -195,6 +197,21 @@ export async function createKasMasukAction(input: CreateKasMasukInput): Promise<
       months: daftarBulan.map((bulan) => Number(bulan)),
       year: tahun,
     })
+
+    if (kategori.tipeTagihan === "sekali") {
+      const expectedMonth = kategori.bulanTagihan != null ? Number(kategori.bulanTagihan) : null
+      const expectedYear = kategori.tahunTagihan
+      if (!expectedMonth || expectedYear == null || !Number.isInteger(expectedMonth)) {
+        return { ok: false, error: "Kategori sekali bayar belum memiliki periode yang valid." }
+      }
+
+      if (daftarBulan.length !== 1 || Number(daftarBulan[0]) !== expectedMonth || tahun !== expectedYear) {
+        return {
+          ok: false,
+          error: "Periode pembayaran kas masuk sekali bayar harus sama dengan periode kategori.",
+        }
+      }
+    }
 
     if (!billingCheck.ok) {
       return { ok: false, error: billingCheck.error }

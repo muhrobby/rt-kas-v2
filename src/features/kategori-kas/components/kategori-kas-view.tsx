@@ -32,7 +32,17 @@ const defaultFormValues: KategoriFormValues = {
   nama: "",
   jenisArus: "masuk",
   tipeTagihan: "bulanan",
+  bulanTagihan: "",
+  tahunTagihan: "",
   nominalDefault: 0,
+}
+
+function normalizeKategoriFormValues(values: KategoriFormValues) {
+  return {
+    ...values,
+    bulanTagihan: values.bulanTagihan.trim() ? Number(values.bulanTagihan) : null,
+    tahunTagihan: values.tahunTagihan.trim() ? Number(values.tahunTagihan) : null,
+  }
 }
 
 export function KategoriKasView() {
@@ -106,9 +116,10 @@ export function KategoriKasView() {
   const handleSubmitKategori = async (values: KategoriFormValues) => {
     setServerError("")
     setFieldErrors({})
+    const payload = normalizeKategoriFormValues(values)
 
     if (formMode === "add") {
-      const result = await createKategoriFromForm(values)
+      const result = await createKategoriFromForm(payload)
       if (!result.ok) {
         setServerError(result.error)
         setFieldErrors(result.fieldErrors ?? {})
@@ -117,7 +128,7 @@ export function KategoriKasView() {
       await reloadList()
       pushToast("Kategori baru berhasil ditambahkan")
     } else if (selectedKategori) {
-      const result = await updateKategoriFromForm(Number(selectedKategori.id), values)
+      const result = await updateKategoriFromForm(Number(selectedKategori.id), payload)
       if (!result.ok) {
         setServerError(result.error)
         setFieldErrors(result.fieldErrors ?? {})

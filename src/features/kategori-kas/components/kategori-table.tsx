@@ -27,6 +27,27 @@ function labelTipe(tipe: KategoriKas["tipeTagihan"]) {
   return tipe === "bulanan" ? "Bulanan" : "Sekali"
 }
 
+const BULAN_LABELS: Record<string, string> = {
+  "1": "Jan",
+  "2": "Feb",
+  "3": "Mar",
+  "4": "Apr",
+  "5": "Mei",
+  "6": "Jun",
+  "7": "Jul",
+  "8": "Agu",
+  "9": "Sep",
+  "10": "Okt",
+  "11": "Nov",
+  "12": "Des",
+}
+
+function formatPeriodeSekali(bulanTagihan?: string | null, tahunTagihan?: number | null) {
+  if (!bulanTagihan || !tahunTagihan) return "Sekali"
+  const label = BULAN_LABELS[bulanTagihan] ?? bulanTagihan
+  return `Sekali (${label} ${tahunTagihan})`
+}
+
 export function KategoriTable({ kategori, onEdit, onDelete, pagination }: KategoriTableProps) {
   return (
     <AppCard className="overflow-hidden p-0">
@@ -44,7 +65,11 @@ export function KategoriTable({ kategori, onEdit, onDelete, pagination }: Katego
 
               <div className="mt-2 flex flex-wrap items-center gap-1.5">
                 <AppPill tone={toneForArus(item.jenisArus)}>{item.jenisArus === "masuk" ? "Masuk" : "Keluar"}</AppPill>
-                <AppPill tone="neutral">{labelTipe(item.tipeTagihan)}</AppPill>
+                <AppPill tone="neutral">
+                  {item.tipeTagihan === "sekali"
+                    ? formatPeriodeSekali(item.bulanTagihan, item.tahunTagihan)
+                    : labelTipe(item.tipeTagihan)}
+                </AppPill>
                 <p className="text-[11px] text-kanvas-ink-4">Dibuat {item.createdAt ?? "—"}</p>
               </div>
 
@@ -104,7 +129,11 @@ export function KategoriTable({ kategori, onEdit, onDelete, pagination }: Katego
                     </div>
 
                     <div>
-                      <AppPill tone="neutral">{labelTipe(item.tipeTagihan)}</AppPill>
+                      <AppPill tone="neutral">
+                        {item.tipeTagihan === "sekali"
+                          ? formatPeriodeSekali(item.bulanTagihan, item.tahunTagihan)
+                          : labelTipe(item.tipeTagihan)}
+                      </AppPill>
                     </div>
 
                     <p className="font-medium text-kanvas-ink">{formatRupiah(item.nominalDefault)}</p>

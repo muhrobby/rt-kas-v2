@@ -6,6 +6,9 @@ export interface KategoriKeluarOptionUi {
   label: string
   sub: string
   nominal: number
+  tipeTagihan: "bulanan" | "sekali"
+  bulanTagihan?: string | null
+  tahunTagihan?: number | null
 }
 
 export interface TransaksiKeluarUi {
@@ -27,8 +30,16 @@ export async function fetchKategoriKeluarOptions(): Promise<KategoriKeluarOption
   return result.data.map((k) => ({
     id: String(k.id),
     label: k.nama,
-    sub: k.tipeTagihan === "bulanan" ? "Bulanan" : "Sekali",
+    sub:
+      k.tipeTagihan === "bulanan"
+        ? "Bulanan"
+        : k.bulanTagihan && k.tahunTagihan
+          ? `Sekali · ${k.bulanTagihan} ${k.tahunTagihan}`
+          : "Sekali",
     nominal: k.nominalDefault,
+    tipeTagihan: k.tipeTagihan,
+    bulanTagihan: k.bulanTagihan,
+    tahunTagihan: k.tahunTagihan,
   }))
 }
 

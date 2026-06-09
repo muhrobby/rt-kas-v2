@@ -26,6 +26,8 @@ export async function listKategoriKeluarAction() {
       nama: kategoriKas.namaKategori,
       jenisArus: kategoriKas.jenisArus,
       tipeTagihan: kategoriKas.tipeTagihan,
+      bulanTagihan: kategoriKas.bulanTagihan,
+      tahunTagihan: kategoriKas.tahunTagihan,
       nominalDefault: kategoriKas.nominalDefault,
     })
     .from(kategoriKas)
@@ -91,6 +93,41 @@ export async function createKasKeluarAction(input: CreateKasKeluarInput): Promis
       return { ok: false, error: "Kategori ini bukan kategori keluar." }
     }
 
+    if (kategori.tipeTagihan === "sekali") {
+      const bulanTagihan = Number(kategori.bulanTagihan)
+      const tahunTagihan = kategori.tahunTagihan
+      if (!Number.isInteger(bulanTagihan) || bulanTagihan < 1 || bulanTagihan > 12 || tahunTagihan == null) {
+        return { ok: false, error: "Kategori sekali bayar belum memiliki periode yang valid." }
+      }
+
+      const [created] = await db
+        .insert(transaksi)
+        .values({
+          userId: admin.id,
+          wargaId: null,
+          kategoriId: parsed.kategoriId,
+          nominal: parsed.nominal,
+          waktuTransaksi: new Date(parsed.waktuTransaksi),
+          tipeArus: "keluar",
+          bulanTagihan: String(bulanTagihan),
+          tahunTagihan,
+          keterangan: parsed.keterangan ?? null,
+        })
+        .returning({ id: transaksi.id })
+
+      await writeAuditLog({
+        userId: admin.id,
+        modul: "Kas Keluar",
+        aksi: "tambah",
+        keterangan: `Mencatat pengeluaran "${kategori.namaKategori}"`,
+      })
+
+      revalidatePath("/admin/kas-keluar")
+      revalidatePath("/admin/dashboard")
+
+      return { ok: true, data: created }
+    }
+
     const [created] = await db
       .insert(transaksi)
       .values({
@@ -100,6 +137,8 @@ export async function createKasKeluarAction(input: CreateKasKeluarInput): Promis
         nominal: parsed.nominal,
         waktuTransaksi: new Date(parsed.waktuTransaksi),
         tipeArus: "keluar",
+        bulanTagihan: null,
+        tahunTagihan: null,
         keterangan: parsed.keterangan ?? null,
       })
       .returning({ id: transaksi.id })

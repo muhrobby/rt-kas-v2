@@ -17,6 +17,8 @@ function mapKategoriRow(row: typeof kategoriKas.$inferSelect) {
     nama: row.namaKategori,
     jenisArus: row.jenisArus,
     tipeTagihan: row.tipeTagihan,
+    bulanTagihan: row.bulanTagihan,
+    tahunTagihan: row.tahunTagihan,
     nominalDefault: row.nominalDefault,
     createdAt: row.createdAt,
   }

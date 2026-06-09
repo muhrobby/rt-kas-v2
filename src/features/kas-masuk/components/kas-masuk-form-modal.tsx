@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 
 import { AppButton, AppCombobox, AppField, AppInput, AppModal, KanvasIcons } from "@/components/kanvas"
 import { BULAN_SINGKAT } from "@/lib/constants/months"
@@ -70,6 +70,31 @@ export function KasMasukFormModal({
     [kategoriOptions, kategoriId],
   )
 
+  const onceBillMonth = useMemo(() => {
+    if (selectedKategori?.tipeTagihan !== "sekali" || selectedKategori.bulanTagihan == null) return null
+    const parsed = Number(selectedKategori.bulanTagihan)
+    return Number.isInteger(parsed) && parsed >= 1 && parsed <= 12 ? parsed : null
+  }, [selectedKategori])
+
+  const onceBillYear = selectedKategori?.tipeTagihan === "sekali" ? selectedKategori.tahunTagihan ?? null : null
+
+  useEffect(() => {
+    if (selectedKategori?.tipeTagihan !== "sekali" || onceBillMonth == null || onceBillYear == null) return
+
+    setValues((state) => {
+      if (state.tahun === onceBillYear && state.bulan.length === 1 && state.bulan[0] === onceBillMonth) {
+        return state
+      }
+      return {
+        ...state,
+        tahun: onceBillYear,
+        bulan: [onceBillMonth],
+      }
+    })
+
+    onYearChange?.(onceBillYear)
+  }, [onYearChange, onceBillMonth, onceBillYear, selectedKategori?.tipeTagihan])
+
   const updateValue = <K extends keyof KasMasukFormValues>(key: K, value: KasMasukFormValues[K]) => {
     setValues((state) => ({ ...state, [key]: value }))
   }
@@ -79,16 +104,36 @@ export function KasMasukFormModal({
     onYearChange?.(year)
   }
 
-  const selectedMonths = filterSelectableMonths(values.bulan, {
-    categoryType: selectedKategori?.tipeTagihan,
-    year: values.tahun,
-    paidMonths,
-    notEligibleMonths,
+  const selectedMonths = useMemo(() => {
+    if (selectedKategori?.tipeTagihan === "sekali" && onceBillMonth != null) {
+      return [onceBillMonth]
+    }
+
+    return filterSelectableMonths(values.bulan, {
+      categoryType: selectedKategori?.tipeTagihan,
+      year: values.tahun,
+      paidMonths,
+      notEligibleMonths,
+      firstBillMonth,
+      firstBillYear,
+    })
+  }, [
     firstBillMonth,
     firstBillYear,
-  })
+    notEligibleMonths,
+    onceBillMonth,
+    paidMonths,
+    selectedKategori?.tipeTagihan,
+    values.bulan,
+    values.tahun,
+  ])
 
   const toggleMonth = (month: number) => {
+    if (selectedKategori?.tipeTagihan === "sekali" && onceBillMonth != null) {
+      setValues((state) => (state.bulan.length === 1 && state.bulan[0] === onceBillMonth ? state : { ...state, bulan: [onceBillMonth] }))
+      return
+    }
+
     setValues((state) => {
       const selectableMonths = filterSelectableMonths(state.bulan, {
         categoryType: selectedKategori?.tipeTagihan,
@@ -200,7 +245,9 @@ export function KasMasukFormModal({
                   min={2020}
                   max={new Date().getFullYear() + 1}
                   value={String(values.tahun)}
+                  disabled={selectedKategori?.tipeTagihan === "sekali"}
                   onChange={(value) => {
+                    if (selectedKategori?.tipeTagihan === "sekali") return
                     const currentYear = new Date().getFullYear()
                     const parsed = Number(value)
                     const num = Number.isFinite(parsed) ? parsed : currentYear
@@ -223,6 +270,7 @@ export function KasMasukFormModal({
                     firstBillYear={firstBillYear ?? 2000}
                     tahun={values.tahun}
                     disableEligibilityCheck={selectedKategori?.tipeTagihan === "sekali"}
+                    lockedMonth={selectedKategori?.tipeTagihan === "sekali" ? onceBillMonth : null}
                   />
                 )}
               </AppField>
