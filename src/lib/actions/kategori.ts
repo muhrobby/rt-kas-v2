@@ -32,10 +32,41 @@ function toActionError(error: unknown): ActionResult<never> {
       fieldErrors: flattened as Record<string, string[]>,
     }
   }
+
   return {
     ok: false,
     error: "Terjadi kesalahan server. Coba lagi.",
   }
+}
+
+const MONTH_TO_NUMBER: Record<string, string> = {
+  januari: "1",
+  februari: "2",
+  maret: "3",
+  april: "4",
+  mei: "5",
+  juni: "6",
+  juli: "7",
+  agustus: "8",
+  september: "9",
+  oktober: "10",
+  november: "11",
+  desember: "12",
+}
+
+function normalizeBulanTagihan(value: CreateKategoriInput["bulanTagihan"]): string | null {
+  if (value === undefined || value === null || value === "") return null
+  if (typeof value === "number") return String(value)
+
+  const trimmed = value.trim()
+  if (/^\d+$/.test(trimmed)) return String(Number(trimmed))
+
+  return MONTH_TO_NUMBER[trimmed.toLowerCase()] ?? trimmed
+}
+
+function normalizeTahunTagihan(value: CreateKategoriInput["tahunTagihan"]): number | null {
+  if (value === undefined || value === null || value === "") return null
+  return typeof value === "number" ? value : Number(value)
 }
 
 export async function listKategoriAction(
@@ -58,6 +89,8 @@ export async function createKategoriAction(input: CreateKategoriInput): Promise<
         namaKategori: parsed.nama,
         jenisArus: parsed.jenisArus,
         tipeTagihan: parsed.tipeTagihan,
+        bulanTagihan: normalizeBulanTagihan(parsed.bulanTagihan),
+        tahunTagihan: normalizeTahunTagihan(parsed.tahunTagihan),
         nominalDefault: parsed.nominalDefault,
       })
       .returning({ id: kategoriKas.id })
@@ -93,6 +126,8 @@ export async function updateKategoriAction(id: number, input: UpdateKategoriInpu
         namaKategori: parsed.nama,
         jenisArus: parsed.jenisArus,
         tipeTagihan: parsed.tipeTagihan,
+        bulanTagihan: normalizeBulanTagihan(parsed.bulanTagihan),
+        tahunTagihan: normalizeTahunTagihan(parsed.tahunTagihan),
         nominalDefault: parsed.nominalDefault,
       })
       .where(eq(kategoriKas.id, id))

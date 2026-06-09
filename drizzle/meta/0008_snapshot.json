@@ -1,6 +1,6 @@
 {
-  "id": "b205a21d-20c3-4376-b9d0-9802e12b1d9f",
-  "prevId": "bfb52fb0-c0d3-47b3-a8a4-ecf72734a07a",
+  "id": "9158a6b2-f4b8-45cc-b7b1-1ec71837164d",
+  "prevId": "b205a21d-20c3-4376-b9d0-9802e12b1d9f",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -487,6 +487,18 @@
           "notNull": true,
           "default": "'bulanan'"
         },
+        "bulan_tagihan": {
+          "name": "bulan_tagihan",
+          "type": "varchar(20)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "tahun_tagihan": {
+          "name": "tahun_tagihan",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
         "nominal_default": {
           "name": "nominal_default",
           "type": "integer",
@@ -762,7 +774,7 @@
         },
         "transaksi_ck_masuk_keluar_shape": {
           "name": "transaksi_ck_masuk_keluar_shape",
-          "value": "(\n      (\"transaksi\".\"tipe_arus\" = 'keluar' and \"transaksi\".\"warga_id\" is null and \"transaksi\".\"bulan_tagihan\" is null and \"transaksi\".\"tahun_tagihan\" is null)\n      or\n      (\"transaksi\".\"tipe_arus\" = 'masuk' and \"transaksi\".\"warga_id\" is not null)\n    )"
+          "value": "(\n      (\"transaksi\".\"tipe_arus\" = 'keluar' and \"transaksi\".\"warga_id\" is null)\n      or\n      (\"transaksi\".\"tipe_arus\" = 'masuk' and \"transaksi\".\"warga_id\" is not null)\n    )"
         }
       },
       "isRLSEnabled": false

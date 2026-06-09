@@ -11,6 +11,8 @@ type KategoriRow = {
   nama: string
   jenisArus: "masuk" | "keluar"
   tipeTagihan: "bulanan" | "sekali"
+  bulanTagihan?: string | null
+  tahunTagihan?: number | null
   nominalDefault: number
   createdAt: Date
 }
@@ -21,6 +23,8 @@ function toUiKategori(row: KategoriRow) {
     nama: row.nama,
     jenisArus: row.jenisArus,
     tipeTagihan: row.tipeTagihan,
+    bulanTagihan: row.bulanTagihan,
+    tahunTagihan: row.tahunTagihan,
     nominalDefault: row.nominalDefault,
     createdAt: row.createdAt?.toISOString?.()?.slice(0, 10) ?? "",
   }

@@ -141,38 +141,8 @@ export async function getWargaProfile(wargaId: number) {
   return toProfile(row)
 }
 
-type SekaliRelevantPeriodMap = Map<number, Set<string>>
-
 function toPeriodKey(bulan: number, tahun: number) {
   return `${bulan}-${tahun}`
-}
-
-async function getSekaliRelevantPeriodsByKategori(kategoriIds: number[]): Promise<SekaliRelevantPeriodMap> {
-  const result: SekaliRelevantPeriodMap = new Map()
-  if (kategoriIds.length === 0) return result
-
-  const rows = await db
-    .select({
-      kategoriId: transaksi.kategoriId,
-      bulanTagihan: transaksi.bulanTagihan,
-      tahunTagihan: transaksi.tahunTagihan,
-    })
-    .from(transaksi)
-    .where(and(eq(transaksi.tipeArus, "masuk"), inArray(transaksi.kategoriId, kategoriIds)))
-
-  for (const row of rows) {
-    if (!row.tahunTagihan) continue
-    const bulan = normalizeMonthTagihan(row.bulanTagihan)
-    if (!bulan) continue
-
-    const key = toPeriodKey(bulan, row.tahunTagihan)
-    if (!result.has(row.kategoriId)) {
-      result.set(row.kategoriId, new Set())
-    }
-    result.get(row.kategoriId)!.add(key)
-  }
-
-  return result
 }
 
 async function getPaymentStatusForPeriod(wargaId: number, filter: WargaRiwayatFilter): Promise<WargaPaymentStatus[]> {
@@ -191,6 +161,8 @@ async function getPaymentStatusForPeriod(wargaId: number, filter: WargaRiwayatFi
       id: kategoriKas.id,
       nama: kategoriKas.namaKategori,
       tipeTagihan: kategoriKas.tipeTagihan,
+      bulanTagihan: kategoriKas.bulanTagihan,
+      tahunTagihan: kategoriKas.tahunTagihan,
       nominalDefault: kategoriKas.nominalDefault,
     })
     .from(kategoriKas)
@@ -209,9 +181,6 @@ async function getPaymentStatusForPeriod(wargaId: number, filter: WargaRiwayatFi
     .from(transaksi)
     .where(and(eq(transaksi.tipeArus, "masuk"), eq(transaksi.wargaId, wargaId)))
 
-  const sekaliKategoriIds = categories.filter((category) => category.tipeTagihan === "sekali").map((category) => category.id)
-  const sekaliRelevantPeriods = await getSekaliRelevantPeriodsByKategori(sekaliKategoriIds)
-
   const results: WargaPaymentStatus[] = []
   const periodeLabel = getPeriodLabel(filter.bulan, filter.tahun)
 
@@ -223,9 +192,12 @@ async function getPaymentStatusForPeriod(wargaId: number, filter: WargaRiwayatFi
     }
 
     if (category.tipeTagihan === "sekali") {
-      const periodKey = toPeriodKey(filter.bulan, filter.tahun)
-      const relevantPeriods = sekaliRelevantPeriods.get(category.id)
-      const isRelevantPeriod = relevantPeriods?.has(periodKey) ?? false
+      const categoryMonth = normalizeMonthTagihan(category.bulanTagihan)
+      const categoryYear = category.tahunTagihan
+      const isRelevantPeriod =
+        categoryMonth != null &&
+        categoryYear != null &&
+        toPeriodKey(filter.bulan, filter.tahun) === toPeriodKey(categoryMonth, categoryYear)
 
       if (!isRelevantPeriod || Number(category.nominalDefault) <= 0) {
         results.push({

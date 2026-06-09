@@ -49,7 +49,7 @@ export const transaksi = pgTable(
     check(
       "transaksi_ck_masuk_keluar_shape",
       sql`(
-      (${table.tipeArus} = 'keluar' and ${table.wargaId} is null and ${table.bulanTagihan} is null and ${table.tahunTagihan} is null)
+      (${table.tipeArus} = 'keluar' and ${table.wargaId} is null)
       or
       (${table.tipeArus} = 'masuk' and ${table.wargaId} is not null)
     )`,

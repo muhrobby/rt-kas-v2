@@ -128,7 +128,8 @@ export function KasMasukView() {
       setSelectedKategori(found)
       setPaidMonths([])
       setNotEligibleMonths([])
-      await loadPaidMonths(selectedWargaId, id, new Date().getFullYear())
+      const initialYear = found?.tipeTagihan === "sekali" && found.tahunTagihan ? found.tahunTagihan : new Date().getFullYear()
+      await loadPaidMonths(selectedWargaId, id, initialYear)
     },
     [kategoriOptions, loadPaidMonths, selectedWargaId],
   )
