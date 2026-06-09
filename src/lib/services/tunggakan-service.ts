@@ -73,6 +73,8 @@ async function getKategoriSekali() {
     .select({
       id: kategoriKas.id,
       nama: kategoriKas.namaKategori,
+      bulanTagihan: kategoriKas.bulanTagihan,
+      tahunTagihan: kategoriKas.tahunTagihan,
       nominalDefault: kategoriKas.nominalDefault,
     })
     .from(kategoriKas)
@@ -182,6 +184,29 @@ function formatPeriode(bulan: number, tahun: number): string {
   return `${BULAN_INDO[bulan - 1]} ${tahun}`
 }
 
+function getMonthIndex(bulan: number, tahun: number) {
+  return tahun * 12 + (bulan - 1)
+}
+
+function getSekaliPeriodIndex(bulanTagihan: string | null, tahunTagihan: number | null) {
+  if (!bulanTagihan || tahunTagihan == null) return null
+
+  const bulan = Number(bulanTagihan)
+  if (!Number.isInteger(bulan) || bulan < 1 || bulan > 12) return null
+
+  return getMonthIndex(bulan, tahunTagihan)
+}
+
+function hasSekaliPeriodOverlap(
+  kat: { bulanTagihan: string | null; tahunTagihan: number | null },
+  bulanCombinations: Array<{ bulan: number; tahun: number }>,
+) {
+  const kategoriIndex = getSekaliPeriodIndex(kat.bulanTagihan, kat.tahunTagihan)
+  if (kategoriIndex == null) return false
+
+  return bulanCombinations.some(({ bulan, tahun }) => getMonthIndex(bulan, tahun) === kategoriIndex)
+}
+
 export async function getTunggakan(filter: TunggakanFilterInput): Promise<TunggakanSummary> {
   const { bulanMulai, tahunMulai, bulanSelesai, tahunSelesai, kategoriId } = filter
 
@@ -212,6 +237,7 @@ export async function getTunggakan(filter: TunggakanFilterInput): Promise<Tungga
   const bulanCombinations = generateMonthYearCombinations(bulanMulai, tahunMulai, bulanSelesai, tahunSelesai)
 
   const filteredSekaliWithNominal = filteredSekali.filter((kat) => kat.nominalDefault > 0)
+  const filteredSekaliRelevant = filteredSekaliWithNominal.filter((kat) => hasSekaliPeriodOverlap(kat, bulanCombinations))
 
   const [paidBulanan, paidSekaliMap] = await Promise.all([
     getPaidBulanan(
@@ -220,7 +246,7 @@ export async function getTunggakan(filter: TunggakanFilterInput): Promise<Tungga
     ),
     getPaidSekaliMap(
       wargaIds,
-      filteredSekaliWithNominal.map((k) => k.id),
+      filteredSekaliRelevant.map((k) => k.id),
     ),
   ])
 
@@ -260,8 +286,19 @@ export async function getTunggakan(filter: TunggakanFilterInput): Promise<Tungga
     }
   }
 
-  for (const kat of filteredSekaliWithNominal) {
+  for (const kat of filteredSekaliRelevant) {
+    const kategoriBulan = Number(kat.bulanTagihan)
+    const kategoriTahun = kat.tahunTagihan
+
+    if (!Number.isInteger(kategoriBulan) || kategoriBulan < 1 || kategoriBulan > 12 || kategoriTahun == null) {
+      continue
+    }
+
     for (const w of allWarga) {
+      if (!shouldIncludeTunggakanBulananPeriod(w.createdAt, kategoriBulan, kategoriTahun)) {
+        continue
+      }
+
       const mapKey = `${w.id}-${kat.id}`
       const paidPeriods = paidSekaliMap.get(mapKey)
 
@@ -269,7 +306,7 @@ export async function getTunggakan(filter: TunggakanFilterInput): Promise<Tungga
         const entry = wargaTunggakanMap.get(w.id)!
         entry.items.push({
           kategori: kat.nama,
-          periode: kat.nama,
+          periode: formatPeriode(kategoriBulan, kategoriTahun),
           nominal: kat.nominalDefault,
         })
         entry.totalNominal += kat.nominalDefault

@@ -26,6 +26,8 @@ export interface KategoriKas {
   nama: string
   jenisArus: JenisArus
   tipeTagihan: TipeTagihan
+  bulanTagihan?: string | null
+  tahunTagihan?: number | null
   nominalDefault: number
   createdAt?: string
 }

@@ -21,6 +21,8 @@ export interface KategoriOptionUi {
   sub: string
   nominal: number
   tipeTagihan: "bulanan" | "sekali"
+  bulanTagihan?: string | null
+  tahunTagihan?: number | null
 }
 
 export interface TransaksiUi {
@@ -63,9 +65,16 @@ export async function fetchKategoriMasukOptions(): Promise<KategoriOptionUi[]> {
     .map((k) => ({
       id: String(k.id),
       label: k.nama,
-      sub: k.tipeTagihan === "bulanan" ? "Bulanan" : "Sekali bayar",
+      sub:
+        k.tipeTagihan === "bulanan"
+          ? "Bulanan"
+          : k.bulanTagihan && k.tahunTagihan
+            ? `Sekali bayar · ${BULAN_SINGKAT[Number(k.bulanTagihan) - 1] ?? k.bulanTagihan} ${k.tahunTagihan}`
+            : "Sekali bayar",
       nominal: k.nominalDefault,
       tipeTagihan: k.tipeTagihan,
+      bulanTagihan: k.bulanTagihan,
+      tahunTagihan: k.tahunTagihan,
     }))
 }
 

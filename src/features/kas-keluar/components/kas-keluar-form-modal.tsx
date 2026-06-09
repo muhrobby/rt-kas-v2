@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useMemo, useState } from "react"
 
 import { AppButton, AppCombobox, AppField, AppInput, AppModal, KanvasIcons } from "@/components/kanvas"
 
@@ -36,6 +36,19 @@ export function KasKeluarFormModal({
 }: KasKeluarFormModalProps) {
   const [values, setValues] = useState<KasKeluarFormValues>(initialValues)
   const [errors, setErrors] = useState({ kategoriId: "", nominal: "", tanggal: "" })
+
+  const selectedKategori = useMemo(
+    () => kategoriOptions.find((item) => item.id === values.kategoriId),
+    [kategoriOptions, values.kategoriId],
+  )
+
+  const oncePeriodLabel = useMemo(() => {
+    if (selectedKategori?.tipeTagihan !== "sekali" || !selectedKategori.bulanTagihan || !selectedKategori.tahunTagihan) {
+      return ""
+    }
+
+    return `Periode otomatis: ${selectedKategori.bulanTagihan} ${selectedKategori.tahunTagihan}`
+  }, [selectedKategori])
 
   const todayISO = (() => {
     const d = new Date()
@@ -101,6 +114,7 @@ export function KasKeluarFormModal({
             {errors.kategoriId || fieldErrors?.kategoriId?.[0] ? (
               <p className="mt-1 text-[11px] text-kanvas-danger">{errors.kategoriId || fieldErrors?.kategoriId?.[0]}</p>
             ) : null}
+            {oncePeriodLabel ? <p className="mt-1 text-[11px] text-kanvas-ink-3">{oncePeriodLabel}</p> : null}
           </AppField>
 
           <div className="grid grid-cols-1 gap-2.5 md:grid-cols-2 md:gap-3">
