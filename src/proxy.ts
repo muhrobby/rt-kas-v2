@@ -44,12 +44,18 @@ export async function proxy(request: NextRequest) {
   // Force change password redirect
   // Exclude API routes so sign-out and other API calls still work
   if (mustChangePassword && !pathname.startsWith("/api/")) {
-    const changePasswordPath = role === "admin"
-      ? "/admin/change-password"
-      : "/warga/change-password";
+    let changePasswordPath: string
+    if (role === "admin") {
+      changePasswordPath = "/admin/change-password"
+    } else if (wargaId) {
+      changePasswordPath = "/warga/change-password"
+    } else {
+      // Panitia user without wargaId — skip force change password
+      // (phone number is their password, they can change it later)
+      changePasswordPath = ""
+    }
 
-    // Don't redirect if already on change-password page
-    if (pathname !== changePasswordPath) {
+    if (changePasswordPath && pathname !== changePasswordPath) {
       return NextResponse.redirect(new URL(changePasswordPath, request.url));
     }
   }
@@ -58,12 +64,20 @@ export async function proxy(request: NextRequest) {
     const redirectUrl =
       role === "admin"
         ? new URL("/admin/dashboard", request.url)
-        : new URL("/warga/dashboard", request.url);
+        : wargaId
+          ? new URL("/warga/dashboard", request.url)
+          : new URL("/panitia/event", request.url);
     return NextResponse.redirect(redirectUrl);
   }
 
   if (pathname.startsWith("/admin") && role !== "admin") {
     return NextResponse.redirect(new URL("/unauthorized", request.url));
+  }
+
+  if (pathname.startsWith("/panitia")) {
+    if (role !== "user") {
+      return NextResponse.redirect(new URL("/unauthorized", request.url));
+    }
   }
 
   if (pathname.startsWith("/warga")) {

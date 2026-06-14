@@ -10,8 +10,9 @@ export type AdminIconName =
   | "log"
   | "gear"
   | "shield"
+  | "calendar"
 
-export type WargaIconName = "home" | "receipt" | "doc"
+export type WargaIconName = "home" | "receipt" | "doc" | "calendar"
 
 export interface AdminNavItem {
   id: string
@@ -41,6 +42,7 @@ export const adminNavItems: AdminNavItem[] = [
   { id: "kas-keluar",     label: "Kas Keluar",        href: "/admin/kas-keluar",     icon: "out",    permission: "kas_keluar.read" },
   { id: "tunggakan",      label: "Tunggakan",         href: "/admin/tunggakan",      icon: "alert",  permission: "tunggakan.read" },
   { id: "laporan",        label: "Laporan Keuangan",  href: "/admin/laporan",        icon: "doc",    permission: "laporan.read" },
+  // { id: "event",          label: "Event/Acara",       href: "/admin/event",          icon: "calendar", permission: "event.read" },
   { id: "log-aktivitas",  label: "Log Aktivitas",     href: "/admin/log-aktivitas",  icon: "log",    permission: "log.read" },
   { id: "settings",       label: "Pengaturan",        href: "/admin/settings",       icon: "gear",   permission: "settings.read" },
   { id: "pengurus",       label: "Pengurus",          href: "/admin/pengurus",       icon: "shield", permission: "pengurus.manage" },
@@ -50,4 +52,5 @@ export const wargaNavItems: WargaNavItem[] = [
   { id: "dashboard", label: "Beranda",  href: "/warga/dashboard", icon: "home" },
   { id: "riwayat",   label: "Riwayat", href: "/warga/riwayat",   icon: "receipt" },
   { id: "laporan",   label: "Laporan", href: "/warga/laporan",   icon: "doc" },
+  { id: "event",     label: "Acara",   href: "/warga/event",     icon: "calendar" },
 ]

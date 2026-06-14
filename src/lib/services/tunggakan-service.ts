@@ -1,6 +1,6 @@
 import "server-only"
 
-import { and, eq, inArray } from "drizzle-orm"
+import { and, eq, inArray, notInArray } from "drizzle-orm"
 
 import { db } from "@/lib/db"
 import { kategoriKas, transaksi, warga } from "@/lib/db/schema"
@@ -78,7 +78,12 @@ async function getKategoriSekali() {
       nominalDefault: kategoriKas.nominalDefault,
     })
     .from(kategoriKas)
-    .where(and(eq(kategoriKas.jenisArus, "masuk"), eq(kategoriKas.tipeTagihan, "sekali")))
+    .where(and(eq(kategoriKas.jenisArus, "masuk"), eq(kategoriKas.tipeTagihan, "sekali"), notInArray(kategoriKas.namaKategori, [
+      "Sisa Dana Event",
+      "Talangan Event",
+      "Refund Talangan Event",
+      "Alih Sumbangan Event",
+    ])))
     .orderBy(kategoriKas.id)
 }
 

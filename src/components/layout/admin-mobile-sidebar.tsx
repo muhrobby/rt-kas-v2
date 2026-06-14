@@ -27,6 +27,7 @@ const iconMap = {
   log: KanvasIcons.log,
   gear: KanvasIcons.gear,
   shield: KanvasIcons.shield,
+  calendar: KanvasIcons.calendar,
 } as const
 
 export function AdminMobileSidebar({ branding, open, onClose, saldoKas, tunggakanCount, navItems }: AdminMobileSidebarProps) {

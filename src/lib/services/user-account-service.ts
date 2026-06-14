@@ -103,3 +103,40 @@ export async function deleteWargaUserAccount(wargaId: number, tx: Tx) {
   if (!existingUser) return
   await tx.delete(user).where(eq(user.id, existingUser.id))
 }
+
+/**
+ * Create account for event panitia (non-warga).
+ * Uses phone as username & initial password. role='user', no wargaId.
+ * Access restricted to event pages via event_panitia table (requireEventAccess).
+ */
+export async function createPanitiaUserAccount(
+  input: { nama: string; phone: string },
+  tx: Tx,
+): Promise<{ userId: string }> {
+  await ensurePhoneUnique(input.phone, tx)
+
+  const userId = generateId()
+  const hashedPassword = await hashPassword(input.phone) // phone as initial password
+
+  await tx.insert(user).values({
+    id: userId,
+    name: input.nama,
+    email: `${input.phone}@panitia.local`,
+    emailVerified: true,
+    username: input.phone,
+    displayUsername: input.phone,
+    role: "user",
+    wargaId: null,
+    mustChangePassword: false,
+  })
+
+  await tx.insert(account).values({
+    id: generateId(),
+    userId,
+    accountId: userId,
+    providerId: "credential",
+    password: hashedPassword,
+  })
+
+  return { userId }
+}
