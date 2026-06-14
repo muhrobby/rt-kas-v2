@@ -1,4 +1,4 @@
-import { and, eq, gte, notExists, sql } from "drizzle-orm"
+import { and, eq, gte, isNull, notExists, sql } from "drizzle-orm"
 
 import { db } from "@/lib/db"
 import { kategoriKas, transaksi, warga } from "@/lib/db/schema"
@@ -137,6 +137,7 @@ async function getKontrakAkanHabis(today: Date): Promise<DashboardSummary["remin
     .where(
       and(
         eq(warga.statusHunian, "kontrak"),
+        isNull(warga.tglPindah),
         gte(warga.tglBatasDomisili, toDateOnly(today)),
         sql`${warga.tglBatasDomisili} <= ${toDateOnly(warningLimit)}`,
       ),

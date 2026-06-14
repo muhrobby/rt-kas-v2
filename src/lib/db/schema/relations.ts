@@ -3,9 +3,17 @@ import { relations } from "drizzle-orm";
 import { event, eventPanitia, pengeluaranEvent, sumbanganEvent } from "./event-acara";
 import { kategoriKas } from "./kategori-kas";
 import { transaksi } from "./transaksi";
-import { warga } from "./warga";
+import { pemilikHunian, warga } from "./warga";
 
-export const wargaRelations = relations(warga, ({ many }) => ({
+export const pemilikHunianRelations = relations(pemilikHunian, ({ many }) => ({
+  warga: many(warga),
+}));
+
+export const wargaRelations = relations(warga, ({ one, many }) => ({
+  pemilikHunian: one(pemilikHunian, {
+    fields: [warga.pemilikHunianId],
+    references: [pemilikHunian.id],
+  }),
   transaksi: many(transaksi),
   sumbanganEvent: many(sumbanganEvent),
 }));

@@ -27,7 +27,7 @@ const titleByPath: Record<string, string> = {
 export interface WargaShellProfile {
   nama: string
   blok: string
-  statusHunian: "tetap" | "kontrak"
+  statusHunian: "tetap" | "kontrak" | "kos"
 }
 
 interface WargaShellProps extends PropsWithChildren {
@@ -86,7 +86,7 @@ export function WargaShell({ branding, children, profile }: WargaShellProps) {
             <p className="text-[12px] font-semibold text-kanvas-ink">{me.nama}</p>
             <p className="mt-0.5 text-[10.5px] text-kanvas-ink-4">Blok {me.blok}</p>
             <div className="mt-1.5 flex gap-1.5">
-              <AppPill tone="neutral">{me.statusHunian === "tetap" ? "Tetap" : "Kontrak"}</AppPill>
+              <AppPill tone="neutral">{me.statusHunian === "tetap" ? "Tetap" : me.statusHunian === "kos" ? "Kos" : "Kontrak"}</AppPill>
             </div>
           </div>
 

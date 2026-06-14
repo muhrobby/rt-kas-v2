@@ -10,12 +10,13 @@ import {
   DuplicateUsernameError,
   createWargaUserAccount,
   deleteWargaUserAccount,
+  resetWargaPassword,
   updateWargaUserAccount,
 } from "@/lib/services/user-account-service"
 import { hasWargaTransaksi, listWarga } from "@/lib/services/warga-service"
 import { parseWargaInput, toggleWargaPengurusInputSchema, type CreateWargaInput, type UpdateWargaInput, type ToggleWargaPengurusInput } from "@/lib/validations/warga"
 import { ZodError } from "zod"
-import { eq } from "drizzle-orm"
+import { and, eq, sql } from "drizzle-orm"
 
 type ActionResult<T> =
   | { ok: true; data: T }
@@ -76,7 +77,7 @@ export async function listWargaAction(input: { search?: string; status?: "semua"
   }
 }
 
-export async function createWargaAction(input: CreateWargaInput): Promise<ActionResult<{ id: number; temporaryPassword?: string }>> {
+export async function createWargaAction(input: CreateWargaInput): Promise<ActionResult<{ id: number }>> {
   const admin = await requirePermission("warga.write")
 
   try {
@@ -93,14 +94,16 @@ export async function createWargaAction(input: CreateWargaInput): Promise<Action
           jumlahAnggota: payload.jumlahAnggota,
           tglBatasDomisili: payload.tglBatasDomisili,
           tglPindah: payload.tglPindah,
+          pemilikHunianId: payload.pemilikHunianId,
         })
         .returning({ id: warga.id })
 
-      const { temporaryPassword } = await createWargaUserAccount(
+      await createWargaUserAccount(
         {
           wargaId: newWarga.id,
           nama: payload.nama,
           phone: payload.telp,
+          password: "warga123",
         },
         tx,
       )
@@ -112,7 +115,7 @@ export async function createWargaAction(input: CreateWargaInput): Promise<Action
         keterangan: `Menambahkan warga ${payload.nama} (${payload.blok})`,
       })
 
-      return { id: newWarga.id, temporaryPassword }
+      return { id: newWarga.id }
     })
 
     revalidatePath("/admin/warga")
@@ -144,6 +147,7 @@ export async function updateWargaAction(id: number, input: UpdateWargaInput): Pr
           jumlahAnggota: payload.jumlahAnggota,
           tglBatasDomisili: payload.tglBatasDomisili,
           tglPindah: payload.tglPindah,
+          pemilikHunianId: payload.pemilikHunianId,
           updatedAt: new Date(),
         })
         .where(eq(warga.id, id))
@@ -238,49 +242,131 @@ export async function updateWargaPengurusAction(id: number, input: ToggleWargaPe
     const parsed = toggleWargaPengurusInputSchema.parse(input)
 
     const [existing] = await db
-      .select({ id: warga.id, nama: warga.namaKepalaKeluarga })
+      .select({ id: warga.id, nama: warga.namaKepalaKeluarga, isPengurus: warga.isPengurus })
       .from(warga)
       .where(eq(warga.id, id))
       .limit(1)
 
     if (!existing) {
-      return {
-        ok: false,
-        error: "Data warga tidak ditemukan.",
+      return { ok: false, error: "Data warga tidak ditemukan." }
+    }
+
+    // Protect last Ketua RT: if demoting a current ketua_rt, ensure at least one other exists
+    if (!parsed.isPengurus && existing.isPengurus) {
+      const [currentUser] = await db
+        .select({ adminRole: user.adminRole })
+        .from(user)
+        .where(eq(user.wargaId, id))
+        .limit(1)
+
+      if (currentUser?.adminRole === "ketua_rt") {
+        const [otherKetua] = await db
+          .select({ id: user.id })
+          .from(user)
+          .where(and(eq(user.adminRole, "ketua_rt"), eq(user.role, "admin")))
+          .limit(2)
+
+        // Count ketua_rt users; if only 1 (this one), block
+        const ketuaCount = await db
+          .select({ total: sql<number>`count(*)` })
+          .from(user)
+          .where(and(eq(user.adminRole, "ketua_rt"), eq(user.role, "admin")))
+
+        if (Number(ketuaCount[0]?.total ?? 0) <= 1) {
+          return { ok: false, error: "Tidak bisa menonaktifkan Ketua RT terakhir. Tetapkan Ketua RT lain terlebih dahulu." }
+        }
       }
     }
+
+    const adminRoleLabel = parsed.adminRole
+      ? { ketua_rt: "Ketua RT", bendahara: "Bendahara", sekretaris: "Sekretaris", anggota: "Anggota Pengurus" }[parsed.adminRole]
+      : null
 
     await db
       .update(warga)
       .set({
         isPengurus: parsed.isPengurus,
-        rolePengurus: parsed.isPengurus ? (parsed.rolePengurus ?? "Pengurus") : null,
+        rolePengurus: parsed.isPengurus ? (adminRoleLabel ?? "Pengurus") : null,
         updatedAt: new Date(),
       })
       .where(eq(warga.id, id))
 
     await db
       .update(user)
-      .set({ role: parsed.isPengurus ? "admin" : "user" })
+      .set({
+        role: parsed.isPengurus ? "admin" : "user",
+        adminRole: parsed.isPengurus ? (parsed.adminRole ?? null) : null,
+        updatedAt: new Date(),
+      })
       .where(eq(user.wargaId, id))
 
-    const statusText = parsed.isPengurus ? `menjadi${parsed.rolePengurus ? ` ${parsed.rolePengurus}` : " Pengurus"}` : "bukan pengurus"
+    const statusText = parsed.isPengurus ? `menjadi ${adminRoleLabel ?? "Pengurus"}` : "bukan pengurus"
     await writeAuditLog({
       userId: admin.id,
       modul: "Data Warga",
       aksi: "edit",
-      keterangan: `Mengubah status pengurus warga ${existing.nama} menjadi ${statusText}`,
+      keterangan: `Mengubah status pengurus warga ${existing.nama} ${statusText}`,
     })
 
     revalidatePath("/admin/warga")
     return { ok: true, data: { id } }
   } catch (error) {
     if (error instanceof ZodError) {
-      return {
-        ok: false,
-        error: "Input tidak valid.",
-      }
+      return { ok: false, error: "Input tidak valid." }
     }
     return toActionError(error)
+  }
+}
+
+export async function resetWargaPasswordAction(wargaId: number): Promise<ActionResult<null>> {
+  const admin = await requirePermission("warga.write")
+
+  try {
+    await resetWargaPassword(wargaId)
+
+    // Get warga name for audit log
+    const [w] = await db.select({ nama: warga.namaKepalaKeluarga }).from(warga).where(eq(warga.id, wargaId)).limit(1)
+
+    await writeAuditLog({
+      userId: admin.id,
+      modul: "Data Warga",
+      aksi: "edit",
+      keterangan: `Reset password warga ${w?.nama ?? wargaId}`,
+    })
+
+    return { ok: true, data: null }
+  } catch (error) {
+    return { ok: false, error: error instanceof Error ? error.message : "Gagal reset password." }
+  }
+}
+
+export async function pindahWargaAction(wargaId: number, tglPindah: string): Promise<ActionResult<null>> {
+  const admin = await requirePermission("warga.write")
+
+  // Validate ISO date
+  if (!tglPindah || Number.isNaN(Date.parse(tglPindah))) {
+    return { ok: false, error: "Tanggal pindah tidak valid." }
+  }
+
+  try {
+    const [w] = await db
+      .update(warga)
+      .set({ tglPindah })
+      .where(eq(warga.id, wargaId))
+      .returning({ nama: warga.namaKepalaKeluarga })
+
+    if (!w) return { ok: false, error: "Warga tidak ditemukan." }
+
+    await writeAuditLog({
+      userId: admin.id,
+      modul: "Data Warga",
+      aksi: "edit",
+      keterangan: `Tandai warga ${w.nama} pindah (${tglPindah})`,
+    })
+
+    revalidatePath("/admin/warga")
+    return { ok: true, data: null }
+  } catch (error) {
+    return { ok: false, error: error instanceof Error ? error.message : "Gagal menyimpan data pindah." }
   }
 }

@@ -16,6 +16,8 @@ const statusOptions: Array<{ id: WargaStatusFilter; label: string }> = [
   { id: "semua", label: "Semua" },
   { id: "tetap", label: "Tetap" },
   { id: "kontrak", label: "Kontrak" },
+  { id: "kos", label: "Kos" },
+  { id: "pindah", label: "Pindah" },
 ]
 
 export function WargaToolbar({ query, status, onQueryChange, onStatusChange, onAdd }: WargaToolbarProps) {

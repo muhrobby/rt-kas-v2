@@ -5,8 +5,10 @@ import { useMemo, useState, useTransition } from "react"
 import { useToast } from "@/components/kanvas"
 import { paginateItems } from "@/lib/pagination"
 import { createWargaFromForm, deleteWargaById, fetchWargaList, updateWargaFromForm, updateWargaPengurusFromTable } from "@/features/warga-management/lib/warga-actions-client"
+import { resetWargaPasswordAction, pindahWargaAction } from "@/lib/actions/warga"
 
 import { DeleteWargaDialog } from "@/features/warga-management/components/delete-warga-dialog"
+import { PindahWargaDialog } from "@/features/warga-management/components/pindah-warga-dialog"
 import { TogglePengurusDialog } from "@/features/warga-management/components/toggle-pengurus-dialog"
 import { WargaFormModal } from "@/features/warga-management/components/warga-form-modal"
 import { TemporaryPasswordDialog } from "@/features/warga-management/components/temporary-password-dialog"
@@ -28,6 +30,7 @@ const defaultFormValues: WargaFormValues = {
   statusHunian: "tetap",
   jumlahAnggota: 1,
   pindah: "",
+  pemilikHunianId: null,
 }
 
 function mapWargaToFormValues(warga: Warga): WargaFormValues {
@@ -38,6 +41,7 @@ function mapWargaToFormValues(warga: Warga): WargaFormValues {
     statusHunian: warga.statusHunian,
     jumlahAnggota: warga.jumlahAnggota ?? 1,
     pindah: warga.pindah ?? "",
+    pemilikHunianId: (warga as Warga & { pemilikHunianId?: number | null }).pemilikHunianId ?? null,
   }
 }
 
@@ -63,6 +67,7 @@ export function WargaManagementView({ initialData, initialError }: WargaManageme
   const [togglePengurusTarget, setTogglePengurusTarget] = useState<Warga | null>(null)
   const [isTogglingPengurus, setIsTogglingPengurus] = useState(false)
   const [tempPasswordData, setTempPasswordData] = useState<{ nama: string, telp: string, password?: string } | null>(null)
+  const [pindahTarget, setPindahTarget] = useState<Warga | null>(null)
 
   const filteredWarga = useMemo(() => filterWarga(wargaData, filters), [wargaData, filters])
 
@@ -119,8 +124,9 @@ export function WargaManagementView({ initialData, initialError }: WargaManageme
       telp: values.telp,
       statusHunian: values.statusHunian,
       jumlahAnggota: values.jumlahAnggota,
-      tglBatasDomisili: values.statusHunian === "kontrak" ? values.pindah : undefined,
-      tglPindah: values.statusHunian === "kontrak" ? values.pindah : undefined,
+      tglBatasDomisili: values.statusHunian !== "tetap" ? values.pindah : undefined,
+      tglPindah: undefined,
+      pemilikHunianId: values.statusHunian !== "tetap" ? values.pemilikHunianId : undefined,
     }
 
     if (formMode === "add") {
@@ -133,13 +139,11 @@ export function WargaManagementView({ initialData, initialError }: WargaManageme
       await reloadList()
       pushToast("Warga baru berhasil ditambahkan")
       
-      if (result.data.temporaryPassword) {
-        setTempPasswordData({
-          nama: values.nama,
-          telp: values.telp,
-          password: result.data.temporaryPassword,
-        })
-      }
+      setTempPasswordData({
+        nama: values.nama,
+        telp: values.telp,
+        password: "warga123",
+      })
     } else if (selectedWarga) {
       const result = await updateWargaFromForm(Number(selectedWarga.id), payload)
       if (!result.ok) {
@@ -178,13 +182,35 @@ export function WargaManagementView({ initialData, initialError }: WargaManageme
     setTogglePengurusTarget(warga)
   }
 
-  const handleTogglePengurusConfirm = async (warga: Warga, role: string) => {
+  const handleResetPassword = async (warga: Warga) => {
+    if (!confirm(`Reset password ${warga.nama}? Password akan direset ke default.`)) return
+    const result = await resetWargaPasswordAction(Number(warga.id))
+    if (!result.ok) {
+      pushToast(result.error, "error")
+      return
+    }
+    pushToast(`Password ${warga.nama} berhasil direset`)
+  }
+
+  const handlePindahConfirm = async (tglPindah: string) => {
+    if (!pindahTarget) return
+    const result = await pindahWargaAction(Number(pindahTarget.id), tglPindah)
+    if (!result.ok) {
+      pushToast(result.error, "error")
+      return
+    }
+    setPindahTarget(null)
+    await reloadList()
+    pushToast(`${pindahTarget.nama} ditandai pindah`)
+  }
+
+  const handleTogglePengurusConfirm = async (warga: Warga, adminRole: string) => {
     setIsTogglingPengurus(true)
     setUpdatingPengurusId(warga.id)
     const nextIsPengurus = !warga.isPengurus
     const result = await updateWargaPengurusFromTable(Number(warga.id), {
       isPengurus: nextIsPengurus,
-      rolePengurus: nextIsPengurus ? (role.trim() || "Pengurus") : undefined,
+      adminRole: nextIsPengurus ? (adminRole as "ketua_rt" | "bendahara" | "sekretaris" | "anggota") : undefined,
     })
     setUpdatingPengurusId(null)
     setIsTogglingPengurus(false)
@@ -234,6 +260,8 @@ export function WargaManagementView({ initialData, initialError }: WargaManageme
         onEdit={openEditModal}
         onDelete={openDeleteDialog}
         onTogglePengurus={handleTogglePengurus}
+        onResetPassword={handleResetPassword}
+        onPindah={(w) => setPindahTarget(w)}
         updatingPengurusId={updatingPengurusId}
         pagination={{
           page: paginatedWarga.page,
@@ -280,6 +308,13 @@ export function WargaManagementView({ initialData, initialError }: WargaManageme
         onClose={() => setTogglePengurusTarget(null)}
         onConfirm={handleTogglePengurusConfirm}
         submitting={isTogglingPengurus}
+      />
+
+      <PindahWargaDialog
+        open={!!pindahTarget}
+        wargaNama={pindahTarget?.nama ?? ""}
+        onClose={() => setPindahTarget(null)}
+        onConfirm={handlePindahConfirm}
       />
     </main>
   )

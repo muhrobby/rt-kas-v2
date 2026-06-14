@@ -15,7 +15,7 @@ export type WargaPortalProfile = {
   id: number
   nama: string
   blok: string
-  statusHunian: "tetap" | "kontrak"
+  statusHunian: "tetap" | "kontrak" | "kos"
   jumlahAnggota: number
   tglBatasDomisili: string | null
 }

@@ -1,7 +1,14 @@
 import { sql } from "drizzle-orm";
 import { boolean, check, date, integer, pgEnum, pgTable, serial, text, timestamp } from "drizzle-orm/pg-core";
 
-export const statusHunianEnum = pgEnum("status_hunian", ["tetap", "kontrak"]);
+export const statusHunianEnum = pgEnum("status_hunian", ["tetap", "kontrak", "kos"]);
+
+export const pemilikHunian = pgTable("pemilik_hunian", {
+  id: serial("id").primaryKey(),
+  nama: text("nama").notNull(),
+  noTelp: text("no_telp"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
 
 export const warga = pgTable(
   "warga",
@@ -14,6 +21,7 @@ export const warga = pgTable(
     jumlahAnggota: integer("jumlah_anggota").notNull().default(1),
     tglBatasDomisili: date("tgl_batas_domisili"),
     tglPindah: date("tgl_pindah"),
+    pemilikHunianId: integer("pemilik_hunian_id").references(() => pemilikHunian.id),
     isPengurus: boolean("is_pengurus").notNull().default(false),
     rolePengurus: text("role_pengurus"),
     createdAt: timestamp("created_at").notNull().defaultNow(),
@@ -29,10 +37,14 @@ export const warga = pgTable(
       (${table.statusHunian} = 'tetap' and ${table.tglBatasDomisili} is null)
       or
       (${table.statusHunian} = 'kontrak' and ${table.tglBatasDomisili} is not null)
+      or
+      (${table.statusHunian} = 'kos' and ${table.tglBatasDomisili} is not null)
     )`,
     ),
   ],
 );
 
+export type PemilikHunian = typeof pemilikHunian.$inferSelect;
+export type NewPemilikHunian = typeof pemilikHunian.$inferInsert;
 export type Warga = typeof warga.$inferSelect;
 export type NewWarga = typeof warga.$inferInsert;

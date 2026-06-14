@@ -92,6 +92,13 @@
       "when": 1781042694801,
       "tag": "0012_vengeful_mantis",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1781420847554,
+      "tag": "0013_steady_meteorite",
+      "breakpoints": true
     }
   ]
 }

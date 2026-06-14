@@ -1,6 +1,6 @@
 import { z } from "zod"
 
-const statusHunianSchema = z.enum(["tetap", "kontrak"])
+const statusHunianSchema = z.enum(["tetap", "kontrak", "kos"])
 
 function normalizePhone(raw: string) {
   const digits = raw.replace(/\D/g, "")
@@ -30,14 +30,22 @@ const baseWargaSchema = z.object({
   jumlahAnggota: z.number().int().min(1, "Jumlah anggota minimal 1."),
   tglBatasDomisili: z.string().optional(),
   tglPindah: z.string().optional(),
+  pemilikHunianId: z.number().int().nullable().optional(),
 })
 
 export const createWargaInputSchema = baseWargaSchema.superRefine((value, ctx) => {
-  if (value.statusHunian === "kontrak" && !value.tglBatasDomisili) {
+  if ((value.statusHunian === "kontrak" || value.statusHunian === "kos") && !value.tglBatasDomisili) {
     ctx.addIssue({
       path: ["tglBatasDomisili"],
       code: z.ZodIssueCode.custom,
-      message: "Batas domisili wajib diisi untuk status kontrak.",
+      message: "Batas domisili wajib diisi untuk status kontrak/kos.",
+    })
+  }
+  if ((value.statusHunian === "kontrak" || value.statusHunian === "kos") && !value.pemilikHunianId) {
+    ctx.addIssue({
+      path: ["pemilikHunianId"],
+      code: z.ZodIssueCode.custom,
+      message: "Pemilik hunian wajib dipilih untuk status kontrak/kos.",
     })
   }
 })
@@ -49,8 +57,11 @@ export type UpdateWargaInput = z.infer<typeof updateWargaInputSchema>
 
 export const toggleWargaPengurusInputSchema = z.object({
   isPengurus: z.boolean(),
-  rolePengurus: z.string().trim().min(1).optional(),
-})
+  adminRole: z.enum(["ketua_rt", "bendahara", "sekretaris", "anggota"]).optional(),
+}).refine(
+  (val) => !val.isPengurus || val.adminRole,
+  { message: "Sub-role wajib dipilih saat menjadikan pengurus.", path: ["adminRole"] },
+)
 
 export type ToggleWargaPengurusInput = z.infer<typeof toggleWargaPengurusInputSchema>
 
@@ -60,10 +71,12 @@ export function toDbPhoneNumber(telp: string) {
 
 export function parseWargaInput<T extends CreateWargaInput | UpdateWargaInput>(input: T) {
   const parsed = createWargaInputSchema.parse(input)
+  const isNonTetap = parsed.statusHunian === "kontrak" || parsed.statusHunian === "kos"
   return {
     ...parsed,
     telp: toDbPhoneNumber(parsed.telp),
-    tglBatasDomisili: parsed.statusHunian === "kontrak" ? (parsed.tglBatasDomisili ?? null) : null,
-    tglPindah: parsed.statusHunian === "kontrak" ? (parsed.tglPindah ?? null) : null,
+    tglBatasDomisili: isNonTetap ? (parsed.tglBatasDomisili ?? null) : null,
+    tglPindah: parsed.tglPindah ?? null,
+    pemilikHunianId: isNonTetap ? (parsed.pemilikHunianId ?? null) : null,
   }
 }
