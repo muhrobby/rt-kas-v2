@@ -18,6 +18,7 @@ const iconMap = {
   log: KanvasIcons.log,
   gear: KanvasIcons.gear,
   shield: KanvasIcons.shield,
+  calendar: KanvasIcons.calendar,
 } as const
 
 interface AdminSidebarProps {

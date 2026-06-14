@@ -71,6 +71,27 @@
       "when": 1780763496521,
       "tag": "0010_backfill_kategori_sekali_period",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1781041967798,
+      "tag": "0010_tense_lockheed",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1781042143522,
+      "tag": "0011_thin_revanche",
+      "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1781042694801,
+      "tag": "0012_vengeful_mantis",
+      "breakpoints": true
     }
   ]
 }

@@ -1,7 +1,19 @@
 import { sql } from "drizzle-orm";
-import { check, integer, pgEnum, pgTable, serial, text, timestamp, uniqueIndex, varchar } from "drizzle-orm/pg-core";
+import {
+  check,
+  index,
+  integer,
+  pgEnum,
+  pgTable,
+  serial,
+  text,
+  timestamp,
+  uniqueIndex,
+  varchar,
+} from "drizzle-orm/pg-core";
 
 import { user } from "./auth";
+import { event } from "./event-acara";
 import { kategoriKas } from "./kategori-kas";
 import { warga } from "./warga";
 
@@ -28,6 +40,10 @@ export const transaksi = pgTable(
         onDelete: "restrict",
         onUpdate: "cascade",
       }),
+    eventId: integer("event_id").references(() => event.id, {
+      onDelete: "set null",
+      onUpdate: "cascade",
+    }),
     bulanTagihan: varchar("bulan_tagihan", { length: 20 }),
     tahunTagihan: integer("tahun_tagihan"),
     nominal: integer("nominal").notNull(),
@@ -39,11 +55,13 @@ export const transaksi = pgTable(
     uniqueIndex("uq_transaksi_masuk_bulanan")
       .on(table.wargaId, table.kategoriId, table.tahunTagihan, table.bulanTagihan)
       .where(
-        sql`${table.tipeArus} = 'masuk' and ${table.bulanTagihan} is not null and ${table.tahunTagihan} is not null`,
+        sql`${table.tipeArus} = 'masuk' and ${table.bulanTagihan} is not null and ${table.tahunTagihan} is not null and ${table.eventId} is null`,
       ),
     uniqueIndex("uq_transaksi_masuk_sekali")
       .on(table.wargaId, table.kategoriId)
-      .where(sql`${table.tipeArus} = 'masuk' and ${table.bulanTagihan} is null and ${table.tahunTagihan} is null`),
+      .where(
+        sql`${table.tipeArus} = 'masuk' and ${table.bulanTagihan} is null and ${table.tahunTagihan} is null and ${table.eventId} is null`,
+      ),
     check("transaksi_ck_nominal_pos", sql`${table.nominal} > 0`),
     check("transaksi_ck_tahun", sql`${table.tahunTagihan} is null or ${table.tahunTagihan} between 2000 and 2100`),
     check(
@@ -51,9 +69,12 @@ export const transaksi = pgTable(
       sql`(
       (${table.tipeArus} = 'keluar' and ${table.wargaId} is null)
       or
-      (${table.tipeArus} = 'masuk' and ${table.wargaId} is not null)
+      (${table.tipeArus} = 'masuk' and ${table.wargaId} is not null and ${table.eventId} is null)
+      or
+      (${table.tipeArus} = 'masuk' and ${table.wargaId} is null and ${table.eventId} is not null)
     )`,
     ),
+    index("transaksi_event_id_idx").on(table.eventId).where(sql`${table.eventId} is not null`),
   ],
 );
 

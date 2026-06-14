@@ -108,4 +108,5 @@ export interface WargaHistoryPeriod {
 export interface ExpenseBreakdownItem {
   kategori: string
   nominal: number
+  items?: Array<{ keterangan: string | null; nominal: number; tanggal: string }>
 }

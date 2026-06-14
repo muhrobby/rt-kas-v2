@@ -80,7 +80,7 @@ export async function getMyRiwayatAction(filter?: Partial<WargaRiwayatFilter>): 
       return { ok: true, data: [period] }
     }
 
-    const periods = await getWargaRiwayatPembayaranPeriods(wargaId)
+    const periods = await getWargaRiwayatPembayaranPeriods(wargaId, 12)
     return { ok: true, data: periods }
   } catch (error) {
     return toActionError(error)

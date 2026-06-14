@@ -32,6 +32,13 @@ export const PERMISSION_MATRIX: PermissionMatrix = Object.freeze({
     "settings.read",
     "settings.write",
     "kuitansi.admin.read",
+    "event.read",
+    "event.write",
+    "event.panitia.manage",
+    "event.approve",
+    "event.transfer",
+    "event.close",
+    "event.cancel",
   ]),
 
   bendahara: new Set<Permission>([
@@ -48,6 +55,12 @@ export const PERMISSION_MATRIX: PermissionMatrix = Object.freeze({
     "laporan.export",
     "log.read",
     "kuitansi.admin.read",
+    "event.read",
+    "event.write",
+    "event.panitia.manage",
+    "event.approve",
+    "event.transfer",
+    "event.close",
   ]),
 
   sekretaris: new Set<Permission>([
@@ -63,6 +76,9 @@ export const PERMISSION_MATRIX: PermissionMatrix = Object.freeze({
     "log.read",
     "log.export",
     "kuitansi.admin.read",
+    "event.read",
+    "event.write",
+    "event.panitia.manage",
   ]),
 
   anggota: new Set<Permission>([
@@ -73,6 +89,7 @@ export const PERMISSION_MATRIX: PermissionMatrix = Object.freeze({
     "kas_keluar.read",
     "tunggakan.read",
     "laporan.read",
+    "event.read",
   ]),
 } as const);
 

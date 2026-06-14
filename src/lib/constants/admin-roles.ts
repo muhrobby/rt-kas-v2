@@ -49,6 +49,13 @@ export const PERMISSIONS = [
   "settings.read",
   "settings.write",
   "kuitansi.admin.read",
+  "event.read",
+  "event.write",
+  "event.panitia.manage",
+  "event.approve",
+  "event.transfer",
+  "event.close",
+  "event.cancel",
 ] as const;
 
 export type Permission = (typeof PERMISSIONS)[number];

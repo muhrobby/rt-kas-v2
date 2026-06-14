@@ -19,6 +19,7 @@ export type KategoriBreakdown = {
   kategoriId: number
   kategoriNama: string
   nominal: number
+  items?: Array<{ keterangan: string | null; nominal: number; tanggal: string }>
 }
 
 export type MonthlyCashflowRow = {
@@ -67,6 +68,7 @@ export async function getLaporanKeuangan(
       nominal: transaksi.nominal,
       kategoriId: transaksi.kategoriId,
       kategoriNama: kategoriKas.namaKategori,
+      keterangan: transaksi.keterangan,
     })
     .from(transaksi)
     .leftJoin(kategoriKas, eq(transaksi.kategoriId, kategoriKas.id))
@@ -152,11 +154,19 @@ export async function getLaporanKeuangan(
     } else {
       entry.pengeluaran += Number(trx.nominal)
       totalPengeluaran += Number(trx.nominal)
+      const tanggal = new Date(trx.waktuTransaksi).toISOString().slice(0, 10)
       const existing = entry.rincianPengeluaran.find((r) => r.kategoriId === kategoriId)
       if (existing) {
         existing.nominal += Number(trx.nominal)
+        existing.items = existing.items ?? []
+        existing.items.push({ keterangan: trx.keterangan, nominal: Number(trx.nominal), tanggal })
       } else {
-        entry.rincianPengeluaran.push({ kategoriId, kategoriNama, nominal: Number(trx.nominal) })
+        entry.rincianPengeluaran.push({
+          kategoriId,
+          kategoriNama,
+          nominal: Number(trx.nominal),
+          items: [{ keterangan: trx.keterangan, nominal: Number(trx.nominal), tanggal }],
+        })
       }
     }
   }

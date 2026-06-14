@@ -14,6 +14,7 @@ const iconMap = {
   home: KanvasIcons.home,
   receipt: KanvasIcons.receipt,
   doc: KanvasIcons.doc,
+  calendar: KanvasIcons.calendar,
 } as const
 
 const titleByPath: Record<string, string> = {

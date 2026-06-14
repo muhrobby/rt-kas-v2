@@ -72,3 +72,24 @@ export function hasAdminPermission(currentUser: CurrentUser, permission: Permiss
   const adminRole = isValidAdminRole(rawRole) ? rawRole : null;
   return checkPermission(adminRole, permission);
 }
+
+/**
+ * Guard untuk aksi event yang boleh dilakukan oleh pengurus (event.write) ATAU panitia aktif.
+ * Membaca status panitia fresh dari DB setiap request (SEC-E13: anti stale-session).
+ */
+export async function requireEventAccess(eventId: number): Promise<CurrentUser> {
+  const currentUser = await requireAuth();
+
+  // Pengurus dengan event.write: boleh
+  if (currentUser.role === "admin") {
+    const adminRole = await getAdminRoleFresh(currentUser.id);
+    if (adminRole && checkPermission(adminRole, "event.write")) return currentUser;
+  }
+
+  // Panitia aktif event ini: boleh (lazy import untuk hindari circular)
+  const { checkIsPanitiaAktif } = await import("@/lib/services/event-panitia-service");
+  const isPanitia = await checkIsPanitiaAktif(currentUser.id, eventId);
+  if (isPanitia) return currentUser;
+
+  redirect("/unauthorized");
+}
