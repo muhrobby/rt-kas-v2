@@ -27,7 +27,7 @@ export function WargaDashboardView({ data }: WargaDashboardViewProps) {
             Blok {me.blok}
           </AppPill>
           <AppPill tone="neutral" soft={false} style={{ background: "rgba(255,255,255,0.2)", color: "var(--kanvas-paper-2)" }}>
-            {me.statusHunian === "tetap" ? "Tetap" : "Kontrak"}
+            {me.statusHunian === "tetap" ? "Tetap" : me.statusHunian === "kos" ? "Kos" : "Kontrak"}
           </AppPill>
         </div>
       </section>

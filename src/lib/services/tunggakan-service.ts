@@ -1,6 +1,6 @@
 import "server-only"
 
-import { and, eq, inArray, notInArray } from "drizzle-orm"
+import { and, eq, inArray, isNull, notInArray } from "drizzle-orm"
 
 import { db } from "@/lib/db"
 import { kategoriKas, transaksi, warga } from "@/lib/db/schema"
@@ -51,6 +51,7 @@ async function getActiveWarga() {
       createdAt: warga.createdAt,
     })
     .from(warga)
+    .where(isNull(warga.tglPindah))
     .orderBy(warga.blokRumah, warga.id)
 
   return rows

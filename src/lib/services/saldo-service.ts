@@ -1,6 +1,6 @@
 import "server-only"
 
-import { and, count, desc, eq, gte, lte, sql } from "drizzle-orm"
+import { and, count, desc, eq, gte, isNull, lte, sql } from "drizzle-orm"
 
 import { db } from "@/lib/db"
 import { logAktivitas, transaksi, user, warga } from "@/lib/db/schema"
@@ -86,7 +86,8 @@ export async function getSaldoSummary(): Promise<SaldoSummary> {
       .where(eq(transaksi.tipeArus, "keluar")),
     db
       .select({ total: count() })
-      .from(warga),
+      .from(warga)
+      .where(isNull(warga.tglPindah)),
   ])
 
   return {

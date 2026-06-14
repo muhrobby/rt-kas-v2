@@ -1,6 +1,6 @@
 export type Role = "admin" | "warga"
 
-export type StatusHunian = "tetap" | "kontrak"
+export type StatusHunian = "tetap" | "kontrak" | "kos"
 
 export type JenisArus = "masuk" | "keluar"
 
@@ -16,6 +16,7 @@ export interface Warga {
   statusHunian: StatusHunian
   domisili: string
   pindah?: string
+  tglPindah?: string
   isPengurus: boolean
   rolePengurus?: string
   jumlahAnggota?: number
