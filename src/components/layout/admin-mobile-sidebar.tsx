@@ -15,6 +15,7 @@ interface AdminMobileSidebarProps {
   saldoKas: number | null
   tunggakanCount: number | null
   navItems?: AdminNavItem[]
+  isSuperAdmin?: boolean
 }
 
 const iconMap = {
@@ -28,9 +29,11 @@ const iconMap = {
   gear: KanvasIcons.gear,
   shield: KanvasIcons.shield,
   calendar: KanvasIcons.calendar,
+  eye: KanvasIcons.eye,
+  more: KanvasIcons.more,
 } as const
 
-export function AdminMobileSidebar({ branding, open, onClose, saldoKas, tunggakanCount, navItems }: AdminMobileSidebarProps) {
+export function AdminMobileSidebar({ branding, open, onClose, saldoKas, tunggakanCount, navItems, isSuperAdmin }: AdminMobileSidebarProps) {
   const pathname = usePathname()
   const brandInitial = branding.appName.trim().charAt(0).toUpperCase() || "K"
   const items = navItems ?? adminNavItems
@@ -57,6 +60,9 @@ export function AdminMobileSidebar({ branding, open, onClose, saldoKas, tunggaka
             <div className="leading-none">
               <p className="text-lg text-kanvas-ink">{branding.appName}</p>
               <p className="mt-1 text-[10px] font-semibold tracking-[1.5px] text-kanvas-ink-4 uppercase">{branding.rtRwLabel}</p>
+              {isSuperAdmin ? (
+                <p className="mt-0.5 text-[10px] text-kanvas-terra-2">Mode konfigurasi</p>
+              ) : null}
             </div>
           </div>
 

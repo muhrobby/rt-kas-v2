@@ -2,7 +2,7 @@
 
 import { usePathname } from "next/navigation"
 
-import { KanvasIcons } from "@/components/kanvas"
+import { KanvasIcons, AppPill } from "@/components/kanvas"
 import { LogoutButton } from "@/components/auth/logout-button"
 import { PageHeader } from "@/components/layout/page-header"
 import type { AdminShellUser } from "@/components/layout/admin-shell"
@@ -53,7 +53,14 @@ export function AdminTopbar({ branding, user, onOpenSidebar }: AdminTopbarProps)
             {user?.initials ?? "U"}
           </div>
           <div className="hidden leading-tight sm:block">
-            <p className="text-[12.5px] font-semibold text-kanvas-ink">{user?.name ?? "User"}</p>
+            <div className="flex items-center gap-1.5">
+              <p className="text-[12.5px] font-semibold text-kanvas-ink">{user?.name ?? "User"}</p>
+              {user?.isSuperAdmin ? (
+                <AppPill tone="terra" style={{ fontSize: 9, padding: "1px 5px" }}>
+                  Super Admin
+                </AppPill>
+              ) : null}
+            </div>
             <p className="text-[10.5px] text-kanvas-ink-4">{user?.role ?? "Admin"}</p>
           </div>
           <LogoutButton

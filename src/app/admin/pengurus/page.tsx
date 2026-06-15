@@ -1,4 +1,4 @@
-import { requirePermission } from "@/lib/auth/permissions"
+import { requirePermission, requireFeatureEnabled } from "@/lib/auth/permissions"
 import { listPengurusAction } from "@/lib/actions/admin-role"
 import { PengurusList } from "@/features/pengurus-management/components/pengurus-list"
 import type { PengurusItem } from "@/features/pengurus-management/types"
@@ -6,6 +6,7 @@ import type { PengurusItem } from "@/features/pengurus-management/types"
 export default async function AdminPengurusPage() {
   // Page-level guard: hanya ketua_rt yang bisa akses halaman ini
   await requirePermission("pengurus.manage")
+  await requireFeatureEnabled("admin.pengurus")
 
   let initialData: PengurusItem[] = []
   let initialError = ""

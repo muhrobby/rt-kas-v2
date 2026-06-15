@@ -1,14 +1,28 @@
 import { requirePermission } from "@/lib/auth/permissions"
+import { getAdminRoleFresh } from "@/lib/auth/session"
 import { createLogAktivitasExcel } from "@/lib/export/excel"
 import { listLogAktivitas } from "@/lib/services/log-aktivitas-service"
 import { logAktivitasQuerySchema, EXPORT_LIMITS } from "@/lib/validations/export"
 import { rateLimit } from "@/lib/rate-limit/limiter"
 import { rateLimitKeys } from "@/lib/rate-limit/keys"
 import { writeAuditLog } from "@/lib/services/audit-log-service"
+import { and, eq } from "drizzle-orm"
+import { db } from "@/lib/db"
+import { user } from "@/lib/db/schema"
 import { headers } from "next/headers"
 
 export async function GET(request: Request) {
   const admin = await requirePermission("log.export")
+
+  const adminRole = await getAdminRoleFresh(admin.id)
+  let excludeUserIds: string[] | undefined
+  if (adminRole !== "super_admin") {
+    const superAdminRows = await db
+      .select({ id: user.id })
+      .from(user)
+      .where(and(eq(user.role, "admin"), eq(user.adminRole, "super_admin")))
+    excludeUserIds = superAdminRows.map((r) => r.id)
+  }
 
   try {
     const headersList = await headers()
@@ -62,6 +76,7 @@ export async function GET(request: Request) {
       tanggal: parsed.data.tanggal,
       query: parsed.data.query,
       limit: EXPORT_LIMITS.MAX_LOG_ROWS,
+      excludeUserIds,
     })
 
     if (logs.length === 0) {

@@ -7,11 +7,12 @@
 
 // ─── Sub-Role Admin ───────────────────────────────────────────────────────────
 
-export const ADMIN_ROLES = ["ketua_rt", "bendahara", "sekretaris", "anggota"] as const;
+export const ADMIN_ROLES = ["super_admin", "ketua_rt", "bendahara", "sekretaris", "anggota"] as const;
 
 export type AdminRole = (typeof ADMIN_ROLES)[number];
 
 export const ADMIN_ROLE_LABELS: Record<AdminRole, string> = {
+  super_admin: "Super Admin",
   ketua_rt: "Ketua RT",
   bendahara: "Bendahara",
   sekretaris: "Sekretaris",
@@ -48,6 +49,9 @@ export const PERMISSIONS = [
   "log.export",
   "settings.read",
   "settings.write",
+  "feature_flags.read",
+  "feature_flags.write",
+  "super_admin.manage",
   "kuitansi.admin.read",
   "event.read",
   "event.write",

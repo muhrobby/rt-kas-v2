@@ -1,3 +1,4 @@
+import { requireFeatureEnabled } from "@/lib/auth/permissions"
 import { listWargaAction } from "@/lib/actions/warga"
 import { WargaManagementView } from "@/features/warga-management/components/warga-management-view"
 import type { Warga } from "@/types/rt-kas"
@@ -24,6 +25,8 @@ function toUiWarga(row: {
 }
 
 export default async function AdminWargaPage() {
+  await requireFeatureEnabled("admin.warga")
+
   let initialData: Warga[] = []
   let initialError = ""
 

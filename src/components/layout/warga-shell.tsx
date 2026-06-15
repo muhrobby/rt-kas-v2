@@ -8,6 +8,7 @@ import { AppPill, KanvasIcons } from "@/components/kanvas"
 import { LogoutButton } from "@/components/auth/logout-button"
 import { WargaMobileNav } from "@/components/layout/warga-mobile-nav"
 import { wargaNavItems } from "@/lib/constants/nav"
+import type { WargaNavItem } from "@/lib/constants/nav"
 import type { AppBranding } from "@/lib/branding/format-branding"
 
 const iconMap = {
@@ -33,11 +34,13 @@ export interface WargaShellProfile {
 interface WargaShellProps extends PropsWithChildren {
   branding: AppBranding
   profile: WargaShellProfile
+  navItems?: WargaNavItem[]
 }
 
-export function WargaShell({ branding, children, profile }: WargaShellProps) {
+export function WargaShell({ branding, children, profile, navItems }: WargaShellProps) {
   const pathname = usePathname()
   const me = profile
+  const items = navItems ?? wargaNavItems
   const initials = me.nama
     .split(" ")
     .filter(Boolean)
@@ -91,7 +94,7 @@ export function WargaShell({ branding, children, profile }: WargaShellProps) {
           </div>
 
           <nav className="space-y-1">
-            {wargaNavItems.map((item) => {
+            {items.map((item) => {
               const Icon = iconMap[item.icon]
               const active = pathname === item.href
               return (
@@ -129,7 +132,7 @@ export function WargaShell({ branding, children, profile }: WargaShellProps) {
         <div className="min-w-0 flex-1 pb-[88px] md:pb-0">{children}</div>
       </div>
 
-      <WargaMobileNav />
+      <WargaMobileNav navItems={items} />
     </div>
   )
 }

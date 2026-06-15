@@ -260,12 +260,6 @@ export async function updateWargaPengurusAction(id: number, input: ToggleWargaPe
         .limit(1)
 
       if (currentUser?.adminRole === "ketua_rt") {
-        const [otherKetua] = await db
-          .select({ id: user.id })
-          .from(user)
-          .where(and(eq(user.adminRole, "ketua_rt"), eq(user.role, "admin")))
-          .limit(2)
-
         // Count ketua_rt users; if only 1 (this one), block
         const ketuaCount = await db
           .select({ total: sql<number>`count(*)` })
