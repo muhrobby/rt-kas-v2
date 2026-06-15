@@ -2,7 +2,7 @@ import { pgEnum, pgTable, serial, text, timestamp } from "drizzle-orm/pg-core";
 
 import { user } from "./auth";
 
-export const aksiEnum = pgEnum("aksi", ["tambah", "edit", "hapus", "login", "logout", "export_excel", "export_pdf", "change_password", "approve", "reject", "transfer", "close", "cancel"]);
+export const aksiEnum = pgEnum("aksi", ["tambah", "edit", "hapus", "login", "logout", "export_excel", "export_pdf", "change_password", "approve", "reject", "transfer", "close", "cancel", "seed"]);
 
 export const logAktivitas = pgTable("log_aktivitas", {
   id: serial("id").primaryKey(),

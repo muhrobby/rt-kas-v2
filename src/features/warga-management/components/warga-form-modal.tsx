@@ -55,7 +55,18 @@ export function WargaFormModal({ open, mode, initialValues, onClose, onSubmit, s
 
   // Reset form when initialValues change
   useEffect(() => {
-    if (open) setValues(initialValues)
+    if (!open) return
+
+    let cancelled = false
+
+    queueMicrotask(() => {
+      if (cancelled) return
+      setValues(initialValues)
+    })
+
+    return () => {
+      cancelled = true
+    }
   }, [open, initialValues])
 
   const updateField = <K extends keyof WargaFormValues>(key: K, value: WargaFormValues[K]) => {

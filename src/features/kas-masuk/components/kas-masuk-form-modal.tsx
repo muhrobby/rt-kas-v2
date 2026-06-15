@@ -81,18 +81,29 @@ export function KasMasukFormModal({
   useEffect(() => {
     if (selectedKategori?.tipeTagihan !== "sekali" || onceBillMonth == null || onceBillYear == null) return
 
-    setValues((state) => {
-      if (state.tahun === onceBillYear && state.bulan.length === 1 && state.bulan[0] === onceBillMonth) {
-        return state
-      }
-      return {
-        ...state,
-        tahun: onceBillYear,
-        bulan: [onceBillMonth],
-      }
+    let cancelled = false
+
+    queueMicrotask(() => {
+      if (cancelled) return
+
+      setValues((state) => {
+        if (state.tahun === onceBillYear && state.bulan.length === 1 && state.bulan[0] === onceBillMonth) {
+          return state
+        }
+
+        return {
+          ...state,
+          tahun: onceBillYear,
+          bulan: [onceBillMonth],
+        }
+      })
+
+      onYearChange?.(onceBillYear)
     })
 
-    onYearChange?.(onceBillYear)
+    return () => {
+      cancelled = true
+    }
   }, [onYearChange, onceBillMonth, onceBillYear, selectedKategori?.tipeTagihan])
 
   const updateValue = <K extends keyof KasMasukFormValues>(key: K, value: KasMasukFormValues[K]) => {

@@ -1,9 +1,10 @@
-import { requirePermission, hasAdminPermission } from "@/lib/auth/permissions"
+import { requirePermission, hasAdminPermission, requireFeatureEnabled } from "@/lib/auth/permissions"
 import { listEvents } from "@/lib/services/event-service"
 import { EventListView } from "@/features/event-acara/components/event-list-view"
 
 export default async function AdminEventPage() {
   const admin = await requirePermission("event.read")
+  await requireFeatureEnabled("admin.event")
   const events = await listEvents()
   const canWrite = hasAdminPermission(admin, "event.write")
 

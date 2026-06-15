@@ -1,6 +1,7 @@
 export * from "./auth";
 export * from "./app-settings";
 export * from "./event-acara";
+export * from "./feature-flags";
 export * from "./kategori-kas";
 export * from "./log-aktivitas";
 export * from "./relations";

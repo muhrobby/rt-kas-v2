@@ -1,0 +1,2 @@
+ALTER TABLE "user" DROP CONSTRAINT "user_ck_admin_role";--> statement-breakpoint
+ALTER TABLE "user" ADD CONSTRAINT "user_ck_admin_role" CHECK ("user"."admin_role" is null or "user"."admin_role" in ('super_admin', 'ketua_rt', 'bendahara', 'sekretaris', 'anggota'));

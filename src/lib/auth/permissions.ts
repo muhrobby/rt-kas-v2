@@ -4,6 +4,9 @@ import { getCurrentUser, getAdminRoleFresh, type CurrentUser } from "./session";
 import { hasPermission as checkPermission } from "./permission-matrix";
 import type { Permission } from "@/lib/constants/admin-roles";
 import { isValidAdminRole } from "@/lib/constants/admin-roles";
+import { getFlagMeta } from "@/lib/constants/feature-flags";
+import type { FeatureFlagKey } from "@/lib/constants/feature-flags";
+import { isFeatureEnabled } from "@/lib/services/feature-flag-service";
 
 export class AuthError extends Error {
   constructor(message: string, public code: "UNAUTHORIZED" | "FORBIDDEN") {
@@ -92,4 +95,24 @@ export async function requireEventAccess(eventId: number): Promise<CurrentUser> 
   if (isPanitia) return currentUser;
 
   redirect("/unauthorized");
+}
+
+/** Validates the key is in the registry and the feature is enabled. Redirects to /unauthorized if disabled or unknown. */
+export async function requireFeatureEnabled(key: FeatureFlagKey, options?: { redirectTo?: string }): Promise<void> {
+  const meta = getFlagMeta(key)
+  if (!meta) {
+    redirect("/unauthorized")
+  }
+  const enabled = await isFeatureEnabled(key)
+  if (!enabled) {
+    redirect(options?.redirectTo ?? "/unauthorized")
+  }
+}
+
+/** Throws AuthError if the feature flag is disabled or unknown. Use in server actions. */
+export async function assertFeatureEnabled(key: FeatureFlagKey): Promise<void> {
+  const meta = getFlagMeta(key)
+  if (!meta || !(await isFeatureEnabled(key))) {
+    throw new AuthError("FEATURE_DISABLED", "FORBIDDEN")
+  }
 }

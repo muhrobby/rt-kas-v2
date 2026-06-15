@@ -4,7 +4,7 @@ import { db } from "@/lib/db"
 import { logAktivitas, type NewLogAktivitas } from "@/lib/db/schema"
 
 export type AuditLogModul = "Data Warga" | "Kategori Kas" | "Kas Masuk" | "Kas Keluar" | "Autentikasi" | "Pengaturan" | "Laporan" | "Log Aktivitas" | "Export" | "Event Acara" | "Panitia Event" | "Sumbangan Event" | "Pengeluaran Event"
-export type AuditLogAksi = "tambah" | "edit" | "hapus" | "login" | "logout" | "export_excel" | "export_pdf" | "change_password" | "approve" | "reject" | "transfer" | "close" | "cancel"
+export type AuditLogAksi = "tambah" | "edit" | "hapus" | "login" | "logout" | "export_excel" | "export_pdf" | "change_password" | "approve" | "reject" | "transfer" | "close" | "cancel" | "seed"
 
 type WriteAuditLogInput = Pick<NewLogAktivitas, "userId" | "modul" | "aksi" | "keterangan">
 

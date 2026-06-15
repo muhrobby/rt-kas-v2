@@ -4,6 +4,7 @@ import { hashPassword } from "better-auth/crypto";
 import { eq } from "drizzle-orm";
 
 import { db } from "./index";
+import { seedFeatureFlags } from "./seed-feature-flags";
 import { appSettings } from "./schema/app-settings";
 import { account, user } from "./schema/auth";
 import { kategoriKas } from "./schema/kategori-kas";
@@ -11,6 +12,16 @@ import { transaksi } from "./schema/transaksi";
 import { warga } from "./schema/warga";
 import type { AdminRole } from "../constants/admin-roles";
 import { defaultAppSettings } from "../constants/app-settings";
+import { normalizePhone } from "../format/phone";
+import { logAktivitas } from "./schema/log-aktivitas";
+
+async function writeAuditSeed(userId: string, modul: string, aksi: string, keterangan: string): Promise<void> {
+  db.insert(logAktivitas)
+    .values({ userId, modul, aksi: aksi as "seed", keterangan })
+    .catch(() => {
+      // Non-blocking: audit log failure must not fail the seed
+    })
+}
 
 function getSeedAdminRole(rolePengurus: string | undefined): AdminRole {
   switch (rolePengurus?.trim().toLowerCase()) {
@@ -27,6 +38,63 @@ function getSeedAdminRole(rolePengurus: string | undefined): AdminRole {
     default:
       return "ketua_rt";
   }
+}
+
+async function seedSuperAdmin(): Promise<void> {
+  const phone = process.env.SEED_SUPER_ADMIN_PHONE;
+  const password = process.env.SEED_SUPER_ADMIN_PASSWORD;
+
+  if (!phone && !password) {
+    console.log("Skipping super admin seed: env not set");
+    return;
+  }
+
+  if (!phone || !password) {
+    throw new Error("Both SEED_SUPER_ADMIN_PHONE and SEED_SUPER_ADMIN_PASSWORD must be set");
+  }
+
+  const normalizedPhone = normalizePhone(phone);
+
+  const [existingUser] = await db.select().from(user).where(eq(user.username, normalizedPhone));
+
+  if (existingUser) {
+    if (existingUser.adminRole !== "super_admin") {
+      await db
+        .update(user)
+        .set({ role: "admin", adminRole: "super_admin" })
+        .where(eq(user.id, existingUser.id));
+      console.log(`Super admin seed: updated user ${normalizedPhone} to super_admin`);
+    } else {
+      console.log("Super admin already exists, skipping");
+    }
+    return;
+  }
+
+  const adminId = generateId();
+  const passwordHash = await hashPassword(password);
+  await db.insert(user).values({
+    id: adminId,
+    name: "Super Admin",
+    email: `${normalizedPhone}@superadmin.local`,
+    emailVerified: true,
+    username: normalizedPhone,
+    displayUsername: normalizedPhone,
+    role: "admin",
+    adminRole: "super_admin",
+    mustChangePassword: true,
+  });
+
+  await db.insert(account).values({
+    id: generateId(),
+    userId: adminId,
+    accountId: adminId,
+    providerId: "credential",
+    password: passwordHash,
+  });
+
+  await writeAuditSeed(adminId, "Autentikasi", "seed", "Super admin seed berhasil");
+
+  console.log(`Super admin seeded: ${normalizedPhone}`);
 }
 
 async function main() {
@@ -220,6 +288,12 @@ async function main() {
 
   await db.insert(transaksi).values(transaksiData).onConflictDoNothing();
   console.log(`Transaksi seeded: ${transaksiData.length} entries.`);
+
+  console.log("Seeding feature flags...");
+  await seedFeatureFlags();
+
+  console.log("Seeding super admin...");
+  await seedSuperAdmin();
 
   console.log("\nSeed complete.");
 }

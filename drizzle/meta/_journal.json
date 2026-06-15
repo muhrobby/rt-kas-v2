@@ -99,6 +99,20 @@
       "when": 1781420847554,
       "tag": "0013_steady_meteorite",
       "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1781441524959,
+      "tag": "0014_futuristic_starhawk",
+      "breakpoints": true
+    },
+    {
+      "idx": 15,
+      "version": "7",
+      "when": 1781530351585,
+      "tag": "0015_wide_pride",
+      "breakpoints": true
     }
   ]
 }

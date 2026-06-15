@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation"
 
-import { requirePermission } from "@/lib/auth/permissions"
+import { requirePermission, requireFeatureEnabled } from "@/lib/auth/permissions"
 import { getAdminRoleFresh } from "@/lib/auth/session"
 import { getPermissions } from "@/lib/auth/permission-matrix"
 import { getEventById, listEvents } from "@/lib/services/event-service"
@@ -18,7 +18,8 @@ export default async function AdminEventDetailPage({
 }: {
   params: Promise<{ id: string }>
 }) {
-  const admin = await requirePermission("event.read")
+  const admin =   await requirePermission("event.read")
+  await requireFeatureEnabled("admin.event")
   const { id: idStr } = await params
   const id = Number(idStr)
   if (!id || isNaN(id)) notFound()

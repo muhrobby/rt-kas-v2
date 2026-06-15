@@ -14,6 +14,7 @@ export interface AdminShellUser {
   initials: string
   role: string
   wargaId: number | null
+  isSuperAdmin?: boolean
 }
 
 interface AdminShellProps extends PropsWithChildren {
@@ -36,10 +37,11 @@ export function AdminShell({ branding, children, user, saldoKas = null, tunggaka
         saldoKas={saldoKas}
         tunggakanCount={tunggakanCount}
         navItems={navItems}
+        isSuperAdmin={user?.isSuperAdmin}
       />
 
       <div className="hidden lg:flex">
-        <AdminSidebar branding={branding} saldoKas={saldoKas} tunggakanCount={tunggakanCount} navItems={navItems} />
+        <AdminSidebar branding={branding} saldoKas={saldoKas} tunggakanCount={tunggakanCount} navItems={navItems} isSuperAdmin={user?.isSuperAdmin} />
       </div>
 
       <div className="flex min-w-0 flex-1 flex-col">
