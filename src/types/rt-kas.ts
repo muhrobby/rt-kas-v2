@@ -20,6 +20,11 @@ export interface Warga {
   isPengurus: boolean
   rolePengurus?: string
   jumlahAnggota?: number
+  pemilikHunian?: {
+    id: number
+    nama: string
+    noTelp: string | null
+  } | null
 }
 
 export interface KategoriKas {

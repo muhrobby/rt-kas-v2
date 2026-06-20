@@ -34,6 +34,7 @@ function statusTone(s: Warga["statusHunian"]) {
 
 function WargaRow({
   warga,
+  onDetail,
   onEdit,
   onDelete,
   onTogglePengurus,
@@ -42,6 +43,7 @@ function WargaRow({
   updatingPengurusId,
 }: {
   warga: Warga
+  onDetail: (warga: Warga) => void
   onEdit: (warga: Warga) => void
   onDelete: (warga: Warga) => void
   onTogglePengurus: (warga: Warga) => void
@@ -118,6 +120,7 @@ function WargaRow({
 
         {/* Button group aksi */}
         <div className="flex justify-end gap-1">
+          <AppButton variant="outline" size="sm" onClick={() => onDetail(warga)}>Detail</AppButton>
           {sudahPindah ? (
             <AppButton variant="danger" size="sm" onClick={() => onDelete(warga)}>Hapus</AppButton>
           ) : (
@@ -152,6 +155,7 @@ function WargaRow({
         </div>
 
         <div className="mt-3 flex flex-wrap gap-1.5">
+          <AppButton variant="outline" size="sm" className="min-h-[36px]" onClick={() => onDetail(warga)}>Detail</AppButton>
           <a
             href={`https://wa.me/${normalizeToWa(warga.telp)}`}
             target="_blank"
@@ -180,7 +184,7 @@ function WargaRow({
   )
 }
 
-export function WargaTable({ warga, onEdit, onDelete, onTogglePengurus, onResetPassword, onPindah, updatingPengurusId, pagination }: WargaTableProps) {
+export function WargaTable({ warga, onDetail, onEdit, onDelete, onTogglePengurus, onResetPassword, onPindah, updatingPengurusId, pagination }: WargaTableProps) {
   return (
     <AppCard className="overflow-hidden p-0">
       <div className="hidden grid-cols-[44px_1.2fr_0.6fr_1fr_0.8fr_0.9fr_0.8fr_280px] gap-0 border-b border-kanvas-line bg-kanvas-paper px-4 py-2.5 text-[10px] font-bold tracking-[0.7px] text-kanvas-ink-3 uppercase lg:grid">
@@ -200,6 +204,7 @@ export function WargaTable({ warga, onEdit, onDelete, onTogglePengurus, onResetP
             <WargaRow
               key={item.id}
               warga={item}
+              onDetail={onDetail}
               onEdit={onEdit}
               onDelete={onDelete}
               onTogglePengurus={onTogglePengurus}

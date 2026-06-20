@@ -22,6 +22,7 @@ export interface WargaFormValues {
 
 export interface WargaTableProps {
   warga: Warga[]
+  onDetail: (warga: Warga) => void
   onEdit: (warga: Warga) => void
   onDelete: (warga: Warga) => void
   onTogglePengurus: (warga: Warga) => void

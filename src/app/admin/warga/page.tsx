@@ -8,6 +8,7 @@ function toUiWarga(row: {
   statusHunian: "tetap" | "kontrak" | "kos"; jumlahAnggota: number
   tglBatasDomisili: string | null; tglPindah: string | null
   isPengurus: boolean; rolePengurus: string | null; createdAt: Date
+  pemilikHunian: { id: number; nama: string; noTelp: string | null } | null
 }): Warga {
   return {
     id: String(row.id),
@@ -21,6 +22,7 @@ function toUiWarga(row: {
     isPengurus: row.isPengurus,
     rolePengurus: row.rolePengurus ?? undefined,
     jumlahAnggota: row.jumlahAnggota,
+    pemilikHunian: row.pemilikHunian,
   }
 }
 

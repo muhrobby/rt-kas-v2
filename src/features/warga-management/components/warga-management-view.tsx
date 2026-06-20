@@ -10,6 +10,7 @@ import { resetWargaPasswordAction, pindahWargaAction } from "@/lib/actions/warga
 import { DeleteWargaDialog } from "@/features/warga-management/components/delete-warga-dialog"
 import { PindahWargaDialog } from "@/features/warga-management/components/pindah-warga-dialog"
 import { TogglePengurusDialog } from "@/features/warga-management/components/toggle-pengurus-dialog"
+import { WargaDetailDialog } from "@/features/warga-management/components/warga-detail-dialog"
 import { WargaFormModal } from "@/features/warga-management/components/warga-form-modal"
 import { TemporaryPasswordDialog } from "@/features/warga-management/components/temporary-password-dialog"
 import { WargaTable } from "@/features/warga-management/components/warga-table"
@@ -72,6 +73,7 @@ export function WargaManagementView({ initialData, initialError }: WargaManageme
   const [isTogglingPengurus, setIsTogglingPengurus] = useState(false)
   const [tempPasswordData, setTempPasswordData] = useState<{ nama: string, telp: string, password?: string } | null>(null)
   const [pindahTarget, setPindahTarget] = useState<Warga | null>(null)
+  const [detailTarget, setDetailTarget] = useState<Warga | null>(null)
 
   const filteredWarga = useMemo(() => filterWarga(wargaData, filters), [wargaData, filters])
 
@@ -261,6 +263,7 @@ export function WargaManagementView({ initialData, initialError }: WargaManageme
 
       <WargaTable
         warga={paginatedWarga.items}
+        onDetail={(w) => setDetailTarget(w)}
         onEdit={openEditModal}
         onDelete={openDeleteDialog}
         onTogglePengurus={handleTogglePengurus}
@@ -319,6 +322,12 @@ export function WargaManagementView({ initialData, initialError }: WargaManageme
         wargaNama={pindahTarget?.nama ?? ""}
         onClose={() => setPindahTarget(null)}
         onConfirm={handlePindahConfirm}
+      />
+
+      <WargaDetailDialog
+        warga={detailTarget}
+        open={!!detailTarget}
+        onClose={() => setDetailTarget(null)}
       />
     </main>
   )
