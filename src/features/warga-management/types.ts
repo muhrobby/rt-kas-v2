@@ -17,6 +17,7 @@ export interface WargaFormValues {
   jumlahAnggota: number
   pindah: string
   pemilikHunianId: number | null
+  pemilikHunianOptionValue: string | null
 }
 
 export interface WargaTableProps {

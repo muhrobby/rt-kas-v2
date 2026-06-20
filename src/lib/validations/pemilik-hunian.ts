@@ -27,3 +27,15 @@ export const createPemilikHunianSchema = z.object({
 })
 
 export type CreatePemilikHunianInput = z.infer<typeof createPemilikHunianSchema>
+
+export const searchPemilikHunianSchema = z.object({
+  query: z.string().trim().max(100, "Pencarian maksimal 100 karakter.").default(""),
+})
+
+export type SearchPemilikHunianInput = z.infer<typeof searchPemilikHunianSchema>
+
+export const pemilikHunianOptionValueSchema = z
+  .string()
+  .regex(/^(pemilik|warga):\d+$/, "Format value pemilik tidak valid.")
+
+export type PemilikHunianOptionValue = z.infer<typeof pemilikHunianOptionValueSchema>

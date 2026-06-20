@@ -31,6 +31,7 @@ const baseWargaSchema = z.object({
   tglBatasDomisili: z.string().optional(),
   tglPindah: z.string().optional(),
   pemilikHunianId: z.number().int().nullable().optional(),
+  pemilikHunianOptionValue: z.string().optional(),
 })
 
 export const createWargaInputSchema = baseWargaSchema.superRefine((value, ctx) => {
@@ -41,9 +42,9 @@ export const createWargaInputSchema = baseWargaSchema.superRefine((value, ctx) =
       message: "Batas domisili wajib diisi untuk status kontrak/kos.",
     })
   }
-  if ((value.statusHunian === "kontrak" || value.statusHunian === "kos") && !value.pemilikHunianId) {
+  if ((value.statusHunian === "kontrak" || value.statusHunian === "kos") && !value.pemilikHunianOptionValue && !value.pemilikHunianId) {
     ctx.addIssue({
-      path: ["pemilikHunianId"],
+      path: ["pemilikHunianOptionValue"],
       code: z.ZodIssueCode.custom,
       message: "Pemilik hunian wajib dipilih untuk status kontrak/kos.",
     })
@@ -78,5 +79,6 @@ export function parseWargaInput<T extends CreateWargaInput | UpdateWargaInput>(i
     tglBatasDomisili: isNonTetap ? (parsed.tglBatasDomisili ?? null) : null,
     tglPindah: parsed.tglPindah ?? null,
     pemilikHunianId: isNonTetap ? (parsed.pemilikHunianId ?? null) : null,
+    pemilikHunianOptionValue: parsed.pemilikHunianOptionValue,
   }
 }

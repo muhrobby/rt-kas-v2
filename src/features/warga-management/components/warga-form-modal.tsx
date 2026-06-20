@@ -4,14 +4,10 @@ import { useEffect, useRef, useState } from "react"
 
 import { AppButton, AppField, AppInput, AppModal, KanvasIcons } from "@/components/kanvas"
 import { normalizePhone } from "@/lib/format/phone"
-import { createPemilikHunianAction, listPemilikHunianAction } from "@/lib/actions/pemilik-hunian"
+import { createPemilikHunianAction } from "@/lib/actions/pemilik-hunian"
+import { PemilikHunianCombobox } from "@/features/warga-management/components/pemilik-hunian-combobox"
 
 import type { WargaFormMode, WargaFormValues } from "@/features/warga-management/types"
-
-interface PemilikHunianOption {
-  id: number
-  nama: string
-}
 
 interface WargaFormModalProps {
   open: boolean
@@ -31,9 +27,8 @@ function getAutoDate(): string {
 
 export function WargaFormModal({ open, mode, initialValues, onClose, onSubmit, serverError, fieldErrors }: WargaFormModalProps) {
   const [values, setValues] = useState<WargaFormValues>(initialValues)
-  const [errors, setErrors] = useState({ nama: "", blok: "", telp: "", pindah: "", jumlahAnggota: "", pemilikHunianId: "" })
+  const [errors, setErrors] = useState({ nama: "", blok: "", telp: "", pindah: "", jumlahAnggota: "", pemilikHunianOptionValue: "" })
   const [submitting, setSubmitting] = useState(false)
-  const [pemilikList, setPemilikList] = useState<PemilikHunianOption[]>([])
   const [subModalOpen, setSubModalOpen] = useState(false)
   const [newPemilikNama, setNewPemilikNama] = useState("")
   const [newPemilikTelp, setNewPemilikTelp] = useState("")
@@ -43,15 +38,6 @@ export function WargaFormModal({ open, mode, initialValues, onClose, onSubmit, s
 
   const title = mode === "add" ? "Tambah Warga Baru" : "Edit Data Warga"
   const isNonTetap = values.statusHunian === "kontrak" || values.statusHunian === "kos"
-
-  // Load pemilik hunian list when modal opens
-  useEffect(() => {
-    if (open) {
-      listPemilikHunianAction().then((res) => {
-        if (res.ok) setPemilikList(res.data.map((d) => ({ id: d.id, nama: d.nama })))
-      })
-    }
-  }, [open])
 
   // Reset form when initialValues change
   useEffect(() => {
@@ -75,7 +61,7 @@ export function WargaFormModal({ open, mode, initialValues, onClose, onSubmit, s
       if (key === "statusHunian") {
         if (value === "tetap") {
           next.pindah = ""
-          next.pemilikHunianId = null
+          next.pemilikHunianOptionValue = null
         } else if (state.statusHunian === "tetap") {
           // Switching from tetap to kontrak/kos → auto-fill date
           next.pindah = getAutoDate()
@@ -92,7 +78,7 @@ export function WargaFormModal({ open, mode, initialValues, onClose, onSubmit, s
       telp: values.telp.trim() ? "" : "Nomor telepon wajib diisi.",
       pindah: isNonTetap && !values.pindah ? "Batas domisili wajib diisi." : "",
       jumlahAnggota: values.jumlahAnggota >= 1 ? "" : "Jumlah anggota minimal 1.",
-      pemilikHunianId: isNonTetap && !values.pemilikHunianId ? "Pemilik hunian wajib dipilih." : "",
+      pemilikHunianOptionValue: isNonTetap && !values.pemilikHunianOptionValue ? "Pemilik hunian wajib dipilih." : "",
     }
     setErrors(nextErrors)
     return Object.values(nextErrors).every((e) => !e)
@@ -124,9 +110,8 @@ export function WargaFormModal({ open, mode, initialValues, onClose, onSubmit, s
       setSubModalError(res.error)
       return
     }
-    // Add to list and auto-select
-    setPemilikList((prev) => [...prev, { id: res.data.id, nama: res.data.nama }])
-    setValues((prev) => ({ ...prev, pemilikHunianId: res.data.id }))
+    // Auto-select the newly created owner
+    setValues((prev) => ({ ...prev, pemilikHunianOptionValue: `pemilik:${res.data.id}` }))
     setSubModalOpen(false)
     setNewPemilikNama("")
     setNewPemilikTelp("")
@@ -211,16 +196,12 @@ export function WargaFormModal({ open, mode, initialValues, onClose, onSubmit, s
             {isNonTetap && (
               <AppField label="Pemilik Kontrakan/Kos">
                 <div className="flex gap-2">
-                  <select
-                    className="flex-1 rounded-lg border border-kanvas-line bg-white px-3 py-2 text-sm text-kanvas-ink outline-none focus:border-kanvas-terra"
-                    value={values.pemilikHunianId ?? ""}
-                    onChange={(e) => updateField("pemilikHunianId", e.target.value ? Number(e.target.value) : null)}
-                  >
-                    <option value="">— Pilih pemilik —</option>
-                    {pemilikList.map((p) => (
-                      <option key={p.id} value={p.id}>{p.nama}</option>
-                    ))}
-                  </select>
+                  <PemilikHunianCombobox
+                    value={values.pemilikHunianOptionValue}
+                    onChange={(value) => updateField("pemilikHunianOptionValue", value)}
+                    onCreateNew={() => setSubModalOpen(true)}
+                    error={errors.pemilikHunianOptionValue || fieldErrors?.pemilikHunianOptionValue?.[0]}
+                  />
                   <button
                     type="button"
                     onClick={() => setSubModalOpen(true)}
@@ -229,8 +210,8 @@ export function WargaFormModal({ open, mode, initialValues, onClose, onSubmit, s
                     + Baru
                   </button>
                 </div>
-                {(errors.pemilikHunianId || fieldErrors?.pemilikHunianId?.[0]) && (
-                  <p className="mt-1 text-[11px] text-kanvas-danger">{errors.pemilikHunianId || fieldErrors?.pemilikHunianId?.[0]}</p>
+                {(errors.pemilikHunianOptionValue || fieldErrors?.pemilikHunianOptionValue?.[0]) && (
+                  <p className="mt-1 text-[11px] text-kanvas-danger">{errors.pemilikHunianOptionValue || fieldErrors?.pemilikHunianOptionValue?.[0]}</p>
                 )}
               </AppField>
             )}

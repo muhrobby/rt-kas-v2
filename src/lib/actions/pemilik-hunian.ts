@@ -1,17 +1,21 @@
 "use server"
 
 import { requirePermission } from "@/lib/auth/permissions"
-import { createPemilikHunian, listPemilikHunian } from "@/lib/services/pemilik-hunian-service"
+import { createPemilikHunian, listPemilikHunianOptions } from "@/lib/services/pemilik-hunian-service"
 import { createPemilikHunianSchema } from "@/lib/validations/pemilik-hunian"
 
 type ActionResult<T> =
   | { ok: true; data: T }
   | { ok: false; error: string; fieldErrors?: Record<string, string[]> }
 
-export async function listPemilikHunianAction() {
+export async function listPemilikHunianAction(input?: { query?: string }) {
   await requirePermission("warga.write")
-  const data = await listPemilikHunian()
-  return { ok: true as const, data }
+  try {
+    const data = await listPemilikHunianOptions(input)
+    return { ok: true as const, data }
+  } catch {
+    return { ok: false as const, error: "Gagal memuat data pemilik hunian." }
+  }
 }
 
 export async function createPemilikHunianAction(input: { nama: string; noTelp?: string }): Promise<ActionResult<{ id: number; nama: string }>> {

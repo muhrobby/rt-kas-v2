@@ -31,6 +31,7 @@ const defaultFormValues: WargaFormValues = {
   jumlahAnggota: 1,
   pindah: "",
   pemilikHunianId: null,
+  pemilikHunianOptionValue: null,
 }
 
 function mapWargaToFormValues(warga: Warga): WargaFormValues {
@@ -42,6 +43,9 @@ function mapWargaToFormValues(warga: Warga): WargaFormValues {
     jumlahAnggota: warga.jumlahAnggota ?? 1,
     pindah: warga.pindah ?? "",
     pemilikHunianId: (warga as Warga & { pemilikHunianId?: number | null }).pemilikHunianId ?? null,
+    pemilikHunianOptionValue: (warga as Warga & { pemilikHunianId?: number | null }).pemilikHunianId
+      ? `pemilik:${(warga as Warga & { pemilikHunianId?: number | null }).pemilikHunianId}`
+      : null,
   }
 }
 
@@ -126,7 +130,7 @@ export function WargaManagementView({ initialData, initialError }: WargaManageme
       jumlahAnggota: values.jumlahAnggota,
       tglBatasDomisili: values.statusHunian !== "tetap" ? values.pindah : undefined,
       tglPindah: undefined,
-      pemilikHunianId: values.statusHunian !== "tetap" ? values.pemilikHunianId : undefined,
+      pemilikHunianOptionValue: values.statusHunian !== "tetap" ? (values.pemilikHunianOptionValue ?? undefined) : undefined,
     }
 
     if (formMode === "add") {

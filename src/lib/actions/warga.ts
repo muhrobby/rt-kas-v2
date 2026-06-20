@@ -14,6 +14,7 @@ import {
   updateWargaUserAccount,
 } from "@/lib/services/user-account-service"
 import { hasWargaTransaksi, listWarga } from "@/lib/services/warga-service"
+import { resolvePemilikHunianIdFromOption } from "@/lib/services/pemilik-hunian-service"
 import { parseWargaInput, toggleWargaPengurusInputSchema, type CreateWargaInput, type UpdateWargaInput, type ToggleWargaPengurusInput } from "@/lib/validations/warga"
 import { ZodError } from "zod"
 import { and, eq, sql } from "drizzle-orm"
@@ -62,6 +63,31 @@ function toActionError(error: unknown): ActionResult<never> {
     }
   }
 
+  if (error instanceof Error) {
+    switch (error.message) {
+      case "INVALID_OPTION_VALUE":
+        return {
+          ok: false,
+          error: "Format pemilik hunian tidak valid.",
+          fieldErrors: { pemilikHunianOptionValue: ["Format tidak valid."] },
+        }
+      case "PEMILIK_NOT_FOUND":
+        return {
+          ok: false,
+          error: "Pemilik hunian tidak ditemukan.",
+          fieldErrors: { pemilikHunianOptionValue: ["Data pemilik tidak ditemukan."] },
+        }
+      case "WARGA_NOT_FOUND":
+        return { ok: false, error: "Warga pemilik tidak ditemukan." }
+      case "WARGA_ALREADY_MOVED":
+        return {
+          ok: false,
+          error: "Warga pemilik sudah pindah dan tidak bisa dipilih.",
+          fieldErrors: { pemilikHunianOptionValue: ["Warga sudah pindah."] },
+        }
+    }
+  }
+
   return {
     ok: false,
     error: "Terjadi kesalahan server. Coba lagi.",
@@ -83,6 +109,10 @@ export async function createWargaAction(input: CreateWargaInput): Promise<Action
   try {
     const payload = parseWargaInput(input)
 
+    const pemilikHunianId = payload.pemilikHunianOptionValue
+      ? await resolvePemilikHunianIdFromOption(payload.pemilikHunianOptionValue)
+      : payload.pemilikHunianId
+
     const created = await db.transaction(async (tx) => {
       const [newWarga] = await tx
         .insert(warga)
@@ -94,7 +124,7 @@ export async function createWargaAction(input: CreateWargaInput): Promise<Action
           jumlahAnggota: payload.jumlahAnggota,
           tglBatasDomisili: payload.tglBatasDomisili,
           tglPindah: payload.tglPindah,
-          pemilikHunianId: payload.pemilikHunianId,
+          pemilikHunianId,
         })
         .returning({ id: warga.id })
 
@@ -131,6 +161,10 @@ export async function updateWargaAction(id: number, input: UpdateWargaInput): Pr
   try {
     const payload = parseWargaInput(input)
 
+    const pemilikHunianId = payload.pemilikHunianOptionValue
+      ? await resolvePemilikHunianIdFromOption(payload.pemilikHunianOptionValue)
+      : payload.pemilikHunianId
+
     const updated = await db.transaction(async (tx) => {
       const [existing] = await tx.select({ id: warga.id }).from(warga).where(eq(warga.id, id)).limit(1)
       if (!existing) {
@@ -147,7 +181,7 @@ export async function updateWargaAction(id: number, input: UpdateWargaInput): Pr
           jumlahAnggota: payload.jumlahAnggota,
           tglBatasDomisili: payload.tglBatasDomisili,
           tglPindah: payload.tglPindah,
-          pemilikHunianId: payload.pemilikHunianId,
+          pemilikHunianId,
           updatedAt: new Date(),
         })
         .where(eq(warga.id, id))
