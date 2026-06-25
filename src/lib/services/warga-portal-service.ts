@@ -1,6 +1,6 @@
 import "server-only"
 
-import { and, asc, eq, gte, inArray, lt, sql } from "drizzle-orm"
+import { and, asc, eq, gte, lt, notInArray, sql } from "drizzle-orm"
 
 import { db } from "@/lib/db"
 import { BULAN } from "@/lib/constants/months"
@@ -15,7 +15,7 @@ export type WargaPortalProfile = {
   id: number
   nama: string
   blok: string
-  statusHunian: "tetap" | "kontrak"
+  statusHunian: "tetap" | "kontrak" | "kos"
   jumlahAnggota: number
   tglBatasDomisili: string | null
 }
@@ -166,7 +166,15 @@ async function getPaymentStatusForPeriod(wargaId: number, filter: WargaRiwayatFi
       nominalDefault: kategoriKas.nominalDefault,
     })
     .from(kategoriKas)
-    .where(eq(kategoriKas.jenisArus, "masuk"))
+    .where(and(
+      eq(kategoriKas.jenisArus, "masuk"),
+      notInArray(kategoriKas.namaKategori, [
+        "Sisa Dana Event",
+        "Talangan Event",
+        "Refund Talangan Event",
+        "Alih Sumbangan Event",
+      ]),
+    ))
     .orderBy(asc(kategoriKas.id))
 
   const paidRows = await db
@@ -291,7 +299,7 @@ export async function getWargaLaporanTransparansi(filter: WargaLaporanFilter = {
   const startDate = new Date(tahun, 0, 1)
   const endDate = new Date(tahun + 1, 0, 1)
 
-  const [saldo, transaksiMasukRows, transaksiKeluarRows, pengeluaranRows] = await Promise.all([
+  const [saldo, transaksiMasukRows, transaksiKeluarRows, pengeluaranRows, pengeluaranDetailRows] = await Promise.all([
     getSaldoSummary(),
     // Pemasukan: filter by tahun_tagihan, group by bulan_tagihan
     db
@@ -320,6 +328,19 @@ export async function getWargaLaporanTransparansi(filter: WargaLaporanFilter = {
       .where(and(eq(transaksi.tipeArus, "keluar"), gte(transaksi.waktuTransaksi, startDate), lt(transaksi.waktuTransaksi, endDate)))
       .groupBy(sql`extract(month from ${transaksi.waktuTransaksi})`, kategoriKas.namaKategori)
       .orderBy(sql`extract(month from ${transaksi.waktuTransaksi})`, kategoriKas.namaKategori),
+    // Individual items per kategori for detailed drilldown
+    db
+      .select({
+        bulanNum: sql<number>`extract(month from ${transaksi.waktuTransaksi})::int`,
+        kategori: kategoriKas.namaKategori,
+        keterangan: transaksi.keterangan,
+        nominal: transaksi.nominal,
+        tanggal: sql<string>`to_char(${transaksi.waktuTransaksi}, 'YYYY-MM-DD')`,
+      })
+      .from(transaksi)
+      .innerJoin(kategoriKas, eq(transaksi.kategoriId, kategoriKas.id))
+      .where(and(eq(transaksi.tipeArus, "keluar"), gte(transaksi.waktuTransaksi, startDate), lt(transaksi.waktuTransaksi, endDate)))
+      .orderBy(sql`extract(month from ${transaksi.waktuTransaksi})`, kategoriKas.namaKategori, transaksi.waktuTransaksi),
   ])
 
   let runningSaldo = 0
@@ -350,7 +371,13 @@ export async function getWargaLaporanTransparansi(filter: WargaLaporanFilter = {
   const breakdownPengeluaran = monthNames.reduce<Record<string, ExpenseBreakdownItem[]>>((acc, bulan, index) => {
     acc[bulan] = pengeluaranRows
       .filter((row) => Number(row.bulanNum) === index + 1)
-      .map((row) => ({ kategori: row.kategori, nominal: Number(row.nominal) }))
+      .map((row) => ({
+        kategori: row.kategori,
+        nominal: Number(row.nominal),
+        items: pengeluaranDetailRows
+          .filter((d) => Number(d.bulanNum) === index + 1 && d.kategori === row.kategori)
+          .map((d) => ({ keterangan: d.keterangan, nominal: Number(d.nominal), tanggal: d.tanggal })),
+      }))
     return acc
   }, {})
 

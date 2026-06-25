@@ -1,6 +1,6 @@
 import "server-only"
 
-import { and, eq, inArray } from "drizzle-orm"
+import { and, eq, inArray, isNull, notInArray } from "drizzle-orm"
 
 import { db } from "@/lib/db"
 import { kategoriKas, transaksi, warga } from "@/lib/db/schema"
@@ -51,6 +51,7 @@ async function getActiveWarga() {
       createdAt: warga.createdAt,
     })
     .from(warga)
+    .where(isNull(warga.tglPindah))
     .orderBy(warga.blokRumah, warga.id)
 
   return rows
@@ -78,7 +79,12 @@ async function getKategoriSekali() {
       nominalDefault: kategoriKas.nominalDefault,
     })
     .from(kategoriKas)
-    .where(and(eq(kategoriKas.jenisArus, "masuk"), eq(kategoriKas.tipeTagihan, "sekali")))
+    .where(and(eq(kategoriKas.jenisArus, "masuk"), eq(kategoriKas.tipeTagihan, "sekali"), notInArray(kategoriKas.namaKategori, [
+      "Sisa Dana Event",
+      "Talangan Event",
+      "Refund Talangan Event",
+      "Alih Sumbangan Event",
+    ])))
     .orderBy(kategoriKas.id)
 }
 

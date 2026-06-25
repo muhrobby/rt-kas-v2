@@ -6,20 +6,27 @@ import { usePathname } from "next/navigation"
 import { KanvasIcons } from "@/components/kanvas"
 import { LogoutButton } from "@/components/auth/logout-button"
 import { wargaNavItems } from "@/lib/constants/nav"
+import type { WargaNavItem } from "@/lib/constants/nav"
 
 const iconMap = {
   home: KanvasIcons.home,
   receipt: KanvasIcons.receipt,
   doc: KanvasIcons.doc,
+  calendar: KanvasIcons.calendar,
 } as const
 
-export function WargaMobileNav() {
+interface WargaMobileNavProps {
+  navItems?: WargaNavItem[]
+}
+
+export function WargaMobileNav({ navItems }: WargaMobileNavProps) {
   const pathname = usePathname()
+  const items = navItems ?? wargaNavItems
 
   return (
     <nav className="fixed right-0 bottom-0 left-0 z-40 border-t border-kanvas-line bg-white/98 backdrop-blur-sm md:hidden">
-      <div className="grid grid-cols-4 pb-[max(env(safe-area-inset-bottom),0px)]">
-        {wargaNavItems.map((item) => {
+      <div className="grid grid-cols-5 pb-[max(env(safe-area-inset-bottom),0px)]">
+        {items.map((item) => {
           const Icon = iconMap[item.icon]
           const active = pathname === item.href
           return (

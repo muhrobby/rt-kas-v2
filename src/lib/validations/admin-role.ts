@@ -4,7 +4,7 @@ import { ADMIN_ROLES } from "@/lib/constants/admin-roles"
 
 /**
  * Schema untuk assign/update admin sub-role.
- * Hanya menerima enum valid dari TASK-001.
+ * Hanya menerima enum valid dari konstanta ADMIN_ROLES.
  */
 export const assignAdminRoleSchema = z.object({
   userId: z.string().min(1, "User ID wajib diisi."),

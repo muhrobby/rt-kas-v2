@@ -71,6 +71,55 @@
       "when": 1780763496521,
       "tag": "0010_backfill_kategori_sekali_period",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1781041967798,
+      "tag": "0010_tense_lockheed",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1781042143522,
+      "tag": "0011_thin_revanche",
+      "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1781042694801,
+      "tag": "0012_vengeful_mantis",
+      "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1781420847554,
+      "tag": "0013_steady_meteorite",
+      "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1781441524959,
+      "tag": "0014_futuristic_starhawk",
+      "breakpoints": true
+    },
+    {
+      "idx": 15,
+      "version": "7",
+      "when": 1781530351585,
+      "tag": "0015_wide_pride",
+      "breakpoints": true
+    },
+    {
+      "idx": 16,
+      "version": "7",
+      "when": 1782401847724,
+      "tag": "0016_certain_ultimates",
+      "breakpoints": true
     }
   ]
 }

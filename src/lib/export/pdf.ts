@@ -233,12 +233,26 @@ export function generateLaporanPDFBytes(data: PdfLaporanData): ArrayBuffer {
         doc.setFillColor(252, 252, 253)
         doc.rect(PAGE_MARGIN_X, y - 1, PAGE_WIDTH - PAGE_MARGIN_X * 2, rowHeight, "F")
       }
-      setText(doc, REPORT_COLORS.ink, 8.4, "normal")
+      setText(doc, REPORT_COLORS.ink, 8.4, "bold")
       doc.text(lines, PAGE_MARGIN_X + 6, y + 4)
       setText(doc, REPORT_COLORS.muted, 8, "normal")
       doc.text(getMonthLabel(row), 136, y + 4)
-      drawAmount(doc, item.nominal, PAGE_WIDTH - PAGE_MARGIN_X - 4, y + 4)
+      drawAmount(doc, item.nominal, PAGE_WIDTH - PAGE_MARGIN_X - 4, y + 4, REPORT_COLORS.danger)
       y += rowHeight
+
+      // Sub-items: individual transactions with keterangan
+      const subItems = item.items ?? []
+      subItems.forEach((sub) => {
+        addPageIfNeeded(6)
+        const ketText = `  · ${sub.tanggal}  ${sub.keterangan ?? '—'}`
+        const ketLines = doc.splitTextToSize(ketText, 110)
+        const subH = Math.max(5.5, ketLines.length * 4 + 2)
+        setText(doc, REPORT_COLORS.muted, 7.5, "normal")
+        doc.text(ketLines, PAGE_MARGIN_X + 10, y + 3.5)
+        setText(doc, REPORT_COLORS.muted, 7.5, "normal")
+        drawAmount(doc, sub.nominal, PAGE_WIDTH - PAGE_MARGIN_X - 4, y + 3.5, REPORT_COLORS.muted)
+        y += subH
+      })
     })
 
     doc.setDrawColor(...REPORT_COLORS.line)

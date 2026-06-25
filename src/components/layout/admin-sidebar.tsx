@@ -18,6 +18,9 @@ const iconMap = {
   log: KanvasIcons.log,
   gear: KanvasIcons.gear,
   shield: KanvasIcons.shield,
+  calendar: KanvasIcons.calendar,
+  eye: KanvasIcons.eye,
+  more: KanvasIcons.more,
 } as const
 
 interface AdminSidebarProps {
@@ -25,9 +28,10 @@ interface AdminSidebarProps {
   saldoKas: number | null
   tunggakanCount: number | null
   navItems?: AdminNavItem[]
+  isSuperAdmin?: boolean
 }
 
-export function AdminSidebar({ branding, saldoKas, tunggakanCount, navItems }: AdminSidebarProps) {
+export function AdminSidebar({ branding, saldoKas, tunggakanCount, navItems, isSuperAdmin }: AdminSidebarProps) {
   const pathname = usePathname()
   const brandInitial = branding.appName.trim().charAt(0).toUpperCase() || "K"
   const items = navItems ?? adminNavItems
@@ -41,6 +45,9 @@ export function AdminSidebar({ branding, saldoKas, tunggakanCount, navItems }: A
         <div className="leading-none">
           <p className="text-lg text-kanvas-ink">{branding.appName}</p>
           <p className="mt-1 text-[10px] font-semibold tracking-[1.5px] text-kanvas-ink-4 uppercase">{branding.rtRwLabel}</p>
+          {isSuperAdmin ? (
+            <p className="mt-0.5 text-[10px] text-kanvas-terra-2">Mode konfigurasi</p>
+          ) : null}
         </div>
       </div>
 

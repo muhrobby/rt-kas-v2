@@ -15,7 +15,7 @@ export const user = pgTable(
     mustChangePassword: boolean("must_change_password").notNull().default(false),
     /**
      * Sub-role domain untuk user dengan role 'admin'.
-     * Nilai valid: 'ketua_rt' | 'bendahara' | 'sekretaris' | 'anggota' | NULL.
+     * Nilai valid: 'super_admin' | 'ketua_rt' | 'bendahara' | 'sekretaris' | 'anggota' | NULL.
      * User dengan role 'user' wajib NULL (dijaga oleh check constraint).
      * TASK-002: ditambahkan untuk permission granular admin.
      */
@@ -29,7 +29,7 @@ export const user = pgTable(
     // admin_role hanya boleh salah satu nilai valid atau NULL
     check(
       "user_ck_admin_role",
-      sql`${table.adminRole} is null or ${table.adminRole} in ('ketua_rt', 'bendahara', 'sekretaris', 'anggota')`,
+      sql`${table.adminRole} is null or ${table.adminRole} in ('super_admin', 'ketua_rt', 'bendahara', 'sekretaris', 'anggota')`,
     ),
     // user dengan role 'user' tidak boleh memiliki admin_role
     check(

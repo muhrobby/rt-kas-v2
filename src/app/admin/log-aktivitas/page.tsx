@@ -1,5 +1,7 @@
+import { requireFeatureEnabled } from "@/lib/auth/permissions"
 import { LogAktivitasView } from "@/features/log-aktivitas/components/log-aktivitas-view"
 
-export default function AdminLogAktivitasPage() {
+export default async function AdminLogAktivitasPage() {
+  await requireFeatureEnabled("admin.log-aktivitas")
   return <LogAktivitasView />
 }

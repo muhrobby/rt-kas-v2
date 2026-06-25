@@ -78,7 +78,7 @@ export function WargaLaporanView({ data }: WargaLaporanViewProps) {
                     setDrilldownOpen(true)
                   }}
                 >
-                  Rincian
+                  Rincian Pengeluaran
                 </AppButton>
               </div>
             </AppCard>

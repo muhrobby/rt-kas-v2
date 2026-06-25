@@ -10,7 +10,7 @@ type ListWargaFilters = {
   status?: "semua" | "tetap" | "kontrak"
 }
 
-function mapWargaRow(row: typeof warga.$inferSelect) {
+function mapWargaRow(row: typeof warga.$inferSelect & { pemilikHunian?: { id: number; nama: string; noTelp: string | null } | null }) {
   return {
     id: row.id,
     nama: row.namaKepalaKeluarga,
@@ -23,6 +23,7 @@ function mapWargaRow(row: typeof warga.$inferSelect) {
     isPengurus: row.isPengurus,
     rolePengurus: row.rolePengurus,
     createdAt: row.createdAt,
+    pemilikHunian: row.pemilikHunian ?? null,
   }
 }
 
@@ -38,7 +39,11 @@ export async function listWarga(filters: ListWargaFilters = {}) {
       : undefined,
   )
 
-  const rows = await db.select().from(warga).where(whereClause).orderBy(desc(warga.createdAt), desc(warga.id))
+  const rows = await db.query.warga.findMany({
+    with: { pemilikHunian: { columns: { id: true, nama: true, noTelp: true } } },
+    where: whereClause,
+    orderBy: [desc(warga.createdAt), desc(warga.id)],
+  })
   return rows.map(mapWargaRow)
 }
 

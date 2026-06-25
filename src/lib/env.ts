@@ -10,6 +10,8 @@ const envSchema = z.object({
 
   // Seed — hanya dibutuhkan saat menjalankan db:seed, opsional di runtime
   SEED_ADMIN_PASSWORD: z.string().min(1).optional(),
+  SEED_SUPER_ADMIN_PHONE: z.string().optional(),
+  SEED_SUPER_ADMIN_PASSWORD: z.string().optional(),
 
   // Redis/Upstash — opsional di development, tapi di production
   // rate limiter akan fallback ke memory store jika tidak diset (tidak efektif di serverless)
@@ -47,6 +49,8 @@ function parse(): z.infer<typeof envSchema> {
     BETTER_AUTH_TRUSTED_ORIGINS: process.env.BETTER_AUTH_TRUSTED_ORIGINS,
     NODE_ENV: process.env.NODE_ENV,
     SEED_ADMIN_PASSWORD: process.env.SEED_ADMIN_PASSWORD,
+    SEED_SUPER_ADMIN_PHONE: process.env.SEED_SUPER_ADMIN_PHONE,
+    SEED_SUPER_ADMIN_PASSWORD: process.env.SEED_SUPER_ADMIN_PASSWORD,
     UPSTASH_REDIS_REST_URL: process.env.UPSTASH_REDIS_REST_URL,
     UPSTASH_REDIS_REST_TOKEN: process.env.UPSTASH_REDIS_REST_TOKEN,
     REDIS_URL: process.env.REDIS_URL,

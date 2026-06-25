@@ -13,13 +13,14 @@ type WargaRow = {
   nama: string
   blok: string
   telp: string
-  statusHunian: "tetap" | "kontrak"
+  statusHunian: "tetap" | "kontrak" | "kos"
   jumlahAnggota: number
   tglBatasDomisili: string | null
   tglPindah: string | null
   isPengurus: boolean
   rolePengurus: string | null
   createdAt: Date
+  pemilikHunian: { id: number; nama: string; noTelp: string | null } | null
 }
 
 function toDateInput(date: Date | string | null | undefined) {
@@ -37,9 +38,11 @@ function toUiWarga(row: WargaRow): Warga {
     statusHunian: row.statusHunian,
     domisili: toDateInput(row.createdAt),
     pindah: row.tglBatasDomisili ?? undefined,
+    tglPindah: row.tglPindah ?? undefined,
     isPengurus: row.isPengurus,
     rolePengurus: row.rolePengurus ?? undefined,
     jumlahAnggota: row.jumlahAnggota,
+    pemilikHunian: row.pemilikHunian,
   }
 }
 

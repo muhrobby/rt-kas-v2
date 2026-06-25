@@ -2,25 +2,40 @@
 
 import { useState } from "react"
 
-import { AppButton, AppField, AppInput, AppModal, KanvasIcons } from "@/components/kanvas"
+import { AppButton, AppField, AppModal, KanvasIcons } from "@/components/kanvas"
 import type { Warga } from "@/types/rt-kas"
+
+const ADMIN_ROLE_OPTIONS = [
+  { value: "ketua_rt", label: "Ketua RT" },
+  { value: "bendahara", label: "Bendahara" },
+  { value: "sekretaris", label: "Sekretaris" },
+  { value: "anggota", label: "Anggota Pengurus" },
+] as const
 
 interface TogglePengurusDialogProps {
   open: boolean
   warga: Warga | null
   onClose: () => void
-  onConfirm: (warga: Warga, role: string) => Promise<void> | void
+  onConfirm: (warga: Warga, adminRole: string) => Promise<void> | void
   submitting?: boolean
 }
 
 export function TogglePengurusDialog({ open, warga, onClose, onConfirm, submitting = false }: TogglePengurusDialogProps) {
-  // Initial role derived from prop. Parent re-mounts via key prop on warga.id change,
-  // so this initializer runs fresh per target — no setState in effect needed.
-  const [role, setRole] = useState<string>(warga?.rolePengurus ?? "")
+  const [adminRole, setAdminRole] = useState("")
+  const [error, setError] = useState("")
 
   if (!warga) return null
 
   const turningOn = !warga.isPengurus
+
+  const handleConfirm = () => {
+    if (turningOn && !adminRole) {
+      setError("Sub-role wajib dipilih.")
+      return
+    }
+    setError("")
+    onConfirm(warga, adminRole)
+  }
 
   return (
     <AppModal open={open} onClose={onClose} width={480}>
@@ -40,25 +55,29 @@ export function TogglePengurusDialog({ open, warga, onClose, onConfirm, submitti
         <p className="mb-4 text-[13px] text-kanvas-ink-2">
           {turningOn
             ? <><span className="font-semibold">{warga.nama}</span> akan dijadikan pengurus RT.</>
-            : <>Status pengurus <span className="font-semibold">{warga.nama}</span> akan dinonaktifkan.</>
+            : <>Status pengurus <span className="font-semibold">{warga.nama}</span> ({warga.rolePengurus}) akan dinonaktifkan.</>
           }
         </p>
 
-        {turningOn ? (
-          <AppField label="Role Pengurus">
-            <AppInput
-              value={role}
-              onChange={setRole}
-              placeholder="Mis. Ketua, Sekretaris, Bendahara"
-            />
+        {turningOn && (
+          <AppField label="Sub-role Pengurus">
+            <select
+              className="w-full rounded-lg border border-kanvas-line bg-white px-3 py-2 text-sm text-kanvas-ink outline-none focus:border-kanvas-terra"
+              value={adminRole}
+              onChange={(e) => { setAdminRole(e.target.value); setError("") }}
+            >
+              <option value="">— Pilih sub-role —</option>
+              {ADMIN_ROLE_OPTIONS.map((opt) => (
+                <option key={opt.value} value={opt.value}>{opt.label}</option>
+              ))}
+            </select>
+            {error && <p className="mt-1 text-[11px] text-kanvas-danger">{error}</p>}
           </AppField>
-        ) : null}
+        )}
 
         <div className="mt-5 flex justify-end gap-2">
-          <AppButton variant="outline" onClick={onClose} disabled={submitting}>
-            Batal
-          </AppButton>
-          <AppButton variant="primary" onClick={() => onConfirm(warga, role)} disabled={submitting}>
+          <AppButton variant="outline" onClick={onClose} disabled={submitting}>Batal</AppButton>
+          <AppButton variant="primary" onClick={handleConfirm} disabled={submitting}>
             {submitting ? "Menyimpan..." : "Simpan"}
           </AppButton>
         </div>

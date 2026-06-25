@@ -6,7 +6,9 @@ export function filterWarga(wargaList: Warga[], filters: WargaFilters): Warga[] 
   const search = filters.query.trim().toLowerCase()
 
   return wargaList.filter((warga) => {
-    const matchesStatus = filters.status === "semua" || warga.statusHunian === filters.status
+    const matchesStatus =
+      filters.status === "semua" ||
+      (filters.status === "pindah" ? !!warga.tglPindah : warga.statusHunian === filters.status)
     if (!matchesStatus) {
       return false
     }

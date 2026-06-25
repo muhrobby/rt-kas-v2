@@ -1,6 +1,6 @@
 export type Role = "admin" | "warga"
 
-export type StatusHunian = "tetap" | "kontrak"
+export type StatusHunian = "tetap" | "kontrak" | "kos"
 
 export type JenisArus = "masuk" | "keluar"
 
@@ -16,9 +16,15 @@ export interface Warga {
   statusHunian: StatusHunian
   domisili: string
   pindah?: string
+  tglPindah?: string
   isPengurus: boolean
   rolePengurus?: string
   jumlahAnggota?: number
+  pemilikHunian?: {
+    id: number
+    nama: string
+    noTelp: string | null
+  } | null
 }
 
 export interface KategoriKas {
@@ -108,4 +114,5 @@ export interface WargaHistoryPeriod {
 export interface ExpenseBreakdownItem {
   kategori: string
   nominal: number
+  items?: Array<{ keterangan: string | null; nominal: number; tanggal: string }>
 }

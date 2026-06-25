@@ -11,6 +11,24 @@ import type { AdminRole, Permission } from "@/lib/constants/admin-roles";
 type PermissionMatrix = Readonly<Record<AdminRole, ReadonlySet<Permission>>>;
 
 export const PERMISSION_MATRIX: PermissionMatrix = Object.freeze({
+  super_admin: new Set<Permission>([
+    "dashboard.read",
+    "warga.read",
+    "kategori.read",
+    "kas_masuk.read",
+    "kas_keluar.read",
+    "tunggakan.read",
+    "laporan.read",
+    "log.read",
+    "kuitansi.admin.read",
+    "event.read",
+    "settings.read",
+    "settings.write",
+    "feature_flags.read",
+    "feature_flags.write",
+    "super_admin.manage",
+  ]),
+
   ketua_rt: new Set<Permission>([
     "dashboard.read",
     "warga.read",
@@ -31,7 +49,15 @@ export const PERMISSION_MATRIX: PermissionMatrix = Object.freeze({
     "log.export",
     "settings.read",
     "settings.write",
+    "feature_flags.read",
     "kuitansi.admin.read",
+    "event.read",
+    "event.write",
+    "event.panitia.manage",
+    "event.approve",
+    "event.transfer",
+    "event.close",
+    "event.cancel",
   ]),
 
   bendahara: new Set<Permission>([
@@ -48,6 +74,12 @@ export const PERMISSION_MATRIX: PermissionMatrix = Object.freeze({
     "laporan.export",
     "log.read",
     "kuitansi.admin.read",
+    "event.read",
+    "event.write",
+    "event.panitia.manage",
+    "event.approve",
+    "event.transfer",
+    "event.close",
   ]),
 
   sekretaris: new Set<Permission>([
@@ -63,6 +95,9 @@ export const PERMISSION_MATRIX: PermissionMatrix = Object.freeze({
     "log.read",
     "log.export",
     "kuitansi.admin.read",
+    "event.read",
+    "event.write",
+    "event.panitia.manage",
   ]),
 
   anggota: new Set<Permission>([
@@ -73,6 +108,7 @@ export const PERMISSION_MATRIX: PermissionMatrix = Object.freeze({
     "kas_keluar.read",
     "tunggakan.read",
     "laporan.read",
+    "event.read",
   ]),
 } as const);
 

@@ -1,6 +1,6 @@
 import "server-only"
 
-import { and, desc, eq, lte, gte, sql } from "drizzle-orm"
+import { and, desc, eq, lte, gte, sql, notInArray } from "drizzle-orm"
 
 import { db } from "@/lib/db"
 import { logAktivitas, user } from "@/lib/db/schema"
@@ -14,6 +14,7 @@ export type LogAktivitasFilters = {
   query?: string
   limit?: number
   offset?: number
+  excludeUserIds?: string[]
 }
 
 const DEFAULT_LIMIT = 100
@@ -30,11 +31,16 @@ export async function listLogAktivitas(
     query,
     limit = DEFAULT_LIMIT,
     offset = 0,
+    excludeUserIds,
   } = filters
 
   const safeLimit = Math.min(Math.max(1, limit), MAX_LIMIT)
 
   const conditions = []
+
+  if (excludeUserIds && excludeUserIds.length > 0) {
+    conditions.push(notInArray(logAktivitas.userId, excludeUserIds))
+  }
 
   if (modul && modul !== "semua") {
     conditions.push(eq(logAktivitas.modul, modul))
@@ -100,16 +106,23 @@ export type LogFiltersResult = {
   petugas: { id: string; nama: string }[]
 }
 
-export async function getLogFilters(): Promise<LogFiltersResult> {
+export async function getLogFilters(excludeUserIds?: string[]): Promise<LogFiltersResult> {
+  const modulPromise = db.selectDistinct({ modul: logAktivitas.modul }).from(logAktivitas).orderBy(logAktivitas.modul)
+  const aksiPromise = db.selectDistinct({ aksi: logAktivitas.aksi }).from(logAktivitas).orderBy(logAktivitas.aksi)
+
+  const petugasQuery = db
+    .select({ id: logAktivitas.userId, nama: user.name })
+    .from(logAktivitas)
+    .innerJoin(user, eq(user.id, logAktivitas.userId))
+
+  if (excludeUserIds && excludeUserIds.length > 0) {
+    petugasQuery.where(notInArray(logAktivitas.userId, excludeUserIds))
+  }
+
   const [modulRows, aksiRows, petugasRows] = await Promise.all([
-    db.selectDistinct({ modul: logAktivitas.modul }).from(logAktivitas).orderBy(logAktivitas.modul),
-    db.selectDistinct({ aksi: logAktivitas.aksi }).from(logAktivitas).orderBy(logAktivitas.aksi),
-    db
-      .select({ id: logAktivitas.userId, nama: user.name })
-      .from(logAktivitas)
-      .innerJoin(user, eq(user.id, logAktivitas.userId))
-      .groupBy(logAktivitas.userId, user.name)
-      .orderBy(user.name),
+    modulPromise,
+    aksiPromise,
+    petugasQuery.groupBy(logAktivitas.userId, user.name).orderBy(user.name),
   ])
 
   return {
@@ -129,10 +142,14 @@ export type LogAktivitasListResult = {
 export async function listLogAktivitasWithCount(
   filters: LogAktivitasFilters = {},
 ): Promise<LogAktivitasListResult> {
-  const { limit = DEFAULT_LIMIT, offset = 0 } = filters
+  const { limit = DEFAULT_LIMIT, offset = 0, excludeUserIds } = filters
   const safeLimit = Math.min(Math.max(1, limit), MAX_LIMIT)
 
   const conditions = []
+
+  if (excludeUserIds && excludeUserIds.length > 0) {
+    conditions.push(notInArray(logAktivitas.userId, excludeUserIds))
+  }
 
   if (filters.modul && filters.modul !== "semua") {
     conditions.push(eq(logAktivitas.modul, filters.modul))
