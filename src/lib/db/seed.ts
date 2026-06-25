@@ -213,81 +213,87 @@ async function main() {
   }
   console.log("Warga login accounts created.");
 
-  console.log("Seeding transaksi...");
-  const allKategori = await db.query.kategoriKas.findMany();
-  const allWarga = await db.query.warga.findMany();
+  const skipTransactionSeed = process.env.SKIP_TRANSACTION_SEED === "true";
 
-  const keamanan = allKategori.find((k) => k.namaKategori === "Keamanan");
-  const sampah = allKategori.find((k) => k.namaKategori === "Sampah");
-  const operasional = allKategori.find((k) => k.namaKategori === "Operasional RT");
-  const sosial = allKategori.find((k) => k.namaKategori === "Sosial");
+  if (skipTransactionSeed) {
+    console.log("Skipping transaksi seed.");
+  } else {
+    console.log("Seeding transaksi...");
+    const allKategori = await db.query.kategoriKas.findMany();
+    const allWarga = await db.query.warga.findMany();
 
-  if (!keamanan || !sampah || !operasional || !sosial) {
-    console.log("Kategori not found, skipping transaksi seed.");
-    return;
-  }
+    const keamanan = allKategori.find((k) => k.namaKategori === "Keamanan");
+    const sampah = allKategori.find((k) => k.namaKategori === "Sampah");
+    const operasional = allKategori.find((k) => k.namaKategori === "Operasional RT");
+    const sosial = allKategori.find((k) => k.namaKategori === "Sosial");
 
-  const bulanList = ["Januari", "Februari", "Maret"];
-  const transaksiData: (typeof transaksi.$inferInsert)[] = [];
-
-  for (const bln of bulanList) {
-    for (const w of allWarga.slice(0, 5)) {
-      transaksiData.push({
-        userId: adminUser.id,
-        wargaId: w.id,
-        kategoriId: keamanan.id,
-        bulanTagihan: bln,
-        tahunTagihan: 2026,
-        nominal: 25000,
-        tipeArus: "masuk",
-        keterangan: `Iuran keamanan ${bln} 2026`,
-      });
-      transaksiData.push({
-        userId: adminUser.id,
-        wargaId: w.id,
-        kategoriId: sampah.id,
-        bulanTagihan: bln,
-        tahunTagihan: 2026,
-        nominal: 15000,
-        tipeArus: "masuk",
-        keterangan: `Iuran sampah ${bln} 2026`,
-      });
+    if (!keamanan || !sampah || !operasional || !sosial) {
+      console.log("Kategori not found, skipping transaksi seed.");
+      return;
     }
+
+    const bulanList = ["Januari", "Februari", "Maret"];
+    const transaksiData: (typeof transaksi.$inferInsert)[] = [];
+
+    for (const bln of bulanList) {
+      for (const w of allWarga.slice(0, 5)) {
+        transaksiData.push({
+          userId: adminUser.id,
+          wargaId: w.id,
+          kategoriId: keamanan.id,
+          bulanTagihan: bln,
+          tahunTagihan: 2026,
+          nominal: 25000,
+          tipeArus: "masuk",
+          keterangan: `Iuran keamanan ${bln} 2026`,
+        });
+        transaksiData.push({
+          userId: adminUser.id,
+          wargaId: w.id,
+          kategoriId: sampah.id,
+          bulanTagihan: bln,
+          tahunTagihan: 2026,
+          nominal: 15000,
+          tipeArus: "masuk",
+          keterangan: `Iuran sampah ${bln} 2026`,
+        });
+      }
+    }
+
+    transaksiData.push({
+      userId: adminUser.id,
+      wargaId: null,
+      kategoriId: operasional.id,
+      bulanTagihan: null,
+      tahunTagihan: null,
+      nominal: 150000,
+      tipeArus: "keluar",
+      keterangan: "Beli ATK dan perlengkapan kantor RT",
+    });
+    transaksiData.push({
+      userId: adminUser.id,
+      wargaId: null,
+      kategoriId: sosial.id,
+      bulanTagihan: null,
+      tahunTagihan: null,
+      nominal: 200000,
+      tipeArus: "keluar",
+      keterangan: "Sumbangan warga sakit - Bpk. Dedi",
+    });
+    transaksiData.push({
+      userId: adminUser.id,
+      wargaId: null,
+      kategoriId: operasional.id,
+      bulanTagihan: null,
+      tahunTagihan: null,
+      nominal: 75000,
+      tipeArus: "keluar",
+      keterangan: "Bayar listrik pos ronda",
+    });
+
+    await db.insert(transaksi).values(transaksiData).onConflictDoNothing();
+    console.log(`Transaksi seeded: ${transaksiData.length} entries.`);
   }
-
-  transaksiData.push({
-    userId: adminUser.id,
-    wargaId: null,
-    kategoriId: operasional.id,
-    bulanTagihan: null,
-    tahunTagihan: null,
-    nominal: 150000,
-    tipeArus: "keluar",
-    keterangan: "Beli ATK dan perlengkapan kantor RT",
-  });
-  transaksiData.push({
-    userId: adminUser.id,
-    wargaId: null,
-    kategoriId: sosial.id,
-    bulanTagihan: null,
-    tahunTagihan: null,
-    nominal: 200000,
-    tipeArus: "keluar",
-    keterangan: "Sumbangan warga sakit - Bpk. Dedi",
-  });
-  transaksiData.push({
-    userId: adminUser.id,
-    wargaId: null,
-    kategoriId: operasional.id,
-    bulanTagihan: null,
-    tahunTagihan: null,
-    nominal: 75000,
-    tipeArus: "keluar",
-    keterangan: "Bayar listrik pos ronda",
-  });
-
-  await db.insert(transaksi).values(transaksiData).onConflictDoNothing();
-  console.log(`Transaksi seeded: ${transaksiData.length} entries.`);
 
   console.log("Seeding feature flags...");
   await seedFeatureFlags();
